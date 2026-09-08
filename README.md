@@ -1,4 +1,3 @@
-
 # DSA Revision Analyzer
 
 An AI-powered, timestamp-aware RAG system for learning and
@@ -133,8 +132,8 @@ The system should:
 
 # 5. Current Data Pipeline
 
-The ingestion pipeline currently processes YouTube lecture
-transcripts in multiple stages.
+The ingestion and retrieval pipeline currently processes
+YouTube lecture transcripts through multiple stages.
 
 ```text
 YouTube Video
@@ -149,14 +148,14 @@ Smart Chunking
       ↓
 Chunked Transcript
       ↓
-Embeddings
+Embedding Generation
       ↓
-Qdrant
+Qdrant Vector Ingestion
       ↓
-Retrieval
+Semantic Retrieval
 ```
 
-The first three processing stages are currently implemented:
+The complete ingestion pipeline currently consists of:
 
 ```text
 youtube_transcribe.py
@@ -164,6 +163,20 @@ youtube_transcribe.py
 translate_transcript.py
       ↓
 chunk_transcript.py
+      ↓
+ingest_embeddings.py
+```
+
+The retrieval pipeline currently uses:
+
+```text
+search_chunks.py
+      ↓
+Query Embedding
+      ↓
+Qdrant Similarity Search
+      ↓
+Top-K Relevant Chunks
 ```
 
 ---
@@ -311,6 +324,137 @@ require an additional NLP dependency.
 
 ---
 
+## 6.4 Embedding Generation and Qdrant Ingestion
+
+File:
+
+```text
+backend/scripts/ingest_embeddings.py
+```
+
+Purpose:
+
+* Read processed transcript chunks.
+* Prepare searchable English text.
+* Generate dense vector embeddings.
+* Create the Qdrant collection when required.
+* Store embeddings together with chunk metadata.
+* Upload the vectors to Qdrant.
+
+Current embedding model:
+
+```text
+sentence-transformers/all-MiniLM-L6-v2
+```
+
+Current vector dimension:
+
+```text
+384
+```
+
+Current Qdrant collection:
+
+```text
+dsa_revision_chunks
+```
+
+The ingestion pipeline preserves important chunk metadata,
+including:
+
+* Video ID
+* Chunk ID
+* Segment range
+* Start timestamp
+* End timestamp
+* Transcript text
+* English transcript text
+* Segment count
+
+Example flow:
+
+```text
+Chunked Transcript
+        ↓
+Embedding Model
+        ↓
+384-dimensional vectors
+        ↓
+Qdrant
+        ↓
+dsa_revision_chunks
+```
+
+---
+
+## 6.5 Semantic Chunk Retrieval
+
+File:
+
+```text
+backend/scripts/search_chunks.py
+```
+
+Purpose:
+
+* Accept a natural-language search query.
+* Generate an embedding for the query.
+* Search the Qdrant vector collection.
+* Retrieve the most semantically similar transcript chunks.
+* Display retrieval scores and timestamp information.
+
+Example:
+
+```bash
+python .\scripts\search_chunks.py "dynamic programming recursion"
+```
+
+A custom Top-K value can also be provided:
+
+```bash
+python .\scripts\search_chunks.py "dynamic programming recursion" 10
+```
+
+The current retrieval output includes:
+
+* Similarity score
+* Video ID
+* Chunk ID
+* Segment range
+* Start timestamp
+* End timestamp
+* English transcript
+* Original transcript
+
+Example:
+
+```text
+Query:
+dynamic programming recursion
+
+        ↓
+
+Query Embedding
+        ↓
+
+Qdrant Semantic Search
+        ↓
+
+Top-K Results
+        ↓
+
+Relevant Chunks
+        ↓
+
+Timestamp Information
+```
+
+The current retrieval implementation is based on semantic
+similarity. Query classification, DSA pattern detection,
+metadata filtering, and reranking are planned for later stages.
+
+---
+
 # 7. Data Directory Structure
 
 ```text
@@ -326,10 +470,16 @@ backend/
 │   └── chunks/
 │       └── <video_id>.json
 │
-└── scripts/
-    ├── youtube_transcribe.py
-    ├── translate_transcript.py
-    └── chunk_transcript.py
+├── scripts/
+│   ├── youtube_transcribe.py
+│   ├── translate_transcript.py
+│   ├── chunk_transcript.py
+│   ├── ingest_embeddings.py
+│   └── search_chunks.py
+│
+└── app/
+    └── services/
+        └── vector_store.py
 ```
 
 Generated data files are kept separate from the processing
@@ -337,31 +487,78 @@ scripts so that the ingestion pipeline remains organized.
 
 ---
 
-# 8. Planned Retrieval Metadata
+# 8. Current Retrieval Metadata
 
-The final retrieval layer is expected to associate each chunk
-with metadata such as:
+The current vector ingestion layer stores chunk-level metadata
+required for timestamp-aware retrieval.
+
+Current metadata includes:
 
 * Video ID
-* Video title
-* Playlist
-* DSA pattern
-* DSA sub-pattern
 * Chunk ID
 * Segment range
 * Start timestamp
 * End timestamp
+* Duration
 * Transcript text
 * English transcript text
+* Segment count
+
+The final retrieval layer is expected to extend this metadata
+with:
+
+* Video title
+* Playlist
+* DSA pattern
+* DSA sub-pattern
 
 This metadata will allow retrieval to become more precise than
 pure semantic similarity.
 
 ---
 
-# 9. Planned RAG Pipeline
+# 9. Current Retrieval Pipeline
 
-The planned RAG workflow is:
+The currently implemented retrieval workflow is:
+
+```text
+User Query
+      ↓
+Query Embedding
+      ↓
+Qdrant Vector Search
+      ↓
+Top-K Semantic Results
+      ↓
+Relevant Transcript Chunks
+      ↓
+Timestamp Information
+```
+
+For example:
+
+```text
+"d​​ynamic programming recursion"
+```
+
+can retrieve lecture chunks containing discussions around:
+
+* Recursion
+* Dynamic Programming
+* Overlapping subproblems
+* Memoization
+* Tabulation
+* Space optimization
+
+The retrieved chunks retain their original lecture timestamps,
+which will later allow the frontend to navigate directly to the
+relevant section of the YouTube video.
+
+---
+
+# 10. Planned RAG Pipeline
+
+The planned complete RAG workflow is:
 
 ```text
 User Question
@@ -392,7 +589,58 @@ rather than relying only on its general knowledge.
 
 ---
 
-# 10. Planned Adaptive Practice System
+# 11. Planned Query Intelligence
+
+The current system performs semantic retrieval directly from the
+user's query.
+
+The next retrieval intelligence layer will analyze the query
+before searching.
+
+Example:
+
+```text
+User Query:
+
+"Explain the two pointer pattern where
+both pointers move towards each other."
+```
+
+Planned analysis:
+
+```text
+Pattern:
+Two Pointer
+
+Sub-pattern:
+Opposite Direction
+
+Intent:
+Concept Explanation
+```
+
+The analyzed query can then be used for:
+
+```text
+Query
+  ↓
+Pattern Detection
+  ↓
+Sub-pattern Detection
+  ↓
+Metadata Filtering
+  ↓
+Semantic Retrieval
+  ↓
+Reranking
+```
+
+This should reduce irrelevant retrieval results and improve
+DSA-specific search precision.
+
+---
+
+# 12. Planned Adaptive Practice System
 
 After completing a DSA pattern or playlist, the system is
 planned to generate practice problems based on the concepts
@@ -425,7 +673,7 @@ providing static questions.
 
 ---
 
-# 11. Planned Technology Stack
+# 13. Planned Technology Stack
 
 ### Backend
 
@@ -435,6 +683,7 @@ providing static questions.
 ### Retrieval
 
 * Qdrant
+* Sentence Transformers
 * Vector embeddings
 * Hybrid / metadata-aware retrieval
 * Reranking
@@ -453,7 +702,7 @@ providing static questions.
 
 ---
 
-# 12. Current Development Status
+# 14. Current Development Status
 
 ## Completed
 
@@ -467,18 +716,30 @@ providing static questions.
 * [x] Timestamp-aware chunk metadata
 * [x] Chunk overlap
 * [x] Duplicate final-tail prevention
+* [x] Embedding generation
+* [x] Sentence Transformer integration
+* [x] 384-dimensional vector generation
+* [x] Qdrant collection setup
+* [x] Vector ingestion
+* [x] Chunk metadata storage in Qdrant
+* [x] Semantic query embedding
+* [x] Top-K semantic retrieval
+* [x] Retrieval score output
+* [x] Timestamp-aware search results
+* [x] Original and English transcript retrieval
 
 ## In Progress / Next
 
-* [ ] Embedding generation
-* [ ] Qdrant collection setup
-* [ ] Vector ingestion
-* [ ] Retrieval pipeline
+* [ ] Reusable vector retrieval service
+* [ ] Multi-video ingestion
 * [ ] Query classification
-* [ ] Pattern / sub-pattern detection
+* [ ] DSA pattern detection
+* [ ] DSA sub-pattern detection
 * [ ] Metadata filtering
+* [ ] Hybrid retrieval
 * [ ] Reranking
 * [ ] Grounded RAG generation
+* [ ] FastAPI retrieval endpoint
 * [ ] Timestamp-aware UI
 * [ ] Adaptive practice generation
 * [ ] Weakness detection
@@ -489,7 +750,45 @@ providing static questions.
 
 ---
 
-# 13. Project Vision
+# 15. Development Progress
+
+The current system has successfully progressed from raw YouTube
+lecture data to a working semantic retrieval system.
+
+```text
+YouTube Lecture
+      ↓
+Transcript Extraction          ✅
+      ↓
+Timestamp Preservation         ✅
+      ↓
+English Translation            ✅
+      ↓
+Smart Chunking                 ✅
+      ↓
+Embedding Generation           ✅
+      ↓
+Qdrant Vector Ingestion        ✅
+      ↓
+Semantic Retrieval             ✅
+      ↓
+Query Intelligence             ⏳
+      ↓
+Reranking                      ⏳
+      ↓
+Grounded RAG                   ⏳
+      ↓
+Timestamp-aware UI             ⏳
+      ↓
+Adaptive Practice              ⏳
+```
+
+The current backend can already retrieve relevant timestamped
+lecture chunks from Qdrant using natural-language queries.
+
+---
+
+# 16. Project Vision
 
 The long-term goal is to turn the system from a simple
 question-answering tool into an adaptive DSA learning system.
@@ -527,4 +826,3 @@ Adaptive Revision
 ```
 
 into one learning workflow.
-----
