@@ -5,12 +5,13 @@ This script:
 
 1. Loads a transcript JSON from data/transcripts/.
 2. Reads the original Hindi/Hinglish transcript segments.
-3. Sends the segments to Groq in small batches.
-4. Translates Hindi/Hinglish into clear technical English.
-5. Preserves timestamps and original segment IDs.
-6. Validates the LLM response.
-7. Retries failed translation batches.
-8. Saves the translated transcript under data/translated/.
+3. Preserves source video metadata such as video_title and source_url.
+4. Sends transcript segments to Groq in small batches.
+5. Translates Hindi/Hinglish into clear technical English.
+6. Preserves timestamps and original segment IDs.
+7. Validates the LLM response.
+8. Retries failed translation batches.
+9. Saves the translated transcript under data/translated/.
 
 Example:
 
@@ -138,16 +139,22 @@ def load_transcript(
 
         data/transcripts/dyG4JBKh6tA.json
 
-    We validate the basic structure before continuing.
-
-    Expected structure:
+    The current transcript format contains:
 
         {
             "video_id": "...",
+            "video_title": "...",
             "source": "...",
+            "source_url": "...",
             "segment_count": 566,
             "segments": [...]
         }
+
+    Important:
+
+    The video metadata is intentionally loaded as part of the
+    complete transcript object so downstream stages do not lose
+    the actual YouTube video identity.
     """
 
     file_path = (
@@ -156,7 +163,6 @@ def load_transcript(
     )
 
     # Print useful debugging information.
-    # This makes path-related problems much easier to diagnose.
     print()
     print("=" * 60)
     print("Transcript configuration")
@@ -192,6 +198,30 @@ def load_transcript(
     ):
         raise ValueError(
             "'segments' must be a list."
+        )
+
+    # Validate video identity.
+    stored_video_id = data.get("video_id")
+
+    if stored_video_id and stored_video_id != video_id:
+        raise ValueError(
+            "Transcript video_id does not match the requested video ID.\n"
+            f"Requested: {video_id}\n"
+            f"Stored: {stored_video_id}"
+        )
+
+    # The title should already exist because youtube_transcribe.py
+    # now stores the actual YouTube title.
+    #
+    # We fail explicitly instead of silently replacing the title
+    # with the video ID.
+    video_title = data.get("video_title")
+
+    if not isinstance(video_title, str) or not video_title.strip():
+        raise ValueError(
+            "Transcript JSON does not contain a valid 'video_title'. "
+            "Re-run youtube_transcribe.py so the actual YouTube "
+            "video title is stored."
         )
 
     return data
@@ -265,21 +295,12 @@ def parse_json_response(
 
     However, defensive parsing is still useful because an LLM
     may occasionally wrap JSON inside markdown code fences.
-
-    Supported accidental format:
-
-        ```json
-        {
-            ...
-        }
-        ```
     """
 
     content = content.strip()
 
     # Remove accidental markdown code fences.
     if content.startswith("```"):
-
         lines = content.splitlines()
 
         if (
@@ -620,7 +641,6 @@ def translate_batch_with_retry(
     ):
 
         try:
-
             print(
                 f"  Attempt "
                 f"{attempt}/{MAX_RETRIES}"
@@ -636,7 +656,6 @@ def translate_batch_with_retry(
             return translations
 
         except Exception as error:
-
             last_error = error
 
             print(
@@ -674,6 +693,9 @@ def translate_batch_with_retry(
 
 def save_translated_transcript(
     video_id: str,
+    video_title: str,
+    source: str,
+    source_url: str,
     translated_segments: list[dict[str, Any]],
 ) -> Path:
     """
@@ -681,7 +703,14 @@ def save_translated_transcript(
 
     Important:
 
-    We keep the original timestamp fields:
+    Metadata from the original transcript is preserved:
+
+        video_id
+        video_title
+        source
+        source_url
+
+    The translated segments preserve:
 
         segment_id
         start
@@ -721,9 +750,15 @@ def save_translated_transcript(
     )
 
     # Build final JSON.
+
+    # We intentionally carry forward video_title and source_url
+    # instead of rebuilding them from the video ID. This prevents
+    # downstream stages from losing source metadata.
     output_data = {
         "video_id": video_id,
-        "source": "youtube-transcript",
+        "video_title": video_title,
+        "source": source,
+        "source_url": source_url,
         "translation": "English",
         "segment_count": len(
             translated_segments
@@ -762,7 +797,7 @@ def translate_transcript(
 
         transcript JSON
               ↓
-        load transcript
+        load transcript + metadata
               ↓
         split into batches
               ↓
@@ -771,6 +806,8 @@ def translate_transcript(
         validate response
               ↓
         preserve timestamps
+              ↓
+        preserve video metadata
               ↓
         save translated JSON
     """
@@ -788,6 +825,46 @@ def translate_transcript(
     transcript = load_transcript(
         video_id
     )
+
+    # --------------------------------------------------------
+    # LOAD SOURCE METADATA
+    # --------------------------------------------------------
+
+    # These fields were created by youtube_transcribe.py.
+    # They are carried through unchanged.
+    stored_video_id = transcript.get(
+        "video_id",
+        video_id,
+    )
+
+    video_title = transcript.get(
+        "video_title",
+    )
+
+    source = transcript.get(
+        "source",
+        "youtube-transcript",
+    )
+
+    source_url = transcript.get(
+        "source_url",
+        f"https://www.youtube.com/watch?v={video_id}",
+    )
+
+    # Defensive validation.
+    if stored_video_id != video_id:
+        raise ValueError(
+            "Loaded transcript video ID does not match "
+            "the requested video ID."
+        )
+
+    if not isinstance(
+        video_title,
+        str,
+    ) or not video_title.strip():
+        raise ValueError(
+            "A valid video_title is required."
+        )
 
     # Extract transcript segments.
     segments = transcript[
@@ -819,6 +896,10 @@ def translate_transcript(
 
     print(
         f"Video ID      : {video_id}"
+    )
+
+    print(
+        f"Video title   : {video_title}"
     )
 
     print(
@@ -857,7 +938,6 @@ def translate_transcript(
         ]
 
         print()
-
         print(
             f"Translating segments "
             f"{start_index} - "
@@ -889,6 +969,7 @@ def translate_transcript(
         #
         # This keeps the original transcript available for
         # debugging, auditing and multilingual retrieval.
+
         for segment, translation in zip(
             batch,
             translations,
@@ -920,6 +1001,9 @@ def translate_transcript(
     output_path = (
         save_translated_transcript(
             video_id=video_id,
+            video_title=video_title,
+            source=source,
+            source_url=source_url,
             translated_segments=translated_segments,
         )
     )
@@ -936,6 +1020,11 @@ def translate_transcript(
     print(
         f"Segments translated: "
         f"{len(translated_segments)}"
+    )
+
+    print(
+        f"Video title preserved: "
+        f"{video_title}"
     )
 
     return output_path
@@ -961,7 +1050,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Translate a YouTube transcript "
-            "from Hindi/Hinglish to English."
+            "from Hindi/Hinglish to English "
+            "while preserving video metadata."
         )
     )
 

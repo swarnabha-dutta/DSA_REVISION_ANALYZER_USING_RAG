@@ -2,20 +2,33 @@
 YouTube Transcript Extraction Utility
 
 This script:
+
 1. Accepts a YouTube video ID or full YouTube URL.
 2. Extracts the actual 11-character video ID.
-3. Fetches the available transcript from YouTube.
-4. Preserves timestamp information for every transcript segment.
-5. Normalizes the transcript into our internal JSON structure.
-6. Saves the result under data/transcripts/.
+3. Fetches the video's actual YouTube title.
+4. Fetches the available transcript from YouTube.
+5. Preserves timestamp information for every transcript segment.
+6. Normalizes the transcript into our internal JSON structure.
+7. Saves the result under data/transcripts/.
+
+The video title is stored together with the transcript because downstream
+stages (translation, chunking, metadata enrichment, embedding, and Qdrant
+ingestion) need a stable video identity.
 
 Example:
 
-    python .\scripts\youtube_transcribe.py "dyG4JBKh6tA"
+    python .\\scripts\\youtube_transcribe.py "dyG4JBKh6tA"
 
 or:
 
-    python .\scripts\youtube_transcribe.py "https://www.youtube.com/watch?v=dyG4JBKh6tA"
+    python .\\scripts\\youtube_transcribe.py \
+        "https://www.youtube.com/watch?v=dyG4JBKh6tA"
+
+Output:
+
+    data/
+    └── transcripts/
+        └── dyG4JBKh6tA.json
 """
 
 from __future__ import annotations
@@ -24,6 +37,9 @@ import argparse
 import json
 import re
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
@@ -33,16 +49,20 @@ from youtube_transcript_api import YouTubeTranscriptApi
 # ============================================================
 
 # __file__ points to:
-# backend/scripts/youtube_transcribe.py
+#
+#     backend/scripts/youtube_transcribe.py
 #
 # parents[1] moves us to:
-# backend/
+#
+#     backend/
 #
 # Therefore transcripts are always stored at:
-# backend/data/transcripts/
 #
-# Using Path instead of hard-coded Windows paths makes the
-# project portable across different machines and operating systems.
+#     backend/data/transcripts/
+#
+# Using Path instead of hard-coded Windows paths keeps the project
+# portable across different machines and operating systems.
+
 OUTPUT_DIR = (
     Path(__file__).resolve().parents[1]
     / "data"
@@ -60,26 +80,27 @@ def extract_video_id(value: str) -> str:
 
     1. A raw YouTube video ID
        Example:
-       dyG4JBKh6tA
+           dyG4JBKh6tA
 
     2. A standard YouTube URL
        Example:
-       https://www.youtube.com/watch?v=dyG4JBKh6tA
+           https://www.youtube.com/watch?v=dyG4JBKh6tA
 
     3. A shortened YouTube URL
        Example:
-       https://youtu.be/dyG4JBKh6tA
+           https://youtu.be/dyG4JBKh6tA
 
     4. An embedded YouTube URL
        Example:
-       https://www.youtube.com/embed/dyG4JBKh6tA
+           https://www.youtube.com/embed/dyG4JBKh6tA
 
     Returns:
-        str: The 11-character YouTube video ID.
+        str:
+            The 11-character YouTube video ID.
 
     Raises:
-        ValueError: If the input does not contain a valid
-                    YouTube video ID.
+        ValueError:
+            If the input does not contain a valid YouTube video ID.
     """
 
     # Remove leading/trailing whitespace.
@@ -88,21 +109,21 @@ def extract_video_id(value: str) -> str:
     # --------------------------------------------------------
     # Case 1: The user directly supplied the video ID.
     # --------------------------------------------------------
-    #
+
     # Standard YouTube video IDs contain exactly 11 characters
     # and may contain:
-    # - letters
-    # - numbers
-    # - underscore
-    # - hyphen
-    #
+    #   - letters
+    #   - numbers
+    #   - underscore
+    #   - hyphen
+
     if re.fullmatch(r"[A-Za-z0-9_-]{11}", value):
         return value
 
     # --------------------------------------------------------
     # Case 2/3/4: The user supplied a YouTube URL.
     # --------------------------------------------------------
-    #
+
     # We support the most common YouTube URL formats.
     patterns = [
         r"(?:v=)([A-Za-z0-9_-]{11})",
@@ -116,11 +137,103 @@ def extract_video_id(value: str) -> str:
         if match:
             return match.group(1)
 
-    # If none of the supported formats matched,
-    # fail explicitly instead of silently continuing.
+    # If none of the supported formats matched, fail explicitly
+    # instead of silently continuing.
+
     raise ValueError(
         "Invalid YouTube URL or video ID."
     )
+
+
+# ============================================================
+# FETCH VIDEO TITLE
+# ============================================================
+
+def fetch_video_title(
+    video_id: str,
+) -> str:
+    """
+    Fetch the actual YouTube video title.
+
+    YouTubeTranscriptApi provides transcript data, but it does not
+    provide the video's display title. Therefore the title is fetched
+    separately through YouTube's public oEmbed endpoint.
+
+    This keeps the transcript API responsible only for transcript data
+    while this function is responsible for video identity metadata.
+
+    Returns:
+        str:
+            The actual YouTube video title.
+
+    Raises:
+        RuntimeError:
+            If the title cannot be fetched or the response does not
+            contain a usable title.
+    """
+
+    video_url = (
+        f"https://www.youtube.com/watch?v={video_id}"
+    )
+
+    # YouTube oEmbed returns lightweight public metadata such as
+    # the video's title without requiring an API key.
+    oembed_url = (
+        "https://www.youtube.com/oembed"
+        f"?url={quote(video_url, safe='')}"
+        "&format=json"
+    )
+
+    request = Request(
+        oembed_url,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 "
+                "(Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 "
+                "Chrome/120 Safari/537.36"
+            )
+        },
+    )
+
+    try:
+        with urlopen(
+            request,
+            timeout=15,
+        ) as response:
+
+            payload = json.loads(
+                response.read().decode(
+                    "utf-8"
+                )
+            )
+
+    except (
+        HTTPError,
+        URLError,
+        TimeoutError,
+        json.JSONDecodeError,
+    ) as error:
+
+        raise RuntimeError(
+            "Could not fetch the YouTube video title. "
+            f"Video ID: {video_id}"
+        ) from error
+
+    title = str(
+        payload.get(
+            "title",
+            "",
+        )
+    ).strip()
+
+    if not title:
+        raise RuntimeError(
+            "YouTube returned no usable video title. "
+            f"Video ID: {video_id}"
+        )
+
+    return title
 
 
 # ============================================================
@@ -140,6 +253,7 @@ def fetch_transcript(
     Why?
 
     The course may contain:
+
     - English transcripts
     - Hindi transcripts
     - Bengali transcripts
@@ -155,9 +269,9 @@ def fetch_transcript(
         duration
         text
 
-    Most importantly, timestamps are preserved because the
-    future RAG system will use them to jump the user directly
-    to the relevant part of the YouTube video.
+    Most importantly, timestamps are preserved because the future
+    RAG system will use them to jump the user directly to the
+    relevant part of the YouTube video.
     """
 
     # Default language preference.
@@ -203,6 +317,7 @@ def fetch_transcript(
         #
         # This is important because later components should not
         # depend directly on YouTubeTranscriptApi's internal model.
+
         segments.append(
             {
                 "segment_id": index,
@@ -222,10 +337,11 @@ def fetch_transcript(
 
 def save_transcript(
     video_id: str,
+    video_title: str,
     segments: list[dict],
 ) -> Path:
     """
-    Save the normalized transcript as JSON.
+    Save the normalized transcript and video metadata as JSON.
 
     Output example:
 
@@ -234,8 +350,11 @@ def save_transcript(
             └── dyG4JBKh6tA.json
 
     The JSON contains:
+
         - video_id
+        - video_title
         - source
+        - source_url
         - segment_count
         - segments
 
@@ -257,16 +376,21 @@ def save_transcript(
     # Build the final JSON structure.
     payload = {
         "video_id": video_id,
+        "video_title": video_title,
         "source": "youtube-transcript",
+        "source_url": (
+            f"https://www.youtube.com/watch?v={video_id}"
+        ),
         "segment_count": len(segments),
         "segments": segments,
     }
 
     # Serialize JSON.
     #
-    # ensure_ascii=False is important because Hindi/Hinglish
-    # text should remain readable instead of becoming Unicode
-    # escape sequences.
+    # ensure_ascii=False is important because Hindi/Hinglish/Bengali
+    # text should remain readable instead of becoming Unicode escape
+    # sequences.
+
     output_file.write_text(
         json.dumps(
             payload,
@@ -288,15 +412,23 @@ def main() -> None:
     Command-line entry point.
 
     The user only needs to provide:
+
         - YouTube URL
         OR
         - YouTube video ID
+
+    The script then automatically:
+
+        1. Extracts the video ID.
+        2. Fetches the actual YouTube title.
+        3. Fetches the transcript.
+        4. Saves both title and transcript metadata.
     """
 
     parser = argparse.ArgumentParser(
         description=(
-            "Fetch a YouTube transcript "
-            "with timestamps."
+            "Fetch a YouTube transcript with timestamps "
+            "and save the actual video title."
         )
     )
 
@@ -307,24 +439,53 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Convert whatever the user supplied into a clean
-    # YouTube video ID.
+    # --------------------------------------------------------
+    # Extract video ID.
+    # --------------------------------------------------------
+
     video_id = extract_video_id(
         args.video
     )
 
     print(
+        f"Video ID: {video_id}"
+    )
+
+    # --------------------------------------------------------
+    # Fetch actual YouTube title.
+    # --------------------------------------------------------
+
+    print(
+        "Fetching YouTube video title..."
+    )
+
+    video_title = fetch_video_title(
+        video_id
+    )
+
+    print(
+        f"Video title: {video_title}"
+    )
+
+    # --------------------------------------------------------
+    # Fetch transcript.
+    # --------------------------------------------------------
+
+    print(
         f"Fetching transcript for: {video_id}"
     )
 
-    # Fetch transcript.
     segments = fetch_transcript(
         video_id
     )
 
-    # Save transcript.
+    # --------------------------------------------------------
+    # Save transcript + metadata.
+    # --------------------------------------------------------
+
     output_file = save_transcript(
         video_id,
+        video_title,
         segments,
     )
 
@@ -339,5 +500,6 @@ def main() -> None:
 
 # This ensures main() runs only when this file is executed
 # directly from the command line.
+
 if __name__ == "__main__":
     main()

@@ -5,6 +5,8 @@ Pipeline:
 
     Chunked Transcript
             ↓
+    Video / Pattern Metadata
+            ↓
     English Text Extraction
             ↓
     Local Embedding Model
@@ -13,68 +15,120 @@ Pipeline:
             ↓
     Qdrant Vector Database
 
-This script is intentionally kept separate from the retrieval
-logic so that ingestion and querying remain independent concerns.
+This script keeps ingestion separate from retrieval.
 
-Usage:
-
-    python scripts/ingest_embeddings.py <video_id>
+Metadata design:
+    Every ingested chunk carries the canonical DSA pattern and its
+    pattern-specific playlist.
 
 Example:
+    pattern  = "two_pointer"
+    playlist = "DSA_Patterns_Two_Pointer"
 
-    python scripts/ingest_embeddings.py dyG4JBKh6tA
+The playlist is ALWAYS derived from the canonical pattern taxonomy.
+It is never manually constructed here.
+
+Usage:
+    python scripts/ingest_embeddings.py <video_id> --pattern <pattern>
+
+Examples:
+    python scripts/ingest_embeddings.py dyG4JBKh6tA --pattern two_pointer
+
+    python scripts/ingest_embeddings.py dyG4JBKh6tA \
+        --pattern two_pointer \
+        --sub-pattern pair_search
+
+Notes:
+    - Existing chunk metadata is preserved.
+    - If chunks already contain pattern metadata, it can be reused.
+    - Explicit CLI metadata takes precedence over missing chunk metadata.
+    - A missing pattern is treated as an error instead of guessing.
+    - Qdrant payload indexes are ensured for filterable metadata fields.
 """
 
 from __future__ import annotations
+
 
 # ============================================================
 # STANDARD LIBRARY IMPORTS
 # ============================================================
 
+import argparse
 import json
 import os
 import sys
+import uuid
 from pathlib import Path
-from dotenv import load_dotenv
 from typing import Any
 
+
+# ============================================================
+# PROJECT PATH CONFIGURATION
+# ============================================================
+
+# Resolve the backend directory from:
+#
+#     backend/scripts/ingest_embeddings.py
+#
+# parent        -> backend/scripts
+# parent.parent -> backend
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+DATA_DIR = BASE_DIR / "data"
+CHUNKS_DIR = DATA_DIR / "chunks"
+
+
+# ============================================================
+# PYTHON PATH
+# ============================================================
+
+# The script is normally executed directly:
+#
+#     python scripts/ingest_embeddings.py ...
+#
+# In that situation Python starts with `backend/scripts` on sys.path.
+# Add the backend root so that project services can be imported reliably.
+
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+
+# ============================================================
+# PROJECT METADATA IMPORTS
+# ============================================================
+
+from app.services.dsa_taxonomy import (  # noqa: E402
+    get_playlist_name,
+    is_valid_pattern,
+    is_valid_sub_pattern,
+)
+
+from app.services.video_metadata_schema import (  # noqa: E402
+    VideoMetadata,
+    validate_video_metadata,
+)
 
 
 # ============================================================
 # THIRD-PARTY IMPORTS
 # ============================================================
 
-from qdrant_client import QdrantClient
-from qdrant_client.models import (
+from dotenv import load_dotenv  # noqa: E402
+
+from qdrant_client import QdrantClient  # noqa: E402
+
+from qdrant_client.models import (  # noqa: E402
     Distance,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
 
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer  # noqa: E402
+
 
 load_dotenv()
-
-# ============================================================
-# PROJECT PATH CONFIGURATION
-# ============================================================
-
-# Resolve the backend directory from this script location.
-#
-# File:
-#
-#     backend/scripts/ingest_embeddings.py
-#
-# Therefore:
-#
-#     parent       -> backend/scripts
-#     parent.parent -> backend
-#
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-DATA_DIR = BASE_DIR / "data"
-
-CHUNKS_DIR = DATA_DIR / "chunks"
 
 
 # ============================================================
@@ -83,11 +137,11 @@ CHUNKS_DIR = DATA_DIR / "chunks"
 
 # Qdrant can run locally or remotely.
 #
-# For local development, the default configuration below uses
-# a local Qdrant server running on port 6333.
+# Local development defaults to:
 #
-# These values can later be moved into a .env file or settings
-# module when the project grows.
+#     http://localhost:6333
+#
+# These values can later be moved into a dedicated settings module.
 
 QDRANT_URL = os.getenv(
     "QDRANT_URL",
@@ -109,13 +163,10 @@ COLLECTION_NAME = os.getenv(
 # EMBEDDING MODEL CONFIGURATION
 # ============================================================
 
-# We use a local Sentence Transformers model.
+# Local Sentence Transformers model.
 #
-# This avoids sending transcript content to an external
-# embedding API and keeps the ingestion pipeline inexpensive
-# and reproducible.
-#
-# The model produces 384-dimensional embeddings.
+# Using a local model keeps transcript content out of external
+# embedding APIs and keeps ingestion inexpensive and reproducible.
 
 EMBEDDING_MODEL_NAME = os.getenv(
     "EMBEDDING_MODEL",
@@ -126,11 +177,6 @@ EMBEDDING_MODEL_NAME = os.getenv(
 # ============================================================
 # BATCH CONFIGURATION
 # ============================================================
-
-# Embeddings are generated in batches instead of processing
-# every chunk individually.
-#
-# This is more efficient for larger playlists.
 
 EMBEDDING_BATCH_SIZE = int(
     os.getenv(
@@ -144,13 +190,8 @@ EMBEDDING_BATCH_SIZE = int(
 # UTILITY FUNCTIONS
 # ============================================================
 
-
 def print_section(title: str) -> None:
-    """
-    Print a visually separated section heading.
-
-    This makes command-line ingestion logs easier to read.
-    """
+    """Print a visually separated command-line section."""
 
     print()
     print("=" * 60)
@@ -158,26 +199,18 @@ def print_section(title: str) -> None:
     print("=" * 60)
 
 
+# ============================================================
+# CHUNK LOADING
+# ============================================================
+
 def load_chunks(
     video_id: str,
 ) -> dict[str, Any]:
     """
-    Load the chunked transcript JSON for a video.
+    Load the chunked transcript JSON for one video.
 
-    Parameters
-    ----------
-    video_id:
-        YouTube video ID.
-
-    Returns
-    -------
-    dict
-        Parsed chunk data.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the chunk file does not exist.
+    Expected file:
+        backend/data/chunks/<video_id>.json
     """
 
     chunk_file = (
@@ -210,11 +243,8 @@ def extract_chunk_text(
     """
     Extract the preferred text representation from a chunk.
 
-    English text is preferred because the embedding pipeline
-    uses the translated transcript.
-
-    If English text is unavailable, the original transcript
-    text is used as a fallback.
+    English translated text is preferred.
+    Original transcript text is the fallback.
     """
 
     text_en = str(
@@ -242,10 +272,6 @@ def validate_chunks(
 ) -> None:
     """
     Validate the minimum information required for embedding.
-
-    The function intentionally performs lightweight validation.
-    More advanced metadata validation can be added later when
-    playlist and DSA pattern classification are implemented.
     """
 
     if not chunks:
@@ -265,9 +291,7 @@ def validate_chunks(
                 f"Chunk at index {index} is missing 'chunk_id'."
             )
 
-        text = extract_chunk_text(
-            chunk
-        )
+        text = extract_chunk_text(chunk)
 
         if not text:
             raise ValueError(
@@ -277,42 +301,334 @@ def validate_chunks(
 
 
 # ============================================================
+# VIDEO METADATA
+# ============================================================
+
+def build_video_metadata_from_chunks(
+    video_id: str,
+    chunks: list[dict[str, Any]],
+    *,
+    pattern_override: str | None = None,
+    sub_pattern_override: str | None = None,
+) -> VideoMetadata:
+    """
+    Build validated VideoMetadata from the chunk data.
+
+    Metadata resolution order:
+
+        1. Explicit CLI pattern
+        2. Pattern already present in the chunks
+
+    For sub-pattern:
+
+        1. Explicit CLI sub-pattern
+        2. A single sub-pattern already present in chunks
+        3. No sub-pattern at video level
+
+    The function deliberately refuses to guess the DSA pattern.
+    """
+
+    first_chunk = chunks[0]
+
+    pattern = (
+        pattern_override
+        or first_chunk.get("pattern")
+    )
+
+    if not isinstance(pattern, str) or not pattern.strip():
+        raise ValueError(
+            "DSA pattern is required. "
+            "Pass it with --pattern or add 'pattern' "
+            "metadata to the chunk JSON."
+        )
+
+    pattern = pattern.strip()
+
+    if not is_valid_pattern(pattern):
+        raise ValueError(
+            f"Unknown DSA pattern: {pattern!r}."
+        )
+
+    # --------------------------------------------------------
+    # Video title.
+    #
+    # Prefer an existing chunk value. If it does not exist,
+    # use a safe fallback rather than inventing a title.
+    # --------------------------------------------------------
+
+    video_title = str(
+        first_chunk.get(
+            "video_title",
+            video_id,
+        )
+    ).strip()
+
+    if not video_title:
+        video_title = video_id
+
+    # --------------------------------------------------------
+    # Playlist is ALWAYS derived from pattern.
+    # --------------------------------------------------------
+
+    playlist = get_playlist_name(pattern)
+
+    # --------------------------------------------------------
+    # Optional playlist ID.
+    # --------------------------------------------------------
+
+    playlist_id = first_chunk.get(
+        "playlist_id"
+    )
+
+    if playlist_id is not None:
+        playlist_id = str(playlist_id)
+
+    # --------------------------------------------------------
+    # Optional video order.
+    # --------------------------------------------------------
+
+    video_order = first_chunk.get(
+        "video_order"
+    )
+
+    if video_order is not None:
+        try:
+            video_order = int(video_order)
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                "video_order must be an integer."
+            ) from error
+
+    # --------------------------------------------------------
+    # Collect existing video-level sub-patterns.
+    # --------------------------------------------------------
+
+    discovered_sub_patterns: list[str] = []
+
+    existing_video_sub_patterns = first_chunk.get(
+        "video_sub_patterns"
+    )
+
+    if isinstance(
+        existing_video_sub_patterns,
+        list,
+    ):
+        for value in existing_video_sub_patterns:
+            if isinstance(value, str):
+                value = value.strip()
+
+                if value:
+                    discovered_sub_patterns.append(value)
+
+    for chunk in chunks:
+        value = chunk.get(
+            "sub_pattern"
+        )
+
+        if isinstance(value, str):
+            value = value.strip()
+
+            if value and value not in discovered_sub_patterns:
+                discovered_sub_patterns.append(value)
+
+    # --------------------------------------------------------
+    # Explicit CLI sub-pattern takes precedence.
+    # --------------------------------------------------------
+
+    if sub_pattern_override:
+        sub_patterns = (
+            sub_pattern_override.strip(),
+        )
+
+    else:
+        sub_patterns = tuple(
+            discovered_sub_patterns
+        )
+
+    # --------------------------------------------------------
+    # Validate every discovered sub-pattern.
+    # --------------------------------------------------------
+
+    for sub_pattern in sub_patterns:
+
+        if not is_valid_sub_pattern(
+            pattern,
+            sub_pattern,
+        ):
+            raise ValueError(
+                f"Invalid sub-pattern {sub_pattern!r} "
+                f"for pattern {pattern!r}."
+            )
+
+    # --------------------------------------------------------
+    # Source URL.
+    # --------------------------------------------------------
+
+    source_url = first_chunk.get(
+        "source_url"
+    )
+
+    if source_url is not None:
+        source_url = str(source_url)
+
+    metadata = VideoMetadata(
+        video_id=video_id,
+        video_title=video_title,
+        pattern=pattern,
+        playlist=playlist,
+        playlist_id=playlist_id,
+        video_order=video_order,
+        sub_patterns=tuple(sub_patterns),
+        source_url=source_url,
+    )
+
+    validate_video_metadata(metadata)
+
+    return metadata
+
+
+def enrich_chunks_with_metadata(
+    chunks: list[dict[str, Any]],
+    metadata: VideoMetadata,
+) -> list[dict[str, Any]]:
+    """
+    Add canonical video metadata to every chunk.
+
+    Existing chunk-specific fields are preserved.
+
+    Sub-pattern rules:
+
+        - Keep an existing valid chunk-level sub_pattern.
+        - If the video has exactly one sub-pattern, inherit it.
+        - If the video has multiple sub-patterns, do not guess.
+
+    This prevents incorrectly labeling every chunk in a multi-topic
+    video with one arbitrary sub-pattern.
+    """
+
+    validate_video_metadata(metadata)
+
+    enriched_chunks: list[dict[str, Any]] = []
+
+    for chunk in chunks:
+
+        enriched = dict(chunk)
+
+        # ----------------------------------------------------
+        # Canonical video metadata.
+        # ----------------------------------------------------
+
+        enriched["video_id"] = metadata.video_id
+        enriched["video_title"] = metadata.video_title
+        enriched["pattern"] = metadata.pattern
+        enriched["playlist"] = metadata.playlist
+
+        if metadata.playlist_id is not None:
+            enriched["playlist_id"] = metadata.playlist_id
+
+        if metadata.video_order is not None:
+            enriched["video_order"] = metadata.video_order
+
+        if metadata.source_url is not None:
+            enriched["source_url"] = metadata.source_url
+
+        if metadata.sub_patterns:
+            enriched["video_sub_patterns"] = list(
+                metadata.sub_patterns
+            )
+
+        # ----------------------------------------------------
+        # Chunk-level sub-pattern.
+        # ----------------------------------------------------
+
+        existing_sub_pattern = enriched.get(
+            "sub_pattern"
+        )
+
+        if existing_sub_pattern is not None:
+
+            if not isinstance(
+                existing_sub_pattern,
+                str,
+            ):
+                raise ValueError(
+                    f"Chunk {chunk.get('chunk_id')!r} "
+                    "'sub_pattern' must be a string."
+                )
+
+            existing_sub_pattern = (
+                existing_sub_pattern.strip()
+            )
+
+            if not is_valid_sub_pattern(
+                metadata.pattern,
+                existing_sub_pattern,
+            ):
+                raise ValueError(
+                    f"Chunk {chunk.get('chunk_id')!r} "
+                    f"contains invalid sub_pattern "
+                    f"{existing_sub_pattern!r} for pattern "
+                    f"{metadata.pattern!r}."
+                )
+
+            enriched["sub_pattern"] = (
+                existing_sub_pattern
+            )
+
+        elif len(metadata.sub_patterns) == 1:
+
+            enriched["sub_pattern"] = (
+                metadata.sub_patterns[0]
+            )
+
+        enriched_chunks.append(enriched)
+
+    return enriched_chunks
+
+
+# ============================================================
 # EMBEDDING MODEL
 # ============================================================
 
-
 def load_embedding_model() -> SentenceTransformer:
-    """
-    Load the local Sentence Transformers embedding model.
-
-    The model is downloaded automatically on first use and then
-    reused from the local Hugging Face cache.
-    """
+    """Load the local Sentence Transformers embedding model."""
 
     print(
         f"Loading embedding model: "
         f"{EMBEDDING_MODEL_NAME}"
     )
 
-    model = SentenceTransformer(
+    return SentenceTransformer(
         EMBEDDING_MODEL_NAME
     )
 
-    return model
+
+def generate_embeddings(
+    model: SentenceTransformer,
+    texts: list[str],
+) -> list[list[float]]:
+    """
+    Generate normalized embeddings in batches.
+
+    Normalization makes the vectors suitable for cosine similarity.
+    """
+
+    embeddings = model.encode(
+        texts,
+        batch_size=EMBEDDING_BATCH_SIZE,
+        show_progress_bar=True,
+        normalize_embeddings=True,
+    )
+
+    return embeddings.tolist()
 
 
 # ============================================================
 # QDRANT CLIENT
 # ============================================================
 
-
 def create_qdrant_client() -> QdrantClient:
-    """
-    Create a Qdrant client.
-
-    If QDRANT_API_KEY is configured, it is passed to Qdrant.
-    Otherwise, the client connects without authentication.
-    """
+    """Create a Qdrant client using environment configuration."""
 
     print(
         f"Connecting to Qdrant: {QDRANT_URL}"
@@ -320,24 +636,98 @@ def create_qdrant_client() -> QdrantClient:
 
     if QDRANT_API_KEY:
 
-        client = QdrantClient(
+        return QdrantClient(
             url=QDRANT_URL,
             api_key=QDRANT_API_KEY,
         )
 
-    else:
+    return QdrantClient(
+        url=QDRANT_URL,
+    )
 
-        client = QdrantClient(
-            url=QDRANT_URL,
+
+# ============================================================
+# QDRANT PAYLOAD INDEX MANAGEMENT
+# ============================================================
+
+def ensure_payload_indexes(
+    client: QdrantClient,
+) -> None:
+    """
+    Ensure all metadata fields used by retrieval filters have
+    Qdrant payload indexes.
+
+    Qdrant requires an appropriate payload index for efficient
+    filtered search on keyword metadata fields.
+
+    This function is intentionally called even when the collection
+    already exists. That is important because an older collection
+    may contain vectors and payloads but still be missing the
+    required payload indexes.
+    """
+
+    print(
+        "Checking Qdrant payload indexes..."
+    )
+
+    collection_info = client.get_collection(
+        collection_name=COLLECTION_NAME,
+    )
+
+    existing_payload_schema = (
+        collection_info.payload_schema
+        or {}
+    )
+
+    # These fields are currently used by retrieval.py filters.
+    #
+    # pattern:
+    #     Primary DSA pattern filter.
+    #
+    # sub_pattern:
+    #     More specific pattern filter.
+
+    required_indexes = (
+        "pattern",
+        "sub_pattern",
+    )
+
+    for field_name in required_indexes:
+
+        if field_name in existing_payload_schema:
+
+            print(
+                f"Payload index already exists: "
+                f"{field_name}"
+            )
+
+            continue
+
+        print(
+            f"Creating payload index: "
+            f"{field_name}"
         )
 
-    return client
+        client.create_payload_index(
+            collection_name=COLLECTION_NAME,
+            field_name=field_name,
+            field_schema=PayloadSchemaType.KEYWORD,
+            wait=True,
+        )
+
+        print(
+            f"Payload index created: "
+            f"{field_name}"
+        )
+
+    print(
+        "Qdrant payload index check completed."
+    )
 
 
 # ============================================================
 # COLLECTION MANAGEMENT
 # ============================================================
-
 
 def ensure_collection(
     client: QdrantClient,
@@ -346,10 +736,11 @@ def ensure_collection(
     """
     Create the Qdrant collection if it does not already exist.
 
-    The vector dimension is obtained dynamically from the
-    embedding model instead of being hard-coded.
+    Vector size is detected from the embedding model instead of
+    being hard-coded.
 
-    This makes it safer to change embedding models later.
+    If the collection already exists, its required payload indexes
+    are still checked and created when missing.
     """
 
     existing_collections = (
@@ -358,7 +749,9 @@ def ensure_collection(
 
     collection_names = {
         collection.name
-        for collection in existing_collections.collections
+        for collection in (
+            existing_collections.collections
+        )
     }
 
     if COLLECTION_NAME in collection_names:
@@ -366,6 +759,14 @@ def ensure_collection(
         print(
             f"Qdrant collection already exists: "
             f"{COLLECTION_NAME}"
+        )
+
+        # IMPORTANT:
+        # Existing collections may have been created before the
+        # retrieval filters were introduced. Therefore, do not
+        # return before ensuring payload indexes.
+        ensure_payload_indexes(
+            client=client,
         )
 
         return
@@ -387,29 +788,33 @@ def ensure_collection(
         "Qdrant collection created successfully."
     )
 
+    # The collection is new, so create the payload indexes now.
+    ensure_payload_indexes(
+        client=client,
+    )
+
 
 # ============================================================
 # PAYLOAD CREATION
 # ============================================================
-
 
 def build_payload(
     video_id: str,
     chunk: dict[str, Any],
 ) -> dict[str, Any]:
     """
-    Build the metadata payload stored alongside the vector.
+    Build the complete Qdrant payload for one transcript chunk.
 
-    Keeping metadata inside Qdrant allows future retrieval
-    filters such as:
+    Pattern-specific metadata is intentionally stored directly in
+    the payload because Qdrant can later filter on these fields.
 
-        video_id = ...
+    Example filters:
+
         pattern = "two_pointer"
-        sub_pattern = "opposite_direction"
-        playlist = ...
 
-    Some fields may not exist yet. They are therefore included
-    only when available.
+        sub_pattern = "pair_search"
+
+        playlist = "DSA_Patterns_Two_Pointer"
     """
 
     payload: dict[str, Any] = {
@@ -455,57 +860,42 @@ def build_payload(
     }
 
     # --------------------------------------------------------
-    # Preserve future metadata if it already exists.
+    # Canonical DSA metadata.
     #
-    # These fields will become important when the system starts
-    # classifying DSA patterns and playlists.
+    # These fields should already have been enriched before this
+    # function is called.
     # --------------------------------------------------------
 
-    optional_metadata_fields = [
+    metadata_fields = [
         "video_title",
         "playlist",
         "playlist_id",
         "pattern",
         "sub_pattern",
+        "video_sub_patterns",
+        "video_order",
+        "source_url",
         "topic",
     ]
 
-    for field in optional_metadata_fields:
+    for field in metadata_fields:
 
         if field in chunk:
 
-            payload[field] = chunk[field]
+            value = chunk[field]
+
+            # Do not store empty optional strings.
+            if value == "":
+                continue
+
+            payload[field] = value
 
     return payload
 
 
 # ============================================================
-# VECTOR INGESTION
+# VECTOR POINT CREATION
 # ============================================================
-
-
-def generate_embeddings(
-    model: SentenceTransformer,
-    texts: list[str],
-) -> list[list[float]]:
-    """
-    Generate embeddings for transcript chunks.
-
-    Embeddings are generated in batches to improve performance.
-
-    normalize_embeddings=True ensures that the vectors are
-    normalized, which works well with cosine similarity.
-    """
-
-    embeddings = model.encode(
-        texts,
-        batch_size=EMBEDDING_BATCH_SIZE,
-        show_progress_bar=True,
-        normalize_embeddings=True,
-    )
-
-    return embeddings.tolist()
-
 
 def build_points(
     video_id: str,
@@ -513,18 +903,20 @@ def build_points(
     embeddings: list[list[float]],
 ) -> list[PointStruct]:
     """
-    Convert chunks and embeddings into Qdrant points.
+    Convert enriched chunks and embeddings into Qdrant points.
 
-    Each point contains:
+    Point IDs are deterministic based on:
 
-        ID
-        Vector
-        Metadata payload
+        video_id + chunk_id
 
-    A deterministic point ID is generated from the video ID
-    and chunk ID so that re-running ingestion updates the same
-    records instead of creating uncontrolled duplicates.
+    Re-running ingestion therefore updates the same Qdrant point
+    instead of creating duplicates.
     """
+
+    if len(chunks) != len(embeddings):
+        raise ValueError(
+            "Chunk count and embedding count must match."
+        )
 
     points: list[PointStruct] = []
 
@@ -542,27 +934,13 @@ def build_points(
                 "Chunk is missing chunk_id."
             )
 
-        # ----------------------------------------------------
-        # Use a deterministic string-based ID.
-        #
-        # This makes ingestion idempotent for a given video.
-        # ----------------------------------------------------
-
-        point_id = (
+        point_key = (
             f"{video_id}_{chunk_id}"
         )
 
-        # Qdrant point IDs support integers or UUIDs.
-        #
-        # Therefore we use a deterministic UUID generated from
-        # the video ID and chunk ID.
-        import uuid
-
-        deterministic_uuid = (
-            uuid.uuid5(
-                uuid.NAMESPACE_URL,
-                point_id,
-            )
+        deterministic_uuid = uuid.uuid5(
+            uuid.NAMESPACE_URL,
+            point_key,
         )
 
         points.append(
@@ -581,16 +959,18 @@ def build_points(
     return points
 
 
+# ============================================================
+# QDRANT UPLOAD
+# ============================================================
+
 def upload_points(
     client: QdrantClient,
     points: list[PointStruct],
 ) -> None:
     """
-    Upload vector points to Qdrant.
+    Upload vector points and metadata to Qdrant.
 
-    Qdrant's upsert operation makes the ingestion process
-    idempotent: running the same ingestion command again updates
-    existing points instead of creating duplicates.
+    Qdrant upsert keeps ingestion idempotent.
     """
 
     if not points:
@@ -615,13 +995,28 @@ def upload_points(
 # MAIN INGESTION PIPELINE
 # ============================================================
 
-
 def ingest_video(
     video_id: str,
+    *,
+    pattern: str | None = None,
+    sub_pattern: str | None = None,
 ) -> None:
     """
-    Execute the complete embedding ingestion pipeline for one
-    YouTube video.
+    Execute the complete ingestion pipeline for one video.
+
+    Steps:
+
+        1. Load chunked transcript.
+        2. Resolve and validate DSA metadata.
+        3. Enrich every chunk with metadata.
+        4. Extract embedding text.
+        5. Load embedding model.
+        6. Generate vectors.
+        7. Connect to Qdrant.
+        8. Ensure collection exists.
+        9. Ensure payload indexes exist.
+        10. Build deterministic Qdrant points.
+        11. Upload vectors and metadata.
     """
 
     print_section(
@@ -662,7 +1057,7 @@ def ingest_video(
     )
 
     # --------------------------------------------------------
-    # Load chunked transcript.
+    # Load chunks.
     # --------------------------------------------------------
 
     print_section(
@@ -675,7 +1070,7 @@ def ingest_video(
 
     chunks = data.get(
         "chunks",
-        []
+        [],
     )
 
     if not isinstance(
@@ -695,7 +1090,56 @@ def ingest_video(
     )
 
     # --------------------------------------------------------
-    # Extract text that will be embedded.
+    # Resolve video metadata.
+    # --------------------------------------------------------
+
+    print_section(
+        "Resolving DSA pattern metadata"
+    )
+
+    metadata = build_video_metadata_from_chunks(
+        video_id=video_id,
+        chunks=chunks,
+        pattern_override=pattern,
+        sub_pattern_override=sub_pattern,
+    )
+
+    print(
+        f"Pattern        : {metadata.pattern}"
+    )
+
+    print(
+        f"Playlist       : {metadata.playlist}"
+    )
+
+    print(
+        f"Video title    : {metadata.video_title}"
+    )
+
+    print(
+        f"Sub-patterns   : "
+        f"{list(metadata.sub_patterns) or 'Not assigned'}"
+    )
+
+    # --------------------------------------------------------
+    # Enrich chunks.
+    # --------------------------------------------------------
+
+    print_section(
+        "Enriching chunks with metadata"
+    )
+
+    chunks = enrich_chunks_with_metadata(
+        chunks=chunks,
+        metadata=metadata,
+    )
+
+    print(
+        "Chunk metadata enrichment completed."
+    )
+
+    # --------------------------------------------------------
+    # Extract text.
     # --------------------------------------------------------
 
     print_section(
@@ -748,7 +1192,7 @@ def ingest_video(
     )
 
     print(
-        f"Vector dimensions  : {vector_size}"
+        f"Vector dimensions : {vector_size}"
     )
 
     # --------------------------------------------------------
@@ -762,7 +1206,9 @@ def ingest_video(
     client = create_qdrant_client()
 
     # --------------------------------------------------------
-    # Make sure the collection exists.
+    # Ensure collection.
+    #
+    # This also ensures required payload indexes.
     # --------------------------------------------------------
 
     print_section(
@@ -775,7 +1221,7 @@ def ingest_video(
     )
 
     # --------------------------------------------------------
-    # Build Qdrant points.
+    # Build points.
     # --------------------------------------------------------
 
     print_section(
@@ -797,7 +1243,7 @@ def ingest_video(
     # --------------------------------------------------------
 
     print_section(
-        "Uploading vectors"
+        "Uploading vectors and metadata"
     )
 
     upload_points(
@@ -818,62 +1264,91 @@ def ingest_video(
     )
 
     print(
-        f"Chunks ingested   : {len(chunks)}"
+        f"Pattern            : {metadata.pattern}"
     )
 
     print(
-        f"Vector dimensions : {vector_size}"
+        f"Playlist           : {metadata.playlist}"
     )
 
     print(
-        f"Qdrant collection : {COLLECTION_NAME}"
+        f"Chunks ingested    : {len(chunks)}"
     )
 
     print(
-        f"Qdrant URL        : {QDRANT_URL}"
+        f"Vector dimensions  : {vector_size}"
+    )
+
+    print(
+        f"Qdrant collection  : {COLLECTION_NAME}"
+    )
+
+    print(
+        f"Qdrant URL         : {QDRANT_URL}"
     )
 
 
 # ============================================================
-# COMMAND-LINE ENTRY POINT
+# CLI
 # ============================================================
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse command-line arguments."""
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Generate embeddings for a DSA transcript "
+            "and ingest vectors + metadata into Qdrant."
+        )
+    )
+
+    parser.add_argument(
+        "video_id",
+        help="YouTube video ID.",
+    )
+
+    parser.add_argument(
+        "--pattern",
+        required=False,
+        help=(
+            "Canonical DSA pattern slug, for example "
+            "'two_pointer'. If omitted, the script attempts "
+            "to read pattern metadata already present in the "
+            "chunk JSON."
+        ),
+    )
+
+    parser.add_argument(
+        "--sub-pattern",
+        required=False,
+        help=(
+            "Optional canonical sub-pattern slug, for example "
+            "'pair_search'."
+        ),
+    )
+
+    return parser.parse_args()
 
 
 def main() -> None:
     """
     Command-line entry point.
 
-    Expected usage:
+    Examples:
 
-        python scripts/ingest_embeddings.py <video_id>
+        python scripts/ingest_embeddings.py dyG4JBKh6tA \
+            --pattern two_pointer
+
+        python scripts/ingest_embeddings.py dyG4JBKh6tA \
+            --pattern two_pointer \
+            --sub-pattern pair_search
     """
 
-    if len(sys.argv) != 2:
+    args = parse_arguments()
 
-        print(
-            "Usage:"
-        )
-
-        print(
-            "  python scripts/ingest_embeddings.py <video_id>"
-        )
-
-        print()
-
-        print(
-            "Example:"
-        )
-
-        print(
-            "  python scripts/ingest_embeddings.py dyG4JBKh6tA"
-        )
-
-        raise SystemExit(1)
-
-    video_id = sys.argv[1].strip()
+    video_id = args.video_id.strip()
 
     if not video_id:
-
         print(
             "Error: video_id cannot be empty."
         )
@@ -883,7 +1358,9 @@ def main() -> None:
     try:
 
         ingest_video(
-            video_id
+            video_id=video_id,
+            pattern=args.pattern,
+            sub_pattern=args.sub_pattern,
         )
 
     except KeyboardInterrupt:

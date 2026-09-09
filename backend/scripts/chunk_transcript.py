@@ -149,7 +149,9 @@ def load_transcript(
 
         {
             "video_id": "...",
+            "video_title": "...",
             "source": "...",
+            "source_url": "...",
             "translation": "English",
             "segment_count": 566,
             "segments": [...]
@@ -211,6 +213,25 @@ def load_transcript(
     if not data["segments"]:
         raise ValueError(
             "Translated transcript contains no segments."
+        )
+
+    # The translation stage is expected to preserve the canonical
+    # YouTube metadata created by youtube_transcribe.py.
+    video_title = data.get("video_title")
+
+    if not isinstance(video_title, str) or not video_title.strip():
+        raise ValueError(
+            "Translated transcript does not contain a valid 'video_title'. "
+            "Re-run youtube_transcribe.py and translate_transcript.py."
+        )
+
+    stored_video_id = data.get("video_id")
+
+    if stored_video_id and stored_video_id != video_id:
+        raise ValueError(
+            "Translated transcript video_id does not match the requested "
+            "video ID. "
+            f"Requested: {video_id}, stored: {stored_video_id}"
         )
 
     return data
@@ -295,6 +316,8 @@ def ends_with_sentence_boundary(
 
 def create_chunk(
     video_id: str,
+    video_title: str,
+    source_url: str | None,
     chunk_id: int,
     segments: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -310,6 +333,8 @@ def create_chunk(
     The chunk preserves:
 
         - video_id
+        - video_title
+        - source_url
         - chunk_id
         - segment_start
         - segment_end
@@ -361,8 +386,9 @@ def create_chunk(
 
     duration = end - start
 
-    return {
+    chunk_data: dict[str, Any] = {
         "video_id": video_id,
+        "video_title": video_title,
         "chunk_id": chunk_id,
 
         # IDs of the first and last transcript segments
@@ -386,12 +412,19 @@ def create_chunk(
         "segment_count": len(segments),
     }
 
+    if source_url:
+        chunk_data["source_url"] = source_url
+
+    return chunk_data
+
 # ============================================================
 # SMART CHUNKING ALGORITHM
 # ============================================================
 
 def create_chunks(
     video_id: str,
+    video_title: str,
+    source_url: str | None,
     segments: list[dict[str, Any]],
     target_chars: int = DEFAULT_TARGET_CHARS,
     max_chars: int = DEFAULT_MAX_CHARS,
@@ -648,6 +681,8 @@ def create_chunks(
 
         chunk = create_chunk(
             video_id=video_id,
+            video_title=video_title,
+            source_url=source_url,
             chunk_id=chunk_id,
             segments=current_segments,
         )
@@ -785,9 +820,16 @@ def save_chunks(
         / f"{video_id}.json"
     )
 
+    # Derive video-level metadata from the first chunk. Every chunk
+    # already carries the same metadata, so this keeps the output JSON
+    # convenient to inspect without introducing another source of truth.
+    first_chunk = chunks[0] if chunks else {}
+
     output_data = {
         "video_id": video_id,
+        "video_title": first_chunk.get("video_title", ""),
         "source": "translated-transcript",
+        "source_url": first_chunk.get("source_url"),
         "chunk_count": len(chunks),
         "chunks": chunks,
     }
@@ -844,6 +886,14 @@ def chunk_transcript(
         "segments"
     ]
 
+    video_title = transcript[
+        "video_title"
+    ]
+
+    source_url = transcript.get(
+        "source_url"
+    )
+
     # Display pipeline configuration.
     print()
     print("=" * 60)
@@ -852,6 +902,10 @@ def chunk_transcript(
 
     print(
         f"Video ID          : {video_id}"
+    )
+
+    print(
+        f"Video title       : {video_title}"
     )
 
     print(
@@ -875,6 +929,8 @@ def chunk_transcript(
     # Generate chunks.
     chunks = create_chunks(
         video_id=video_id,
+        video_title=video_title,
+        source_url=source_url,
         segments=segments,
         target_chars=target_chars,
         max_chars=max_chars,

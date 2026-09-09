@@ -1,6 +1,8 @@
 {
   "video_id": "dyG4JBKh6tA",
+  "video_title": "DP Full Revision and Next Steps | DP Series Episode 16",
   "source": "youtube-transcript",
+  "source_url": "https://www.youtube.com/watch?v=dyG4JBKh6tA",
   "translation": "English",
   "segment_count": 566,
   "segments": [
@@ -50,7 +52,7 @@
       "end": 14.639,
       "duration": 4.239,
       "text": "हैं उसको रिकंसाइज कर देंगे अगर इंग्लिश",
-      "text_en": "we will recognize it if it's in English"
+      "text_en": "we will recognize it if in English"
     },
     {
       "segment_id": 6,
@@ -82,7 +84,7 @@
       "end": 23.199,
       "duration": 5.119,
       "text": "भी देख रहे थे कि एआई कोर्स भी शुरू होने",
-      "text_en": "also were seeing that the AI course is also about to start"
+      "text_en": "also seeing that the AI course is also about to start"
     },
     {
       "segment_id": 10,
@@ -90,7 +92,7 @@
       "end": 24.64,
       "duration": 4.24,
       "text": "वाला है। तो वो भी होगा और डीएसए वाला भी।",
-      "text_en": "is. So that will also happen and the DSA one as well"
+      "text_en": "is. So that will happen and the DSA one as well."
     },
     {
       "segment_id": 11,
@@ -106,7 +108,7 @@
       "end": 29.279,
       "duration": 4.639,
       "text": "अब देखिए सात से आठ लेक्चर और बचे हैं। तो",
-      "text_en": "Now see, there are seven to eight lectures left. So"
+      "text_en": "Now see, only seven to eight lectures are left. So"
     },
     {
       "segment_id": 13,
@@ -122,7 +124,7 @@
       "end": 32.719,
       "duration": 3.44,
       "text": "पहले डीपी का रिवीजन करा देते हैं। उसके",
-      "text_en": "First, let's do a DP revision. Its"
+      "text_en": "First, we will do a DP revision. Its"
     },
     {
       "segment_id": 15,
@@ -130,7 +132,7 @@
       "end": 35.12,
       "duration": 4.081,
       "text": "बाद बात करेंगे कि आगे क्या होने वाला है।",
-      "text_en": "After that we will talk about what is going to happen next."
+      "text_en": "after that we will talk about what is going to happen next."
     },
     {
       "segment_id": 16,
@@ -138,7 +140,7 @@
       "end": 37.2,
       "duration": 4.481,
       "text": "ठीक है? तो देखिए जब हम लोग डायनेमिक",
-      "text_en": "Okay? So see when we start Dynamic"
+      "text_en": "Okay? So see, when we started learning dynamic"
     },
     {
       "segment_id": 17,
@@ -146,7 +148,7 @@
       "end": 39.2,
       "duration": 4.08,
       "text": "प्रोग्रामिंग पढ़ना शुरू किए थे तो सबसे",
-      "text_en": "Programming, first"
+      "text_en": "programming, the first"
     },
     {
       "segment_id": 18,
@@ -154,7 +156,7 @@
       "end": 40.96,
       "duration": 3.76,
       "text": "पहले हम आपको बोले थे कि आपको रिकर्शन आना",
-      "text_en": "first we told you that you should know recursion"
+      "text_en": "we had told you earlier that you should know recursion"
     },
     {
       "segment_id": 19,
@@ -162,7 +164,7 @@
       "end": 43.04,
       "duration": 3.84,
       "text": "चाहिए। ठीक है? आपको मेरा रिक्शन का पूरा",
-      "text_en": "should. Okay? You should watch my full recursion"
+      "text_en": "Okay? You should come after watching my recursion playlist."
     },
     {
       "segment_id": 20,
@@ -170,7 +172,7 @@
       "end": 44.719,
       "duration": 3.759,
       "text": "प्लेलिस्ट देख के आना चाहिए। रिकर्शन पे",
-      "text_en": "playlist and come. DP is based on recursion"
+      "text_en": "DP is based on recursion. Without recursion"
     },
     {
       "segment_id": 21,
@@ -178,7 +180,7 @@
       "end": 46.32,
       "duration": 3.28,
       "text": "ही बेस्ड है डीपीए। बिना रिकर्शन के",
-      "text_en": "DP is based only on recursion. Without recursion"
+      "text_en": "dynamic programming is not possible."
     },
     {
       "segment_id": 22,
@@ -186,7 +188,7 @@
       "end": 48.16,
       "duration": 3.441,
       "text": "डायनेमिक प्रोग्रामिंग पॉसिबल नहीं है।",
-      "text_en": "Dynamic Programming is not possible."
+      "text_en": "Alright. So what we said was that you should"
     },
     {
       "segment_id": 23,
@@ -194,7 +196,7 @@
       "end": 50.719,
       "duration": 4.399,
       "text": "ठीक बात है। तो हम क्या बोले थे कि आपको",
-      "text_en": "Alright. So what we said was that you should"
+      "text_en": "know recursion. So you all learn recursion"
     },
     {
       "segment_id": 24,
@@ -202,7 +204,7 @@
       "end": 52.879,
       "duration": 4.719,
       "text": "रिकर्शन आना चाहिए। तो आप लोग रिकर्शन सीख",
-      "text_en": "know recursion. So you all learn recursion"
+      "text_en": "should know recursion. So you all learn recursion"
     },
     {
       "segment_id": 25,
@@ -218,7 +220,7 @@
       "end": 57.92,
       "duration": 5.041,
       "text": "क्या होता था कि भाई अगर कोई प्रॉब्लम है",
-      "text_en": "What used to happen is, brother, if there is a problem"
+      "text_en": "What used to happen is, bro, if there is a problem."
     },
     {
       "segment_id": 27,
@@ -226,7 +228,7 @@
       "end": 60.399,
       "duration": 4.879,
       "text": "मान लीजिए कोई n n बड़ा प्रॉब्लम है मतलब",
-      "text_en": "Suppose there is a problem of size n, meaning"
+      "text_en": "Suppose there is a big problem of size n, meaning."
     },
     {
       "segment_id": 28,
@@ -234,7 +236,7 @@
       "end": 62.16,
       "duration": 4.24,
       "text": "मान लीजिए किसी प्रॉब्लम का साइज जो है वो",
-      "text_en": "Assume the size of a problem is"
+      "text_en": "Assume the size of a problem is."
     },
     {
       "segment_id": 29,
@@ -242,7 +244,7 @@
       "end": 65.119,
       "duration": 4.72,
       "text": "n है तो हम लोग क्या बोलते थे कि एक काम",
-      "text_en": "n, then we used to say, do one thing"
+      "text_en": "n, then we used to say, do one thing."
     },
     {
       "segment_id": 30,
@@ -250,7 +252,7 @@
       "end": 67.36,
       "duration": 5.2,
       "text": "करो भाई n - 1 अगर हमको कोई सॉल्व करके दे",
-      "text_en": "Do, brother, n‑1 if we get someone to solve and give us"
+      "text_en": "Do, bro, n‑1 if we get someone to solve it and give it to us."
     },
     {
       "segment_id": 31,
@@ -258,7 +260,7 @@
       "end": 69.6,
       "duration": 4.481,
       "text": "दे मतलब कि मान लीजिए आपको सम ऑफ़ 10",
-      "text_en": "Meaning, suppose you need the sum of 10"
+      "text_en": "Meaning, suppose you need the sum of 10."
     },
     {
       "segment_id": 32,
@@ -266,7 +268,7 @@
       "end": 71.28,
       "duration": 3.92,
       "text": "नंबर्स निकालना है। ठीक है? आपको सम ऑफ़ 1",
-      "text_en": "numbers. Okay? You need the sum of 1"
+      "text_en": "numbers. Okay? You need the sum of 1."
     },
     {
       "segment_id": 33,
@@ -274,7 +276,7 @@
       "end": 73.36,
       "duration": 3.76,
       "text": "टू 10 निकालना है। फॉर एग्जांपल तो यहां",
-      "text_en": "to 10. For example, here"
+      "text_en": "to 10. For example, here."
     },
     {
       "segment_id": 34,
@@ -282,7 +284,7 @@
       "end": 76.479,
       "duration": 5.199,
       "text": "पे n10 है। तो हम लोग क्या बोलते थे कि एक",
-      "text_en": "n is 10. So we used to say, one"
+      "text_en": "n is 10. So we used to say, one."
     },
     {
       "segment_id": 35,
@@ -290,7 +292,7 @@
       "end": 78.64,
       "duration": 5.28,
       "text": "काम करें? अ अगर कोई हमको 1 टू 9 निकाल के",
-      "text_en": "task? And if someone gives us 1 to 9"
+      "text_en": "task? If someone gives us the sum from 1 to 9."
     },
     {
       "segment_id": 36,
@@ -298,7 +300,7 @@
       "end": 81.36,
       "duration": 4.881,
       "text": "दे दे। कोई आदमी 1 टू 9 का सम निकाल के दे",
-      "text_en": "give. Someone calculates the sum of 1 to 9 and gives"
+      "text_en": "give. Someone calculates the sum of 1 to 9 and gives it."
     },
     {
       "segment_id": 37,
@@ -306,7 +308,7 @@
       "end": 83.6,
       "duration": 4.96,
       "text": "दे। मतलब 1 + 2 + 3 + 9 करके दे दे। किसी",
-      "text_en": "it. Meaning 1 + 2 + 3 + … + 9 and give it. Some"
+      "text_en": "That is, 1 + 2 + 3 + ... + 9 and give it."
     },
     {
       "segment_id": 38,
@@ -314,7 +316,7 @@
       "end": 85.28,
       "duration": 3.92,
       "text": "तरीके से जादू से दे दे। फिर हम ना क्या",
-      "text_en": "way magically. Then what do we"
+      "text_en": "magically give it. Then what do we."
     },
     {
       "segment_id": 39,
@@ -322,7 +324,7 @@
       "end": 87.36,
       "duration": 3.76,
       "text": "करेंगे कि ये जो भी आंसर मिलेगा कहीं से",
-      "text_en": "will do is that whatever answer we get from somewhere"
+      "text_en": "We will take whatever answer we get from somewhere."
     },
     {
       "segment_id": 40,
@@ -330,7 +332,7 @@
       "end": 89.52,
       "duration": 4.24,
       "text": "आएगा ना उसमें 10 जोड़ देंगे और अपना आंसर",
-      "text_en": "will come, we will add 10 to it and our answer"
+      "text_en": "and add 10 to it and return our answer."
     },
     {
       "segment_id": 41,
@@ -338,7 +340,7 @@
       "end": 91.68,
       "duration": 4.32,
       "text": "रिटर्न कर देंगे। पूरा रिकर्शन इसी",
-      "text_en": "return. The whole recursion is based on this"
+      "text_en": "The whole recursion is based on this concept."
     },
     {
       "segment_id": 42,
@@ -346,7 +348,7 @@
       "end": 95.04,
       "duration": 5.52,
       "text": "कांसेप्ट पे बेस है कि भाई ऊपर वाले पे",
-      "text_en": "concept is based on the idea that, brother, trust the higher level"
+      "text_en": "The concept is based on trusting the higher level, bro."
     },
     {
       "segment_id": 43,
@@ -354,7 +356,7 @@
       "end": 96.88,
       "duration": 5.2,
       "text": "भरोसा रखो और ऊपर वाले भगवान पे भरोसा रखो",
-      "text_en": "trust and trust the higher‑level (the god)"
+      "text_en": "Trust the upper one and trust the higher power."
     },
     {
       "segment_id": 44,
@@ -362,7 +364,7 @@
       "end": 98.56,
       "duration": 3.52,
       "text": "कि भाई तुमको वन टू न का आंसर मिल जाएगा।",
-      "text_en": "that, brother, you will get the answer for 1 to n."
+      "text_en": "That, bro, you will get the answer for 1 to n."
     },
     {
       "segment_id": 45,
@@ -370,7 +372,7 @@
       "end": 100.96,
       "duration": 4.08,
       "text": "कहां से मिलेगा उसकी चिंता मत करो। मिल",
-      "text_en": "Don't worry about where it will come from. It will"
+      "text_en": "Don’t worry where it will come from. It will."
     },
     {
       "segment_id": 46,
@@ -378,7 +380,7 @@
       "end": 103.36,
       "duration": 4.8,
       "text": "जाएगा। अब कैसे आंसर बनाओगे? तो अब वो",
-      "text_en": "come. Now how will you make the answer? So now that"
+      "text_en": "come. Now how will you construct the answer? So now you."
     },
     {
       "segment_id": 47,
@@ -386,7 +388,7 @@
       "end": 105.2,
       "duration": 4.24,
       "text": "तुमको सोचना पड़ेगा कि जो आंसर मिल गया है",
-      "text_en": "you have to think about the answer you have got"
+      "text_en": "have to think about the answer you have obtained."
     },
     {
       "segment_id": 48,
@@ -394,7 +396,7 @@
       "end": 106.799,
       "duration": 3.439,
       "text": "उसमें ऐसा क्या करें कि हमको पूरा आंसर",
-      "text_en": "what to do with it so that we get the complete answer"
+      "text_en": "what to do with it so that we get the complete answer."
     },
     {
       "segment_id": 49,
@@ -402,7 +404,7 @@
       "end": 108.479,
       "duration": 3.279,
       "text": "मिल जाए। तो उसमें आप बोलते थे कि ठीक है",
-      "text_en": "will be obtained. So you would say, okay"
+      "text_en": "gets. So you would say, okay."
     },
     {
       "segment_id": 50,
@@ -418,7 +420,7 @@
       "end": 113.36,
       "duration": 4.881,
       "text": "देंगे। पूरा रिकज़न इस पे बेस्ड था। अब",
-      "text_en": "We will give. The whole recursion was based on this. Now"
+      "text_en": "Will give. The entire recursion was based on this. Now"
     },
     {
       "segment_id": 52,
@@ -426,7 +428,7 @@
       "end": 114.88,
       "duration": 2.801,
       "text": "डायनेमिक प्रोग्रामिंग क्यों आया?",
-      "text_en": "Why did dynamic programming arise?"
+      "text_en": "Why did dynamic programming come?"
     },
     {
       "segment_id": 53,
@@ -450,7 +452,7 @@
       "end": 120.56,
       "duration": 3.441,
       "text": "रिकर्शन बहुत अच्छा है। रिकर्शन बहुत",
-      "text_en": "Recursion is a very good concept. Recursion is very"
+      "text_en": "Recursion is very good. Recursion is very"
     },
     {
       "segment_id": 56,
@@ -458,7 +460,7 @@
       "end": 122.64,
       "duration": 4.08,
       "text": "अच्छा कांसेप्ट है। लेकिन ऐसा देखा गया कि",
-      "text_en": "good concept. But it was observed that"
+      "text_en": "a good concept. But it was observed that"
     },
     {
       "segment_id": 57,
@@ -514,7 +516,7 @@
       "end": 136.959,
       "duration": 5.119,
       "text": "रहा है। उससे एक आदमी आके पूछा कि भाई एक",
-      "text_en": "A man comes and asks, 'Brother, one"
+      "text_en": "A man comes and asks, \"Brother, one\""
     },
     {
       "segment_id": 64,
@@ -522,7 +524,7 @@
       "end": 138.56,
       "duration": 4.241,
       "text": "काम करो एक कप चाय का प्राइस बताओ। तो",
-      "text_en": "job, tell me the price of a cup of tea.' So"
+      "text_en": "do a favor, tell me the price of one cup of tea. So"
     },
     {
       "segment_id": 65,
@@ -530,7 +532,7 @@
       "end": 140.56,
       "duration": 3.601,
       "text": "आदमी क्या करता था कि ठीक है अपने मेन्यू",
-      "text_en": "The man would say, 'Alright, in my menu'"
+      "text_en": "The man would say, \"Alright, alright,\" and look at his menu."
     },
     {
       "segment_id": 66,
@@ -538,7 +540,7 @@
       "end": 143.2,
       "duration": 4.64,
       "text": "में देखता था और एक कप चाय का प्राइस वो",
-      "text_en": "he looks and the price of one cup of tea he"
+      "text_en": "and sees that the price of one cup of tea is"
     },
     {
       "segment_id": 67,
@@ -546,7 +548,7 @@
       "end": 145.92,
       "duration": 5.36,
       "text": "बोलता था कि ₹10 है भाई अच्छा दूसरा आदमी",
-      "text_en": "says is ₹10, brother. Then another man"
+      "text_en": "he says it's ₹10, brother. Then another man"
     },
     {
       "segment_id": 68,
@@ -562,7 +564,7 @@
       "end": 150.16,
       "duration": 4.24,
       "text": "एक बिस्किट भी चाहिए इसका प्राइस बताओ तो",
-      "text_en": "one biscuit also, tell its price.'"
+      "text_en": "also a biscuit, tell me its price then."
     },
     {
       "segment_id": 70,
@@ -578,7 +580,7 @@
       "end": 155.28,
       "duration": 5.12,
       "text": "मेन्यू खोलता था उसको पता चलता था कि एक",
-      "text_en": "menu and finds that one"
+      "text_en": "menu and finds out that one"
     },
     {
       "segment_id": 72,
@@ -594,7 +596,7 @@
       "end": 160.4,
       "duration": 5.12,
       "text": "है। तो बोलता था कि भाई टोटल इसका ना ₹15",
-      "text_en": "So he says, 'Brother, the total is ₹15'"
+      "text_en": "So he says, \"Brother, the total is ₹15\""
     },
     {
       "segment_id": 74,
@@ -602,7 +604,7 @@
       "end": 162.56,
       "duration": 4.56,
       "text": "आपका दाम पड़ जाएगा। ये भी ठीक बात है। अब",
-      "text_en": "Your price will be. That's also correct. Now"
+      "text_en": "Your price will be. That's also fine. Now"
     },
     {
       "segment_id": 75,
@@ -626,7 +628,7 @@
       "end": 171.12,
       "duration": 5.601,
       "text": "चाहिए और हमको एक फैन भी चाहिए। फैन समझते",
-      "text_en": "We also need a fan. We consider fan"
+      "text_en": "We also need a fan. We consider the fan"
     },
     {
       "segment_id": 78,
@@ -642,7 +644,7 @@
       "end": 175.68,
       "duration": 4.56,
       "text": "बेचारा आदमी क्या एक चाय का देखता था",
-      "text_en": "The poor man was looking at a tea."
+      "text_en": "the poor man was looking at a tea"
     },
     {
       "segment_id": 80,
@@ -650,7 +652,7 @@
       "end": 178.239,
       "duration": 5.28,
       "text": "अच्छा ₹10 है। एक बिस्किट का बोलता था ₹5",
-      "text_en": "Okay, it's ₹10. He said a biscuit is ₹5."
+      "text_en": "Okay, it is ₹10. He said a biscuit is ₹5"
     },
     {
       "segment_id": 81,
@@ -658,7 +660,7 @@
       "end": 181.04,
       "duration": 5.36,
       "text": "है। फैन का बोलता था ₹15 है। तो वो क्या",
-      "text_en": "It's. He said the fan is ₹15. So what"
+      "text_en": "It is. He said the fan is ₹15. So what"
     },
     {
       "segment_id": 82,
@@ -666,7 +668,7 @@
       "end": 183.04,
       "duration": 4.801,
       "text": "बताता था? टोटल भैया आपका ₹30 हो गया।",
-      "text_en": "Did he tell? Total brother, your total is ₹30."
+      "text_en": "did he tell? Total, brother, your total is ₹30."
     },
     {
       "segment_id": 83,
@@ -674,7 +676,7 @@
       "end": 184.64,
       "duration": 3.6,
       "text": "इसको आप थोड़ा-थोड़ा रिकज़न की तरह समझ",
-      "text_en": "You can understand this a little like recursion."
+      "text_en": "You can understand this a bit like recursion."
     },
     {
       "segment_id": 84,
@@ -682,7 +684,7 @@
       "end": 188.0,
       "duration": 4.96,
       "text": "सकते हैं। अब इसमें वो चाय वाला गलती क्या",
-      "text_en": "Now what mistake is the tea guy making in this"
+      "text_en": "Now, what mistake is the tea seller making in this?"
     },
     {
       "segment_id": 85,
@@ -690,7 +692,7 @@
       "end": 190.879,
       "duration": 6.239,
       "text": "कर रहा था? वो ऑलरेडी एक चाय का दाम निकाल",
-      "text_en": "He had already calculated the price of a tea."
+      "text_en": "He had already calculated the price of one tea."
     },
     {
       "segment_id": 86,
@@ -698,7 +700,7 @@
       "end": 192.8,
       "duration": 4.8,
       "text": "चुका था। ठीक है? ऑलरेडी एक चाय प्लस एक",
-      "text_en": "He had already done that. Okay? Already a tea plus a"
+      "text_en": "He had already done that. Okay? He had already calculated the price of one tea plus one"
     },
     {
       "segment_id": 87,
@@ -706,7 +708,7 @@
       "end": 195.04,
       "duration": 4.161,
       "text": "बिस्किट का भी दाम निकाल चुका था। वो भी",
-      "text_en": "biscuit price had also been calculated. That also"
+      "text_en": "biscuit as well. That also"
     },
     {
       "segment_id": 88,
@@ -722,7 +724,7 @@
       "end": 199.36,
       "duration": 4.32,
       "text": "कि भाई एक चाय, एक बिस्किट, एक फैन तो वो",
-      "text_en": "that brother, a tea, a biscuit, a fan, then he"
+      "text_en": "that brother, one tea, one biscuit, one fan, then"
     },
     {
       "segment_id": 90,
@@ -730,7 +732,7 @@
       "end": 201.28,
       "duration": 3.761,
       "text": "पूरा कैलकुलेशन सारा फिर से करने लगता था।",
-      "text_en": "started doing the whole calculation again."
+      "text_en": "started doing the whole calculation all over again."
     },
     {
       "segment_id": 91,
@@ -738,7 +740,7 @@
       "end": 203.599,
       "duration": 4.239,
       "text": "मेन्यू खोल खोल के पढ़ के जोड़ के मतलब",
-      "text_en": "He kept opening the menu, reading, adding, meaning"
+      "text_en": "He kept opening the menu, reading and adding."
     },
     {
       "segment_id": 92,
@@ -746,7 +748,7 @@
       "end": 205.92,
       "duration": 4.64,
       "text": "उसमें टाइम लगता था। अगर चाय वाला एक",
-      "text_en": "It took time. If the tea guy had a"
+      "text_en": "It took time. If the tea seller did one"
     },
     {
       "segment_id": 93,
@@ -754,7 +756,7 @@
       "end": 207.92,
       "duration": 4.321,
       "text": "ट्रिक करता कि भाई एक बोर्ड बना देता।",
-      "text_en": "trick that, brother, he would make a board."
+      "text_en": "trick that, brother, he would create a board."
     },
     {
       "segment_id": 94,
@@ -778,7 +780,7 @@
       "end": 213.68,
       "duration": 3.441,
       "text": "पहला आदमी पूछा कि एक चाय का दाम कितना",
-      "text_en": "the first person asked what is the price of a tea"
+      "text_en": "the first person asked what is the price of one tea"
     },
     {
       "segment_id": 97,
@@ -786,7 +788,7 @@
       "end": 215.68,
       "duration": 3.6,
       "text": "है? तो शुरू में तो उसको नहीं याद होगा।",
-      "text_en": "right? At first he might not remember."
+      "text_en": "Right? At first he might not remember."
     },
     {
       "segment_id": 98,
@@ -794,7 +796,7 @@
       "end": 218.799,
       "duration": 5.119,
       "text": "तो एक चाय का दाम देख के उसको बता दिया",
-      "text_en": "So after seeing the tea price, he told him"
+      "text_en": "So after seeing the price of one tea, he told him"
     },
     {
       "segment_id": 99,
@@ -834,7 +836,7 @@
       "end": 230.959,
       "duration": 4.64,
       "text": "अब वो क्या किया कि एक चाय के दाम के लिए",
-      "text_en": "Now what he did for the price of a tea"
+      "text_en": "Now what he did for the price of a tea is"
     },
     {
       "segment_id": 104,
@@ -842,7 +844,7 @@
       "end": 232.239,
       "duration": 3.36,
       "text": "मेन्यू बुक नहीं खोला। अपने बोर्ड पे देख",
-      "text_en": "He didn't open the menu book; he looked at his board."
+      "text_en": "He didn't open the menu book. He looked at his board."
     },
     {
       "segment_id": 105,
@@ -850,7 +852,7 @@
       "end": 233.84,
       "duration": 2.881,
       "text": "लिया कि मेरे बोर्ड पे लिखा हुआ है क्या",
-      "text_en": "He checked what was written on his board."
+      "text_en": "He checked what is written on my board."
     },
     {
       "segment_id": 106,
@@ -866,7 +868,7 @@
       "end": 238.959,
       "duration": 5.119,
       "text": "चाय पे लिखा हुआ है ₹10। तो क्या किया? 10",
-      "text_en": "Tea is written as ₹10 on the board. So what did he do? He took 10."
+      "text_en": "Tea is written as ₹10 on the board. So what did he do? He took 10"
     },
     {
       "segment_id": 108,
@@ -874,7 +876,7 @@
       "end": 240.72,
       "duration": 4.24,
       "text": "लिया। एक बिस्किट का दाम देख लिया मेन्यू",
-      "text_en": "He took it. He looked at the price of one biscuit from the menu book."
+      "text_en": "He took it. He looked at the price of one biscuit from the menu"
     },
     {
       "segment_id": 109,
@@ -890,7 +892,7 @@
       "end": 245.84,
       "duration": 5.12,
       "text": "₹5 है। तो वो क्या किया कि 10 + 5 उसको",
-      "text_en": "₹5. So what he did is he added 10 + 5 and"
+      "text_en": "₹5. So what he did is 10 + 5 and"
     },
     {
       "segment_id": 111,
@@ -898,7 +900,7 @@
       "end": 248.159,
       "duration": 5.119,
       "text": "डायरेक्ट 15 बता दिया। और इसको भी अपने",
-      "text_en": "directly told 15. And he also wrote on his"
+      "text_en": "directly told 15. And also on his"
     },
     {
       "segment_id": 112,
@@ -906,7 +908,7 @@
       "end": 251.12,
       "duration": 5.28,
       "text": "बोर्ड पे लिख दिया कि एक चाय प्लस एक",
-      "text_en": "board that one tea plus one"
+      "text_en": "wrote on the board that one tea plus one"
     },
     {
       "segment_id": 113,
@@ -914,7 +916,7 @@
       "end": 253.36,
       "duration": 5.201,
       "text": "बिस्किट का दाम भैया ₹15 है। जब तीसरा",
-      "text_en": "biscuit costs ₹15. When the third"
+      "text_en": "biscuit price, brother, is ₹15. When the third"
     },
     {
       "segment_id": 114,
@@ -946,7 +948,7 @@
       "end": 262.32,
       "duration": 4.241,
       "text": "एक चाय और एक बिस्किट इसका दाम ऑलरेडी",
-      "text_en": "one tea and one biscuit's price is already"
+      "text_en": "one tea and one biscuit, its price is already"
     },
     {
       "segment_id": 118,
@@ -978,7 +980,7 @@
       "end": 273.36,
       "duration": 5.84,
       "text": "₹15 और उसको जोड़ के ये बता दिया। और इस",
-      "text_en": "added ₹15 and told this. And this"
+      "text_en": "added ₹15 to it and told this. And this"
     },
     {
       "segment_id": 122,
@@ -986,7 +988,7 @@
       "end": 276.479,
       "duration": 6.079,
       "text": "कॉम्बिनेशन को भी कहां पे लिख दिया? अपने",
-      "text_en": "where did he write this combination? On his"
+      "text_en": "where did he also write this combination? On his"
     },
     {
       "segment_id": 123,
@@ -994,7 +996,7 @@
       "end": 279.36,
       "duration": 6.0,
       "text": "बोर्ड पे लिख दिया। तो इस प्रॉब्लम को चाय",
-      "text_en": "board he wrote it. So this problem of tea"
+      "text_en": "wrote on the board. So this problem, the tea"
     },
     {
       "segment_id": 124,
@@ -1002,7 +1004,7 @@
       "end": 281.68,
       "duration": 5.201,
       "text": "वाला जो इसमें दिमाग लगाया ना इसी चीज को",
-      "text_en": "the one who thought about it, that's the thing"
+      "text_en": "guy who thought about this, that's the thing"
     },
     {
       "segment_id": 125,
@@ -1010,7 +1012,7 @@
       "end": 283.28,
       "duration": 3.92,
       "text": "टेक्निकल टर्म्स में मेमोराइजेशन बोलते",
-      "text_en": "In technical terms, we call it memoization."
+      "text_en": "In technical terms, we say memorization."
     },
     {
       "segment_id": 126,
@@ -1018,7 +1020,7 @@
       "end": 285.44,
       "duration": 3.76,
       "text": "हैं। मेमोराइजेशन का क्या मतलब होता है?",
-      "text_en": "What does memoization mean?"
+      "text_en": "What does memorization mean?"
     },
     {
       "segment_id": 127,
@@ -1026,7 +1028,7 @@
       "end": 287.68,
       "duration": 4.4,
       "text": "मेमोरी का क्या मतलब होता है? याद रखना",
-      "text_en": "What does memory mean? To remember."
+      "text_en": "What does memory mean? To remember"
     },
     {
       "segment_id": 128,
@@ -1034,7 +1036,7 @@
       "end": 289.44,
       "duration": 4.0,
       "text": "चीजों को। तो ओवरलैपिंग सब प्रॉब्लम्स",
-      "text_en": "things. So overlapping subproblems."
+      "text_en": "things. So overlapping subproblems"
     },
     {
       "segment_id": 129,
@@ -1042,7 +1044,7 @@
       "end": 290.8,
       "duration": 3.12,
       "text": "होता है ना कि आप बार-बार एक ही चीज सॉल्व",
-      "text_en": "occur when you repeatedly solve the same thing."
+      "text_en": "occur when you repeatedly solve the same thing"
     },
     {
       "segment_id": 130,
@@ -1050,7 +1052,7 @@
       "end": 292.72,
       "duration": 3.28,
       "text": "कर रहे हो। बार-बार एक ही एक ही एक ही एक",
-      "text_en": "again and again. Repeatedly the same, the same, the same."
+      "text_en": "again and again. Repeatedly the same, the same, the same"
     },
     {
       "segment_id": 131,
@@ -1058,7 +1060,7 @@
       "end": 295.04,
       "duration": 4.24,
       "text": "ही काम बार-बार करते थे। तो बार-बार क्यों",
-      "text_en": "task over and over. So why repeatedly."
+      "text_en": "task over and over. So why repeatedly"
     },
     {
       "segment_id": 132,
@@ -1066,7 +1068,7 @@
       "end": 297.84,
       "duration": 5.12,
       "text": "कर रहे हो काम? एक बार अगर कोई काम कर लिए",
-      "text_en": "do the work? If you have done a task once."
+      "text_en": "are you doing the work? If you have done a task once"
     },
     {
       "segment_id": 133,
@@ -1074,7 +1076,7 @@
       "end": 299.759,
       "duration": 4.719,
       "text": "हो उसका आंसर याद रख लो ना कहीं पे। बाद",
-      "text_en": "keep its answer in memory somewhere. Later."
+      "text_en": "keep its answer stored somewhere. Later"
     },
     {
       "segment_id": 134,
@@ -1082,7 +1084,7 @@
       "end": 301.6,
       "duration": 3.76,
       "text": "में अगर उसकी जरूरत पड़ी, बाद में अगर उस",
-      "text_en": "if you need it later, if later that."
+      "text_en": "if you need it later, if later that"
     },
     {
       "segment_id": 135,
@@ -1090,7 +1092,7 @@
       "end": 304.0,
       "duration": 4.241,
       "text": "प्रॉब्लम का आपको आंसर की जरूरत पड़ी तो",
-      "text_en": "problem's answer is needed then."
+      "text_en": "problem requires an answer, then"
     },
     {
       "segment_id": 136,
@@ -1098,7 +1100,7 @@
       "end": 306.72,
       "duration": 5.12,
       "text": "फिर से मत सॉल्व करो। अपने बोर्ड पे देख",
-      "text_en": "don't solve it again. Look at your board."
+      "text_en": "don't solve it again. Look at your board"
     },
     {
       "segment_id": 137,
@@ -1106,7 +1108,7 @@
       "end": 308.479,
       "duration": 4.479,
       "text": "लो। अपने बोर्ड पे देख लो। इसी चीज को",
-      "text_en": "here. Look at your board. This is the same thing."
+      "text_en": "here. Look at your board. This thing"
     },
     {
       "segment_id": 138,
@@ -1114,7 +1116,7 @@
       "end": 311.6,
       "duration": 4.88,
       "text": "डायनेमिक प्रोग्रामिंग में मेमोराइजेशन",
-      "text_en": "in dynamic programming, memoization."
+      "text_en": "in dynamic programming, memorization"
     },
     {
       "segment_id": 139,
@@ -1122,7 +1124,7 @@
       "end": 313.84,
       "duration": 5.361,
       "text": "कहा गया कि भाई अगर तुम रिकर्शन लिख रहे",
-      "text_en": "is said that, brother, if you are writing recursion."
+      "text_en": "is said that, bro, if you are writing recursion"
     },
     {
       "segment_id": 140,
@@ -1130,7 +1132,7 @@
       "end": 315.52,
       "duration": 3.92,
       "text": "हो और रिकर्शन में तुमको पता चलता है कि",
-      "text_en": "and in recursion you realize that."
+      "text_en": "and in recursion you realize that"
     },
     {
       "segment_id": 141,
@@ -1138,7 +1140,7 @@
       "end": 317.759,
       "duration": 3.919,
       "text": "तुम एक ही प्रॉब्लम को बार-बार सॉल्व कर",
-      "text_en": "you are solving the same problem repeatedly."
+      "text_en": "you are solving the same problem repeatedly"
     },
     {
       "segment_id": 142,
@@ -1146,7 +1148,7 @@
       "end": 320.56,
       "duration": 5.04,
       "text": "रहे हो। फॉर एग्जांपल अगर तुम इस तरीके का",
-      "text_en": "For example, if you use this kind of."
+      "text_en": "are doing. For example, if you use this kind of"
     },
     {
       "segment_id": 143,
@@ -1154,7 +1156,7 @@
       "end": 323.36,
       "duration": 5.601,
       "text": "कोई रिकर्शन फंक्शन लिखे हो। इंट फन इंट",
-      "text_en": "any recursive function. int func int."
+      "text_en": "any recursion function you wrote. int fun(int n)"
     },
     {
       "segment_id": 144,
@@ -1162,7 +1164,7 @@
       "end": 325.6,
       "duration": 5.04,
       "text": "n। तो इसका मतलब क्या हुआ कि आप एक n नंबर",
-      "text_en": "n. So this means you will pass an n number."
+      "text_en": "So this means you will pass an n number"
     },
     {
       "segment_id": 145,
@@ -1170,7 +1172,7 @@
       "end": 328.639,
       "duration": 5.279,
       "text": "पास करेंगे और आपका फन आपको एक इंटीजर",
-      "text_en": "and your function will give you an integer."
+      "text_en": "and your function will give you an integer"
     },
     {
       "segment_id": 146,
@@ -1178,7 +1180,7 @@
       "end": 331.52,
       "duration": 5.92,
       "text": "आंसर देगा। अगर आपको पता चलता है कि भाई",
-      "text_en": "answer. If you find out that, brother."
+      "text_en": "answer. If you find out that, bro"
     },
     {
       "segment_id": 147,
@@ -1186,7 +1188,7 @@
       "end": 333.6,
       "duration": 4.961,
       "text": "फन ऑफ फाइव का आंसर लेट्स से 100 है। कुछ",
-      "text_en": "function of five's answer is, let's say, 100. Something."
+      "text_en": "fun of five's answer is, let's say, 100. Something"
     },
     {
       "segment_id": 148,
@@ -1194,7 +1196,7 @@
       "end": 335.759,
       "duration": 4.239,
       "text": "भी हो सकता है प्रोग्राम। लेकिन आपको पता",
-      "text_en": "could happen in the program. But you know."
+      "text_en": "could also be in the program. But you know"
     },
     {
       "segment_id": 149,
@@ -1202,7 +1204,7 @@
       "end": 338.639,
       "duration": 5.039,
       "text": "चला कि फन ऑफ फाइव को जब आप कैलकुलेट",
-      "text_en": "that when you calculate function of five."
+      "text_en": "that when you calculate fun of five"
     },
     {
       "segment_id": 150,
@@ -1218,7 +1220,7 @@
       "end": 343.12,
       "duration": 4.481,
       "text": "करिए ना फन ऑफ़ फाइव का आंसर 100 या कहीं",
-      "text_en": "Compute the answer of the function of five as 100 or somewhere"
+      "text_en": "Find the answer of the function of five as 100, or somewhere"
     },
     {
       "segment_id": 152,
@@ -1226,7 +1228,7 @@
       "end": 346.24,
       "duration": 4.96,
       "text": "पे लिख के रख लीजिए। अपने डायरी में या",
-      "text_en": "Write it down in your diary or"
+      "text_en": "Write it down. In your diary or"
     },
     {
       "segment_id": 153,
@@ -1234,7 +1236,7 @@
       "end": 348.88,
       "duration": 5.76,
       "text": "अपने बोर्ड पे लिख के रख लीजिए। आगे जाके",
-      "text_en": "Write it on your board. Later"
+      "text_en": "Write it on your board. Later, when you go"
     },
     {
       "segment_id": 154,
@@ -1250,7 +1252,7 @@
       "end": 354.56,
       "duration": 5.68,
       "text": "कि निकालो। तो आप क्या करेंगे? बार-बार फन",
-      "text_en": "to compute it. What will you do? Repeatedly computing the function"
+      "text_en": "to compute it. What will you do? Repeatedly compute the function"
     },
     {
       "segment_id": 156,
@@ -1258,7 +1260,7 @@
       "end": 357.919,
       "duration": 6.0,
       "text": "ऑफ़ फाइव का कैलकुलेशन नहीं चलाएंगे। सीधा",
-      "text_en": "of five's calculation you won't run. Directly"
+      "text_en": "of five calculation you won't run. Directly"
     },
     {
       "segment_id": 157,
@@ -1282,7 +1284,7 @@
       "end": 364.479,
       "duration": 4.0,
       "text": "मेमोराइजेशन बोला जाता था। इस चीज को हम",
-      "text_en": "It was called memoization. This thing we"
+      "text_en": "It was called memorization. We"
     },
     {
       "segment_id": 160,
@@ -1290,7 +1292,7 @@
       "end": 367.039,
       "duration": 4.239,
       "text": "लोग सबसे अच्छा एग्जांपल में किस में देखे",
-      "text_en": "people saw the best example in which"
+      "text_en": "people saw the best example in"
     },
     {
       "segment_id": 161,
@@ -1306,7 +1308,7 @@
       "end": 372.96,
       "duration": 5.921,
       "text": "क्या होता था? fn = fn + 1 + fn + 2 तो",
-      "text_en": "What was happening? fn = fn+1 + fn+2 then"
+      "text_en": "What was happening? fn = fn+1 + fn+2, so"
     },
     {
       "segment_id": 163,
@@ -1322,7 +1324,7 @@
       "end": 378.08,
       "duration": 5.12,
       "text": "करता था। एक बार अगर किसी आंसर निकल गया",
-      "text_en": "It used to do that. Once if an answer is obtained"
+      "text_en": "It used to do. Once if an answer is obtained"
     },
     {
       "segment_id": 165,
@@ -1338,7 +1340,7 @@
       "end": 383.199,
       "duration": 5.119,
       "text": "होता था मेमोराइजेशन। मेमोराइजेशन में",
-      "text_en": "was called memoization. In memoization"
+      "text_en": "was called memorization. In memorization"
     },
     {
       "segment_id": 167,
@@ -1346,7 +1348,7 @@
       "end": 385.68,
       "duration": 5.361,
       "text": "क्या किया जाता था? सबसे पहले तो रिक्शन",
-      "text_en": "what was done? First, recursion"
+      "text_en": "What was done? First, recursion"
     },
     {
       "segment_id": 168,
@@ -1370,7 +1372,7 @@
       "end": 392.56,
       "duration": 4.241,
       "text": "भाई कोई ओवरलैपिंग सा प्रॉब्लम्स है क्या?",
-      "text_en": "bro, is there any overlapping kind of problem?"
+      "text_en": "bro, is there any overlapping problem?"
     },
     {
       "segment_id": 171,
@@ -1386,7 +1388,7 @@
       "end": 396.96,
       "duration": 4.4,
       "text": "ही वेरिएबल का बार-बार बार-बार आंसर निकाल",
-      "text_en": "single variable repeatedly repeatedly extracting answer"
+      "text_en": "single variable repeatedly, repeatedly extracting answer"
     },
     {
       "segment_id": 173,
@@ -1426,7 +1428,7 @@
       "end": 412.88,
       "duration": 5.681,
       "text": "लेते थे कि भाई ये जो आप फन ऑफ़ x को सॉल्व",
-      "text_en": "whether, brother, the function of x you want to solve"
+      "text_en": "we would check whether, brother, the function of x you want to solve"
     },
     {
       "segment_id": 178,
@@ -1458,7 +1460,7 @@
       "end": 423.44,
       "duration": 5.04,
       "text": "हम लोग डायरेक्टली उसको डीपी एरे से",
-      "text_en": "We would directly from the DP array"
+      "text_en": "we would directly retrieve it from the DP array"
     },
     {
       "segment_id": 182,
@@ -1466,7 +1468,7 @@
       "end": 425.44,
       "duration": 4.64,
       "text": "रिटर्न कर देते थे। अगर ऐसा नहीं होता था।",
-      "text_en": "return it. If that was not the case."
+      "text_en": "and return it. If that was not the case."
     },
     {
       "segment_id": 183,
@@ -1474,7 +1476,7 @@
       "end": 428.4,
       "duration": 4.96,
       "text": "अगर ऐसा नहीं होता था तो हम लोग उसको पूरा",
-      "text_en": "If that was not the case, we would completely"
+      "text_en": "If that was not the case, we would fully"
     },
     {
       "segment_id": 184,
@@ -1498,7 +1500,7 @@
       "end": 436.72,
       "duration": 5.84,
       "text": "में लिख देते थे उसको ताकि आगे के लिए काम",
-      "text_en": "write it into it so that it can be used later"
+      "text_en": "write it there so that it works for future"
     },
     {
       "segment_id": 187,
@@ -1514,7 +1516,7 @@
       "end": 440.88,
       "duration": 4.16,
       "text": "लोग तीन चार पांच लेक्चर स्पेंड किए थे।",
-      "text_en": "people spent three, four, five lectures."
+      "text_en": "spent three, four, five lectures."
     },
     {
       "segment_id": 189,
@@ -1522,7 +1524,7 @@
       "end": 443.039,
       "duration": 4.159,
       "text": "सही बात है? समझ में आ गया? चलिए आगे",
-      "text_en": "Is that correct? Got it? Let's move ahead."
+      "text_en": "Right? Got it? Let's move ahead."
     },
     {
       "segment_id": 190,
@@ -1538,7 +1540,7 @@
       "end": 446.96,
       "duration": 3.921,
       "text": "एक और चीज देखे थे हम आपको बहुत",
-      "text_en": "We had shown another thing, we told you a lot"
+      "text_en": "We had seen another thing, we told you a lot"
     },
     {
       "segment_id": 192,
@@ -1546,7 +1548,7 @@
       "end": 449.36,
       "duration": 4.721,
       "text": "इंपॉर्टेंट बात बताए थे कि हर क्वेश्चन",
-      "text_en": "the important thing we told that every question"
+      "text_en": "the important thing we told that for every question"
     },
     {
       "segment_id": 193,
@@ -1554,7 +1556,7 @@
       "end": 450.72,
       "duration": 3.76,
       "text": "में डीपी नहीं लगा देना है। मतलब लोगों की",
-      "text_en": "should not apply DP in. Means people's"
+      "text_en": "you should not apply DP in it. Means people's"
     },
     {
       "segment_id": 194,
@@ -1562,7 +1564,7 @@
       "end": 452.24,
       "duration": 2.88,
       "text": "टेंडेंसी क्या बन जाती है ना? क्योंकि",
-      "text_en": "tendency becomes, right? Because"
+      "text_en": "tendency becomes what, right? Because"
     },
     {
       "segment_id": 195,
@@ -1610,7 +1612,7 @@
       "end": 463.52,
       "duration": 3.201,
       "text": "क्वेश्चन बड़ा हार्ड है। तो उनको लगता है",
-      "text_en": "The question is very hard. So they think"
+      "text_en": "The question is very hard, so they think"
     },
     {
       "segment_id": 201,
@@ -1618,7 +1620,7 @@
       "end": 465.12,
       "duration": 3.04,
       "text": "कि हार्ड क्वेश्चन में क्या लगाया जा",
-      "text_en": "what can be put in a hard question?"
+      "text_en": "what can be placed in a hard question?"
     },
     {
       "segment_id": 202,
@@ -1634,7 +1636,7 @@
       "end": 469.44,
       "duration": 4.32,
       "text": "लगा देते हैं। नहीं डीपी ऐसे पागल की तरह",
-      "text_en": "apply it. No, DP should not be used like a crazy person"
+      "text_en": "apply DP. No, DP should not be used like a crazy person"
     },
     {
       "segment_id": 204,
@@ -1650,7 +1652,7 @@
       "end": 474.8,
       "duration": 5.36,
       "text": "डीपी? कभी भी आपके पास कोई चॉइस बेस्ड",
-      "text_en": "DP? Whenever you have a choice‑based"
+      "text_en": "DP? Whenever you have a choice‑based question appears"
     },
     {
       "segment_id": 206,
@@ -1658,7 +1660,7 @@
       "end": 476.56,
       "duration": 4.32,
       "text": "क्वेश्चन आता है। क्या आता है? चॉइस बेस्ड",
-      "text_en": "question. What comes? Choice‑based"
+      "text_en": "What appears? A choice‑based question"
     },
     {
       "segment_id": 207,
@@ -1666,7 +1668,7 @@
       "end": 479.68,
       "duration": 4.88,
       "text": "क्वेश्चन आता है। फॉर एग्जांपल क्लाइंबिंग",
-      "text_en": "question comes. For example, climbing"
+      "text_en": "A choice‑based question appears. For example, climbing"
     },
     {
       "segment_id": 208,
@@ -1690,7 +1692,7 @@
       "end": 484.24,
       "duration": 1.921,
       "text": "चढ़ सकते हैं। तो ये",
-      "text_en": "can climb. So this"
+      "text_en": "You can climb. So this"
     },
     {
       "segment_id": 211,
@@ -1698,7 +1700,7 @@
       "end": 486.8,
       "duration": 3.405,
       "text": "[गला साफ़ करने की आवाज़] क्या हुआ? आपको",
-      "text_en": "[Throat clearing sound] What happened? You are"
+      "text_en": "[Throat‑clearing sound] What happened? You are being given a choice"
     },
     {
       "segment_id": 212,
@@ -1706,7 +1708,7 @@
       "end": 489.28,
       "duration": 5.04,
       "text": "चॉइस दे रहा है। हाउस रॉबर। हाउस रॉबर",
-      "text_en": "being given a choice. House Robber. House Robber"
+      "text_en": "House Robber. House Robber"
     },
     {
       "segment_id": 213,
@@ -1722,7 +1724,7 @@
       "end": 495.12,
       "duration": 5.84,
       "text": "कि भाई आप इस घर को लूटेंगे या आप इस घर",
-      "text_en": "whether, brother, you will rob this house or you will"
+      "text_en": "whether you will rob this house or you will"
     },
     {
       "segment_id": 215,
@@ -1730,7 +1732,7 @@
       "end": 498.16,
       "duration": 5.44,
       "text": "को छोड़ देंगे? तो एक तो ये चॉइस बेस्ड",
-      "text_en": "leave it? So first, this should be choice‑based"
+      "text_en": "skip it? So first, this should be choice‑based"
     },
     {
       "segment_id": 216,
@@ -1738,7 +1740,7 @@
       "end": 500.319,
       "duration": 5.199,
       "text": "होना चाहिए। और क्वेश्चन ऐसा होना चाहिए",
-      "text_en": "should be. And the question should be"
+      "text_en": "and the question should be"
     },
     {
       "segment_id": 217,
@@ -1746,7 +1748,7 @@
       "end": 502.8,
       "duration": 4.64,
       "text": "कि आप उसका कोई डेफिनेट एल्गोरिदम नहीं",
-      "text_en": "such that you cannot devise any definite algorithm for it"
+      "text_en": "such that you cannot devise a definite algorithm for it"
     },
     {
       "segment_id": 218,
@@ -1778,7 +1780,7 @@
       "end": 513.68,
       "duration": 6.24,
       "text": "कर सकते थे कि चलो हम जीरो हाउस को छोड़",
-      "text_en": "do something like, let's skip the zero house"
+      "text_en": "do something like, let’s skip the zero house"
     },
     {
       "segment_id": 222,
@@ -1794,7 +1796,7 @@
       "end": 518.479,
       "duration": 4.799,
       "text": "लेंगे। ऐसा पॉसिबल नहीं था। आप देखते थे",
-      "text_en": "would be possible. That wasn't possible. You would see"
+      "text_en": "That was not possible. You would see"
     },
     {
       "segment_id": 224,
@@ -1826,7 +1828,7 @@
       "end": 527.6,
       "duration": 5.04,
       "text": "प्रोबेबिलिटी है। तो इसीलिए आपको सारे",
-      "text_en": "probability. So that's why you need all"
+      "text_en": "probability. That's why you have to consider all"
     },
     {
       "segment_id": 228,
@@ -1834,7 +1836,7 @@
       "end": 529.519,
       "duration": 4.319,
       "text": "चॉइसेस लेके चलने होते थे। फॉर एग्जांपल",
-      "text_en": "choices to consider. For example"
+      "text_en": "choices and proceed. For example"
     },
     {
       "segment_id": 229,
@@ -1842,7 +1844,7 @@
       "end": 531.839,
       "duration": 4.239,
       "text": "कोई आपको बोल रहा है कि आपके आप 10थ में",
-      "text_en": "Someone is telling you that you are in the 10th"
+      "text_en": "Someone is telling you that you are in 10th"
     },
     {
       "segment_id": 230,
@@ -1850,7 +1852,7 @@
       "end": 534.0,
       "duration": 4.481,
       "text": "है। आपके पास दो चॉइस है बेटा आप पास कर",
-      "text_en": "You have two choices, son: you can pass"
+      "text_en": "There are two choices, son: you can pass"
     },
     {
       "segment_id": 231,
@@ -1858,7 +1860,7 @@
       "end": 535.68,
       "duration": 3.841,
       "text": "सकते हैं या फेल कर सकते हैं। अब आप देखा",
-      "text_en": "or you can fail. Now you see"
+      "text_en": "or fail. Now you see"
     },
     {
       "segment_id": 232,
@@ -1866,7 +1868,7 @@
       "end": 537.92,
       "duration": 3.92,
       "text": "गया कि आप इसमें रिजिड नहीं हो सकते हैं",
-      "text_en": "that you cannot remain stuck in this"
+      "text_en": "that you cannot stay stuck in this"
     },
     {
       "segment_id": 233,
@@ -1874,7 +1876,7 @@
       "end": 540.08,
       "duration": 4.4,
       "text": "कि चलो हम 10थ में फेल ही कर जाएंगे या",
-      "text_en": "that let's just fail in the 10th or"
+      "text_en": "that we will either fail in 10th or"
     },
     {
       "segment_id": 234,
@@ -1882,7 +1884,7 @@
       "end": 542.88,
       "duration": 4.96,
       "text": "10th में हम पास ही कर जाएंगे। आपको दोनों",
-      "text_en": "in the 10th we will just pass. You need both"
+      "text_en": "we will pass in 10th. You need both"
     },
     {
       "segment_id": 235,
@@ -1890,7 +1892,7 @@
       "end": 545.68,
       "duration": 5.6,
       "text": "ऑप्शन खुला रखना होगा। आपको 10 पास करके",
-      "text_en": "options to stay open. You have to try passing the 10th"
+      "text_en": "options to stay open. You have to try passing 10th"
     },
     {
       "segment_id": 236,
@@ -1898,7 +1900,7 @@
       "end": 547.68,
       "duration": 4.8,
       "text": "देखना होगा। 10 फेल करके भी देखना होगा।",
-      "text_en": "and see. You also have to try failing the 10th and see."
+      "text_en": "and see. You also have to try failing 10th and see."
     },
     {
       "segment_id": 237,
@@ -1906,7 +1908,7 @@
       "end": 550.399,
       "duration": 4.719,
       "text": "जिसमें भी अच्छा आंसर आएगा मतलब जिसमें भी",
-      "text_en": "whichever yields a good answer, meaning whichever"
+      "text_en": "Whichever yields a better answer, meaning whichever"
     },
     {
       "segment_id": 238,
@@ -1914,7 +1916,7 @@
       "end": 553.279,
       "duration": 5.599,
       "text": "आप लाइफ में सक्सेसफुल होंगे आपको वो लेना",
-      "text_en": "you will be successful in life, you will have to take that."
+      "text_en": "you will be successful in life, you will have to take that"
     },
     {
       "segment_id": 239,
@@ -1930,7 +1932,7 @@
       "end": 558.64,
       "duration": 5.361,
       "text": "इनवॉल्वड हो, ऑप्शन इनवॉल्वड हो। आपको",
-      "text_en": "involved, options involved. You"
+      "text_en": "involved, options involved. You have"
     },
     {
       "segment_id": 241,
@@ -1938,7 +1940,7 @@
       "end": 560.64,
       "duration": 4.801,
       "text": "तरह-तरह के तरीके दिए हो कि आप ये कर सकते",
-      "text_en": "are given various ways that you can do"
+      "text_en": "various methods given so that you can do this"
     },
     {
       "segment_id": 242,
@@ -1946,7 +1948,7 @@
       "end": 562.8,
       "duration": 4.16,
       "text": "हैं, ये कर सकते हैं, ये कर सकते हैं। और",
-      "text_en": "these, these. And"
+      "text_en": "are, you can do this, you can do that. And"
     },
     {
       "segment_id": 243,
@@ -1954,7 +1956,7 @@
       "end": 565.839,
       "duration": 5.199,
       "text": "आपको पहले से पता नहीं हो कि क्या करना",
-      "text_en": "you may not know beforehand what will be right."
+      "text_en": "you don't know beforehand what will be right."
     },
     {
       "segment_id": 244,
@@ -1978,7 +1980,7 @@
       "end": 571.76,
       "duration": 4.0,
       "text": "लेकिन आपको पता नहीं है कि अभी क्या करने",
-      "text_en": "but you don't know what to do now"
+      "text_en": "But you don't know what to do now"
     },
     {
       "segment_id": 247,
@@ -1986,7 +1988,7 @@
       "end": 574.88,
       "duration": 5.28,
       "text": "से फायदा मिलेगा। तो आपको क्या करना रहता",
-      "text_en": "will benefit you. So what you have to do"
+      "text_en": "that will benefit you. So what you have to do is"
     },
     {
       "segment_id": 248,
@@ -1994,7 +1996,7 @@
       "end": 577.36,
       "duration": 5.6,
       "text": "था? हर चीज करके देखो। जितना ऑप्शन खुला",
-      "text_en": "was? Try everything. As many options open"
+      "text_en": "was? Try everything. As many options are open"
     },
     {
       "segment_id": 249,
@@ -2010,7 +2012,7 @@
       "end": 581.76,
       "duration": 4.4,
       "text": "आए उसको रिटर्न कर दो। इस तरीके के",
-      "text_en": "When it comes, return it. This kind of"
+      "text_en": "Return it when it comes. This kind of"
     },
     {
       "segment_id": 251,
@@ -2018,7 +2020,7 @@
       "end": 583.2,
       "duration": 3.681,
       "text": "क्वेश्चन में डायनेमिक प्रोग्रामिंग लगता",
-      "text_en": "Dynamic programming seems to apply to the question"
+      "text_en": "Dynamic programming seems to apply in the question"
     },
     {
       "segment_id": 252,
@@ -2026,7 +2028,7 @@
       "end": 585.12,
       "duration": 3.36,
       "text": "है। और किसी क्वेश्चन में डायनेमिक",
-      "text_en": "is. And in a question, dynamic"
+      "text_en": "is. And in some question, dynamic"
     },
     {
       "segment_id": 253,
@@ -2050,7 +2052,7 @@
       "end": 591.2,
       "duration": 4.4,
       "text": "ये मतलब नहीं कि उसमें डीपी लग जाएगा।",
-      "text_en": "does not mean that DP will be applied to it"
+      "text_en": "does not mean that DP will be applied."
     },
     {
       "segment_id": 256,
@@ -2058,7 +2060,7 @@
       "end": 593.44,
       "duration": 5.12,
       "text": "नहीं। तो ये याद रखा कीजिए। ठीक है?",
-      "text_en": "No. So keep this in mind. Okay?"
+      "text_en": "No. So remember this. Okay?"
     },
     {
       "segment_id": 257,
@@ -2090,7 +2092,7 @@
       "end": 601.12,
       "duration": 3.68,
       "text": "बताए थे कि इवन दो की आप अगर रिकर्शन वाला",
-      "text_en": "had told you that even for two, if you write a recursive DP"
+      "text_en": "had told you that even for two, if you have a recursive"
     },
     {
       "segment_id": 261,
@@ -2098,7 +2100,7 @@
       "end": 603.2,
       "duration": 3.681,
       "text": "डीपी लिख देते हैं लेकिन आपसे",
-      "text_en": "but the expectation is"
+      "text_en": "DP, you write it, but from you"
     },
     {
       "segment_id": 262,
@@ -2106,7 +2108,7 @@
       "end": 605.2,
       "duration": 4.08,
       "text": "एक्सपेक्टेशन रहता है कि आप उसको टैबुलेशन",
-      "text_en": "that you write it in tabulation form."
+      "text_en": "the expectation is that you write it in tabulation form."
     },
     {
       "segment_id": 263,
@@ -2122,7 +2124,7 @@
       "end": 608.959,
       "duration": 3.759,
       "text": "है। हम आपको एक और बात बताए थे कि दुनिया",
-      "text_en": "It is. We told you another thing that the world"
+      "text_en": "It is. We also told you that the world"
     },
     {
       "segment_id": 265,
@@ -2130,7 +2132,7 @@
       "end": 612.88,
       "duration": 6.0,
       "text": "का कोई भी कोड या दुनिया का कोई भी डीएसए",
-      "text_en": "any code in the world or any DSA"
+      "text_en": "any code of the world or any DSA"
     },
     {
       "segment_id": 266,
@@ -2146,7 +2148,7 @@
       "end": 617.36,
       "duration": 4.48,
       "text": "आइट्रेशन से भी सॉल्व हो सकता है। रिकर्शन",
-      "text_en": "with iteration. Recursion"
+      "text_en": "can also be solved with iteration. Recursion"
     },
     {
       "segment_id": 268,
@@ -2154,7 +2156,7 @@
       "end": 619.519,
       "duration": 3.919,
       "text": "मतलब जो हम लोग रिकर्शन का फंक्शन लिखते",
-      "text_en": "meaning that the recursion function we write"
+      "text_en": "means the recursion function we write"
     },
     {
       "segment_id": 269,
@@ -2170,7 +2172,7 @@
       "end": 623.92,
       "duration": 4.401,
       "text": "मतलब जहां पे आप कोई लूप लिखते हैं उससे",
-      "text_en": "meaning where you write a loop, it can also solve it."
+      "text_en": "meaning where you write a loop, from that"
     },
     {
       "segment_id": 271,
@@ -2178,7 +2180,7 @@
       "end": 626.56,
       "duration": 4.96,
       "text": "भी सॉल्व हो सकता है। ये सिंपलेस्ट ऑफ़",
-      "text_en": "can also solve it. This is the simplest of"
+      "text_en": "it can also be solved. This is the simplest of"
     },
     {
       "segment_id": 272,
@@ -2186,7 +2188,7 @@
       "end": 628.399,
       "duration": 4.479,
       "text": "प्रोग्राम पे भी एप्लीकेबल है। बड़े से बड़े",
-      "text_en": "applicable even on programs. Even the largest"
+      "text_en": "applicable even on the simplest program. Even the largest"
     },
     {
       "segment_id": 273,
@@ -2218,7 +2220,7 @@
       "end": 639.279,
       "duration": 4.239,
       "text": "से भी लिख सकते हैं, लूप से भी लिख सकते",
-      "text_en": "You can also write it using a loop."
+      "text_en": "You can also write it using loops."
     },
     {
       "segment_id": 277,
@@ -2234,7 +2236,7 @@
       "end": 643.04,
       "duration": 3.761,
       "text": "से सॉल्व कर सकते हैं। ऐसा कोई क्वेश्चन",
-      "text_en": "You can solve it. There is no question"
+      "text_en": "There is no question in the world that requires only recursion"
     },
     {
       "segment_id": 279,
@@ -2242,7 +2244,7 @@
       "end": 645.04,
       "duration": 3.761,
       "text": "नहीं है दुनिया में जिसमें सिर्फ रिकर्शन",
-      "text_en": "in the world that requires only recursion"
+      "text_en": "or only loops. That never happens."
     },
     {
       "segment_id": 280,
@@ -2250,7 +2252,7 @@
       "end": 648.16,
       "duration": 5.12,
       "text": "लगे या सिर्फ लूप लगे। ऐसा हो ही नहीं",
-      "text_en": "or only a loop. That never happens."
+      "text_en": "It cannot happen. Right, now about memoization which"
     },
     {
       "segment_id": 281,
@@ -2258,7 +2260,7 @@
       "end": 650.0,
       "duration": 4.96,
       "text": "सकता है। ठीक बात है। अब मेमोराइजेशन जो",
-      "text_en": "It cannot happen. Right. Now, about memoization which"
+      "text_en": "we have been doing memoization until now"
     },
     {
       "segment_id": 282,
@@ -2266,7 +2268,7 @@
       "end": 652.959,
       "duration": 4.799,
       "text": "मेमोराइजेशन था अभी तक हम लोग कर रहे थे",
-      "text_en": "we have been doing memoization until now."
+      "text_en": "that memoization was solved using recursion."
     },
     {
       "segment_id": 283,
@@ -2274,7 +2276,7 @@
       "end": 654.88,
       "duration": 4.88,
       "text": "कि मेमोराइजेशन वो रिकर्शन से सॉल्व होता",
-      "text_en": "We thought memoization is solved with recursion."
+      "text_en": "It was. It is obvious that it is solved by recursion."
     },
     {
       "segment_id": 284,
@@ -2282,7 +2284,7 @@
       "end": 658.399,
       "duration": 5.44,
       "text": "था। ऑब्वियस बात है कि रिकर्शन से सॉल्व",
-      "text_en": "It was. Obviously, it will be solved by recursion."
+      "text_en": "It will be. What came is tabulation; tabulation is nothing."
     },
     {
       "segment_id": 285,
@@ -2290,7 +2292,7 @@
       "end": 661.279,
       "duration": 6.399,
       "text": "होगा। जो टैबुलेशन आया टैबुलेशन कुछ नहीं",
-      "text_en": "The tabulation that came, tabulation is nothing."
+      "text_en": "Tabulation means whatever logic you wrote in recursion,"
     },
     {
       "segment_id": 286,
@@ -2298,7 +2300,7 @@
       "end": 663.92,
       "duration": 5.521,
       "text": "था। टैबुलेशन मतलब जो भी आप रिकर्शन में",
-      "text_en": "Tabulation means that whatever you wrote in recursion"
+      "text_en": "write that logic in loop form."
     },
     {
       "segment_id": 287,
@@ -2306,7 +2308,7 @@
       "end": 665.839,
       "duration": 4.56,
       "text": "लॉजिक लिखे हैं ना उसको लूप फॉर्म में लिख",
-      "text_en": "the logic, write it in loop form."
+      "text_en": "Please do that. For this we learned a trick."
     },
     {
       "segment_id": 288,
@@ -2314,7 +2316,7 @@
       "end": 668.399,
       "duration": 4.479,
       "text": "दीजिए। इसके लिए हम लोग क्या ट्रिक सीखे",
-      "text_en": "Please do that. For this, what trick did we learn"
+      "text_en": "We learned: \"Look, analyze the recursion.\""
     },
     {
       "segment_id": 289,
@@ -2322,7 +2324,7 @@
       "end": 670.8,
       "duration": 4.961,
       "text": "थे कि भाई देखो रिकर्शन को एनालाइज करो।",
-      "text_en": "that we learned: 'bro, look, analyze the recursion.'"
+      "text_en": "Look at the recursion. Understand the recursion. This"
     },
     {
       "segment_id": 290,
@@ -2330,7 +2332,7 @@
       "end": 674.399,
       "duration": 6.0,
       "text": "रिकर्शन को देखो। रिकर्शन को समझो। ये जो",
-      "text_en": "Look at the recursion. Understand the recursion. This"
+      "text_en": "your DP array, this DP array, what"
     },
     {
       "segment_id": 291,
@@ -2338,7 +2340,7 @@
       "end": 678.0,
       "duration": 7.2,
       "text": "आपका डीपी एरे है ये डीपी एरे है ये स किस",
-      "text_en": "your DP array, this DP array, what"
+      "text_en": "method is it being filled with? In what way is it being filled?"
     },
     {
       "segment_id": 292,
@@ -2346,7 +2348,7 @@
       "end": 681.44,
       "duration": 7.041,
       "text": "तरीके से भर रहा है? ये किस तरीके से भर",
-      "text_en": "is being filled? In what way is it being filled"
+      "text_en": "Is it being filled or populated? In what way is it being filled?"
     },
     {
       "segment_id": 293,
@@ -2354,7 +2356,7 @@
       "end": 683.279,
       "duration": 5.279,
       "text": "रहा है या फिल हो रहा है? किस तरीके से भर",
-      "text_en": "or being populated? In what way is it being filled"
+      "text_en": "being filled. So in this"
     },
     {
       "segment_id": 294,
@@ -2362,7 +2364,7 @@
       "end": 684.72,
       "duration": 3.28,
       "text": "रहा है या फिल हो रहा है। तो इसमें",
-      "text_en": "being filled. So in this"
+      "text_en": "in tabulation we do not go into much detail because everything is already chosen."
     },
     {
       "segment_id": 295,
@@ -2370,7 +2372,7 @@
       "end": 686.16,
       "duration": 2.881,
       "text": "टैबुलेशन में हम लोग क्या करते हम बहुत",
-      "text_en": "in tabulation we do not go into much detail"
+      "text_en": "We won't go into detail since everything has already been chosen."
     },
     {
       "segment_id": 296,
@@ -2378,7 +2380,7 @@
       "end": 687.839,
       "duration": 3.119,
       "text": "डिटेल में नहीं जाएंगे क्योंकि ऑलरेडी सब",
-      "text_en": "because everything is already chosen."
+      "text_en": "Just reminding you what used to happen."
     },
     {
       "segment_id": 297,
@@ -2386,7 +2388,7 @@
       "end": 690.079,
       "duration": 3.919,
       "text": "चूज़ हुआ है। जस्ट एक आपको याद दिला रहे",
-      "text_en": "It has been chosen. Just reminding you"
+      "text_en": "In tabulation, first we look at the base case of the recursion."
     },
     {
       "segment_id": 298,
@@ -2394,7 +2396,7 @@
       "end": 693.68,
       "duration": 5.841,
       "text": "हैं कि क्या होता था। टैबुलेशन में सबसे",
-      "text_en": "what used to happen. In tabulation, the most"
+      "text_en": "We first look at the base case of the recursion."
     },
     {
       "segment_id": 299,
@@ -2402,7 +2404,7 @@
       "end": 696.64,
       "duration": 6.561,
       "text": "पहले हम लोग रिक्शन का बेस केस देख के",
-      "text_en": "first we look at the base case of the recursion."
+      "text_en": "We first look at the base case of the recursion."
     },
     {
       "segment_id": 300,
@@ -2410,7 +2412,7 @@
       "end": 698.72,
       "duration": 5.04,
       "text": "डीपी एरे खुद से भर लेते थे। डीपी एरे खुद",
-      "text_en": "We used to fill the DP array ourselves. The DP array itself."
+      "text_en": "We used to fill the DP array ourselves. The DP array itself"
     },
     {
       "segment_id": 301,
@@ -2418,7 +2420,7 @@
       "end": 701.6,
       "duration": 4.96,
       "text": "से भर लेते थे। फॉर एग्जांपल अगर फिबोनाकी",
-      "text_en": "We used to fill it. For example, if Fibonacci."
+      "text_en": "by ourselves. For example, if Fibonacci"
     },
     {
       "segment_id": 302,
@@ -2426,7 +2428,7 @@
       "end": 705.36,
       "duration": 6.64,
       "text": "में बेस केस ये था ना कि फिबोनाकी का जहां",
-      "text_en": "In it, the base case was, you know, the Fibonacci where."
+      "text_en": "in it, the base case was that in Fibonacci where"
     },
     {
       "segment_id": 303,
@@ -2434,7 +2436,7 @@
       "end": 707.92,
       "duration": 6.32,
       "text": "तक हमको याद आ रहा है n = 0 और n = 1 तो",
-      "text_en": "up to where we recall n = 0 and n = 1, then."
+      "text_en": "we recall up to n = 0 and n = 1, then"
     },
     {
       "segment_id": 304,
@@ -2442,7 +2444,7 @@
       "end": 710.0,
       "duration": 4.64,
       "text": "हम लोग क्या बोलते थे कि रिटर्न n। इसी",
-      "text_en": "We used to say return n. Likewise."
+      "text_en": "we used to say return n. Similarly"
     },
     {
       "segment_id": 305,
@@ -2450,7 +2452,7 @@
       "end": 712.24,
       "duration": 4.32,
       "text": "बेस केस को हम लोग डीपीआर में भर लेते हम",
-      "text_en": "We would fill that base case in the DP array, we."
+      "text_en": "we would fill this base case in DP, we"
     },
     {
       "segment_id": 306,
@@ -2458,7 +2460,7 @@
       "end": 715.36,
       "duration": 5.36,
       "text": "लोग क्या लिखते थे कि डीपी ज़ीरो का आंसर",
-      "text_en": "We would write that DP[0]'s answer."
+      "text_en": "used to write that DP[0]'s answer"
     },
     {
       "segment_id": 307,
@@ -2466,7 +2468,7 @@
       "end": 717.36,
       "duration": 5.12,
       "text": "होगा ज़ीरो और डीपी वन का आंसर होगा वन। तो",
-      "text_en": "will be zero and DP[1]'s answer will be one. So."
+      "text_en": "will be zero and DP[1]'s answer will be one. So"
     },
     {
       "segment_id": 308,
@@ -2474,7 +2476,7 @@
       "end": 720.48,
       "duration": 5.12,
       "text": "सबसे पहले बेस केस को देख के रिकर्शन भर",
-      "text_en": "First, after looking at the base case, fill the recursion."
+      "text_en": "First, after looking at the base case, fill the recursion"
     },
     {
       "segment_id": 309,
@@ -2482,7 +2484,7 @@
       "end": 722.8,
       "duration": 5.44,
       "text": "लिए। उसके बाद आपको देखना है कि डीपी एरे",
-      "text_en": "for it. After that you need to see what the DP array."
+      "text_en": "for it. After that you need to see what the DP array"
     },
     {
       "segment_id": 310,
@@ -2498,7 +2500,7 @@
       "end": 729.519,
       "duration": 6.719,
       "text": "तो फिबोनाकी में क्या फार्मूला था? कि फन",
-      "text_en": "So what was the formula in Fibonacci? That the function."
+      "text_en": "So what was the formula in Fibonacci? That the function"
     },
     {
       "segment_id": 312,
@@ -2506,7 +2508,7 @@
       "end": 735.2,
       "duration": 9.681,
       "text": "n का आंसर फन n का आंसर क्या होता था? फन",
-      "text_en": "the answer for n, what was the answer of function n? function."
+      "text_en": "of n's answer, what was the answer of function n? function"
     },
     {
       "segment_id": 313,
@@ -2514,7 +2516,7 @@
       "end": 736.639,
       "duration": 7.12,
       "text": "ऑफ n - 1 + फन ऑफ n - 2। इसी चीज को लूप",
-      "text_en": "of n-1 + function of n-2. Write this thing in a loop."
+      "text_en": "of n-1 + function of n-2. Write this thing in a loop"
     },
     {
       "segment_id": 314,
@@ -2522,7 +2524,7 @@
       "end": 743.519,
       "duration": 8.319,
       "text": "में लिख दीजिए। इसी चीज को क्या लिख",
-      "text_en": "in the loop. What should we write this thing."
+      "text_en": "in. Write this thing. What to write"
     },
     {
       "segment_id": 315,
@@ -2530,7 +2532,7 @@
       "end": 746.88,
       "duration": 10.241,
       "text": "दीजिए? कि dp ऑफ़ i = dp ऑफ़ i - 1 + dp ऑफ़",
-      "text_en": "Write? that dp of i = dp of i - 1 + dp of."
+      "text_en": "? that dp[i] = dp[i-1] + dp[i]"
     },
     {
       "segment_id": 316,
@@ -2538,7 +2540,7 @@
       "end": 749.92,
       "duration": 6.401,
       "text": "i - 2 ये हो गया फार्मूला। लूप किस तरीके",
-      "text_en": "i - 2. That's the formula. How should the loop run."
+      "text_en": "i-2. That's the formula. How will the loop run"
     },
     {
       "segment_id": 317,
@@ -2546,7 +2548,7 @@
       "end": 752.399,
       "duration": 5.519,
       "text": "से चलेगा? जिस तरीके से dp भर रहा है उसी",
-      "text_en": "Will it run? In the same way that dp is being filled."
+      "text_en": "? It will run in the same way that dp is being filled"
     },
     {
       "segment_id": 318,
@@ -2554,7 +2556,7 @@
       "end": 756.88,
       "duration": 6.96,
       "text": "तरीके से चलेगा। अगर आप इसमें गौर करें तो",
-      "text_en": "It will run in that way. If you pay attention to this."
+      "text_en": "in that way. If you pay attention to this"
     },
     {
       "segment_id": 319,
@@ -2562,7 +2564,7 @@
       "end": 760.639,
       "duration": 8.24,
       "text": "dpi को किन दो चीजों की नीड है? dpi - 1",
-      "text_en": "What two things does dp[i] need? dp[i-1."
+      "text_en": "dp[i] needs which two things? dp[i-1]"
     },
     {
       "segment_id": 320,
@@ -2570,7 +2572,7 @@
       "end": 762.88,
       "duration": 6.0,
       "text": "का नीड है और dpi - 2 का नीड है। तो आपको",
-      "text_en": "needs, and dp[i-2] needs. So you."
+      "text_en": "needs, and dp[i-2] needs. So you"
     },
     {
       "segment_id": 321,
@@ -2578,7 +2580,7 @@
       "end": 768.959,
       "duration": 8.32,
       "text": "लूप किस तरीके से चलाना पड़ेगा? आपको लूप",
-      "text_en": "How should the loop be run? You need to."
+      "text_en": "how should the loop be run? You need to run the loop"
     },
     {
       "segment_id": 322,
@@ -2586,7 +2588,7 @@
       "end": 771.6,
       "duration": 8.72,
       "text": "ऐसे चलाना पड़ेगा कि फॉर i = 2 i > = n i +",
-      "text_en": "Run it such that for i = 2; i <= n; i++."
+      "text_en": "such that for i = 2; i <= n; i++"
     },
     {
       "segment_id": 323,
@@ -2602,7 +2604,7 @@
       "end": 778.959,
       "duration": 7.359,
       "text": "dp ऑफ़ i = dp ऑफ़ i - 1 + dp ऑफ़ i - 2 ये",
-      "text_en": "dp[i] = dp[i-1] + dp[i-2] this."
+      "text_en": "dp[i] = dp[i-1] + dp[i-2] this"
     },
     {
       "segment_id": 325,
@@ -2618,7 +2620,7 @@
       "end": 785.279,
       "duration": 6.32,
       "text": "आएगा? dp एरे कैसे भर रहा है? एक dp ऑफ़ i",
-      "text_en": "Will it come? How is the dp array being filled? A dp of i."
+      "text_en": "Will it come? How is the dp array being filled? A dp of i"
     },
     {
       "segment_id": 327,
@@ -2626,7 +2628,7 @@
       "end": 788.32,
       "duration": 5.76,
       "text": "को किन लोगों की नीड है? अब dp ऑफ i को i",
-      "text_en": "Who needs it? Now dp of i needs i."
+      "text_en": "Who needs it? Now dp of i needs i"
     },
     {
       "segment_id": 328,
@@ -2634,7 +2636,7 @@
       "end": 790.639,
       "duration": 5.36,
       "text": "- 1 और i - 2 की नीड है। मतलब कि मान",
-      "text_en": "-1 and i‑2 are needed. Meaning that the value"
+      "text_en": "-1 and i-2 are needed. Means that the value"
     },
     {
       "segment_id": 329,
@@ -2650,7 +2652,7 @@
       "end": 799.12,
       "duration": 8.481,
       "text": "इसको dp ऑफ 3 का नीड पड़ेगा और dp ऑफ़ 2",
-      "text_en": "It will need dp of 3 and dp of 2."
+      "text_en": "It will need dp of 3 and dp of 2"
     },
     {
       "segment_id": 331,
@@ -2666,7 +2668,7 @@
       "end": 805.44,
       "duration": 6.32,
       "text": "3 ये दोनों पहले सॉल्व होना चाहिए i = 4",
-      "text_en": "3 both must be solved first; i = 4."
+      "text_en": "3 both must be solved before i = 4"
     },
     {
       "segment_id": 333,
@@ -2674,7 +2676,7 @@
       "end": 808.399,
       "duration": 5.44,
       "text": "के। यही मतलब है ना? अगर आप i = 4 को पहले",
-      "text_en": "That's what it means, right? If you solve i = 4 first"
+      "text_en": "right? If you solve i = 4 first"
     },
     {
       "segment_id": 334,
@@ -2682,7 +2684,7 @@
       "end": 810.48,
       "duration": 5.04,
       "text": "सॉल्व करेंगे तो i = 2 और i = 3 का वैल्यू",
-      "text_en": "then where will the values of i = 2 and i = 3 come from?"
+      "text_en": "then where will the values for i = 2 and i = 3 come from"
     },
     {
       "segment_id": 335,
@@ -2690,7 +2692,7 @@
       "end": 813.2,
       "duration": 4.801,
       "text": "कहां से आएगा? कहीं से नहीं आएगा। इसीलिए",
-      "text_en": "They won't come from anywhere. That's why"
+      "text_en": "from? It won't come from anywhere. That's why"
     },
     {
       "segment_id": 336,
@@ -2706,7 +2708,7 @@
       "end": 820.88,
       "duration": 7.68,
       "text": "रिलेशन ऐसा होता बेटा कि dp ऑफ़ i को आगे",
-      "text_en": "relation is such, son, that dp of i needs future"
+      "text_en": "relation is such, son, that dp of i needs later"
     },
     {
       "segment_id": 338,
@@ -2722,7 +2724,7 @@
       "end": 826.32,
       "duration": 5.44,
       "text": "2 इसका जरूरत पड़ने लगता। तो आप किस तरीके",
-      "text_en": "2 starts to be needed. So in what way"
+      "text_en": "2 starts being needed. So how would you"
     },
     {
       "segment_id": 340,
@@ -2730,7 +2732,7 @@
       "end": 831.12,
       "duration": 7.44,
       "text": "से चलाते? तब आपको लूप उल्टा चलाना पड़ता।",
-      "text_en": "do you run it? Then you have to run the loop backwards."
+      "text_en": "run it? Then you have to run the loop backwards."
     },
     {
       "segment_id": 341,
@@ -2754,7 +2756,7 @@
       "end": 840.639,
       "duration": 6.719,
       "text": "मतलब कि dp ऑफ़ 4 को dp ऑफ़ फाइव का जरूरत",
-      "text_en": "Meaning that dp of 4 needs dp of 5"
+      "text_en": "Meaning that dp of 4 needs dp of five"
     },
     {
       "segment_id": 344,
@@ -2762,7 +2764,7 @@
       "end": 844.8,
       "duration": 6.88,
       "text": "पड़ेगा और dp ऑफ़ सिक्स का जरूरत पड़ेगा।",
-      "text_en": "and will need dp of 6."
+      "text_en": "and will need dp of six."
     },
     {
       "segment_id": 345,
@@ -2770,7 +2772,7 @@
       "end": 846.72,
       "duration": 6.081,
       "text": "इसका मतलब कि i = 6 और i = 5 i = 4 के",
-      "text_en": "This means that i = 6 and i = 5 must be solved before i = 4."
+      "text_en": "This means that i = 6 and i = 5 must be solved before i = 4"
     },
     {
       "segment_id": 346,
@@ -2786,7 +2788,7 @@
       "end": 850.639,
       "duration": 3.919,
       "text": "सॉल्व करेंगे तभी तो पहले सॉल्व होगा।",
-      "text_en": "you solve, then it will be solved first."
+      "text_en": "solving, then the earlier will be solved."
     },
     {
       "segment_id": 348,
@@ -2802,7 +2804,7 @@
       "end": 856.079,
       "duration": 5.44,
       "text": "रॉकेट साइंस कोई ऐसा बहुत महान कॉन्सेप्ट",
-      "text_en": "rocket science, no such great concept."
+      "text_en": "rocket science, some very great concept"
     },
     {
       "segment_id": 350,
@@ -2818,7 +2820,7 @@
       "end": 859.92,
       "duration": 3.841,
       "text": "सिंपल कॉमन सेंस है। मतलब बहुत कंप्यूटर",
-      "text_en": "Simple common sense. It means a lot of computer"
+      "text_en": "It is simple common sense. It means a lot of computer"
     },
     {
       "segment_id": 352,
@@ -2826,7 +2828,7 @@
       "end": 863.279,
       "duration": 4.88,
       "text": "साइंस का मतलब ही होता है कॉमन सेंस। ठीक",
-      "text_en": "Science essentially means common sense. Okay"
+      "text_en": "Science essentially means common sense. Right"
     },
     {
       "segment_id": 353,
@@ -2834,7 +2836,7 @@
       "end": 865.68,
       "duration": 5.76,
       "text": "है? ये हो गया टैबुलेशन। उसके बाद हम लोग",
-      "text_en": "Is it? That's the tabulation. After that we"
+      "text_en": "Is it? That's the tabulation done. After that we"
     },
     {
       "segment_id": 354,
@@ -2842,7 +2844,7 @@
       "end": 867.68,
       "duration": 4.401,
       "text": "देखते थे कि आप टैबुलेशन में स्पेस भी",
-      "text_en": "used to see that you can also space in the tabulation."
+      "text_en": "used to see that you can also optimize space in the tabulation."
     },
     {
       "segment_id": 355,
@@ -2850,7 +2852,7 @@
       "end": 869.44,
       "duration": 3.76,
       "text": "ऑप्टिमाइज कर सकते हैं। क्या ऑप्टिमाइज कर",
-      "text_en": "can optimize. Can we optimize"
+      "text_en": "Can be optimized. Can you optimize"
     },
     {
       "segment_id": 356,
@@ -2858,7 +2860,7 @@
       "end": 871.6,
       "duration": 3.92,
       "text": "सकते हैं? स्पेस भी ऑप्टिमाइज कर सकते",
-      "text_en": "can? You can also optimize space"
+      "text_en": "space as well?"
     },
     {
       "segment_id": 357,
@@ -2882,7 +2884,7 @@
       "end": 878.16,
       "duration": 4.24,
       "text": "थे या अपने लूप को देखते थे। आपको पता",
-      "text_en": "or you used to look at your loop. You would know"
+      "text_en": "or you look at your loop. You would know"
     },
     {
       "segment_id": 360,
@@ -2890,7 +2892,7 @@
       "end": 880.24,
       "duration": 4.161,
       "text": "चलता था लेट से फिबोनाची में। ठीक है?",
-      "text_en": "It used to work late in Fibonacci. Okay?"
+      "text_en": "how it works from the late Fibonacci. Okay?"
     },
     {
       "segment_id": 361,
@@ -2898,7 +2900,7 @@
       "end": 883.6,
       "duration": 5.44,
       "text": "क्या पता चलता था कि डीपी ऑफ़ i को दो",
-      "text_en": "What you would discover is that DP of i needs two"
+      "text_en": "What you would find out is that DP of i needs two"
     },
     {
       "segment_id": 362,
@@ -2914,7 +2916,7 @@
       "end": 889.519,
       "duration": 5.919,
       "text": "i - 2। मतलब कि अगर आपका डीपीआरए कितना भी",
-      "text_en": "i‑2. Meaning that if your DP array is whatever"
+      "text_en": "i‑2. Meaning that no matter how large your DPRA is"
     },
     {
       "segment_id": 364,
@@ -2922,7 +2924,7 @@
       "end": 892.8,
       "duration": 5.12,
       "text": "बड़ा हो आपका डीपीआरए कितना भी बड़ा हो",
-      "text_en": "big, your DP array however big"
+      "text_en": "big, your DPRA is, no matter how big your DPRA is"
     },
     {
       "segment_id": 365,
@@ -2930,7 +2932,7 @@
       "end": 895.36,
       "duration": 5.841,
       "text": "आपका डीपीआर मान लीजिए ये है 0 1 2 3 4 5",
-      "text_en": "Assume your DP values are 0 1 2 3 4 5"
+      "text_en": "Assume your DPR is 0 1 2 3 4 5"
     },
     {
       "segment_id": 366,
@@ -2946,7 +2948,7 @@
       "end": 899.279,
       "duration": 3.919,
       "text": "हैं फाइव के लिए सॉल्व कर रहे हैं तो मतलब",
-      "text_en": "you are solving for five then it means"
+      "text_en": "five. Then it means"
     },
     {
       "segment_id": 368,
@@ -2970,7 +2972,7 @@
       "end": 908.32,
       "duration": 6.72,
       "text": "किन दो चीजों की नीड पड़ेगी आपको dp ऑफ़ 4",
-      "text_en": "which two things you need: DP of 4"
+      "text_en": "Which two things? You will need DP of 4"
     },
     {
       "segment_id": 371,
@@ -2978,7 +2980,7 @@
       "end": 910.88,
       "duration": 5.681,
       "text": "+ dp ऑफ़ थ्री की नीड पड़ेगी। डीपी ऑफ़ फाइव",
-      "text_en": "+ DP of three is needed. DP of five"
+      "text_en": "+ DP of three. DP of five"
     },
     {
       "segment_id": 372,
@@ -2986,7 +2988,7 @@
       "end": 912.959,
       "duration": 4.639,
       "text": "को सॉल्व करने के लिए आपको ना डीपी ऑफ़ टू",
-      "text_en": "to solve it you don't need DP of two"
+      "text_en": "to solve, you don't need DP of two"
     },
     {
       "segment_id": 373,
@@ -3010,7 +3012,7 @@
       "end": 918.959,
       "duration": 3.919,
       "text": "ये दोनों चीजें चाहिए। तो, इसमें हम लोग",
-      "text_en": "We need both of these things. So, in this we"
+      "text_en": "Both of these are required. So, in this we"
     },
     {
       "segment_id": 376,
@@ -3018,7 +3020,7 @@
       "end": 921.76,
       "duration": 4.801,
       "text": "क्या करते थे कि भाई, पूरा डीपी एरे काहे",
-      "text_en": "What we used to do was, brother, why maintain the whole DP array"
+      "text_en": "What we used to do was, brother, why maintain the entire DP array"
     },
     {
       "segment_id": 377,
@@ -3026,7 +3028,7 @@
       "end": 924.16,
       "duration": 5.201,
       "text": "मेंटेन करेंगे? दो वेरिएबल मेंटेन कर लेते",
-      "text_en": "maintain? We would just keep two variables"
+      "text_en": "to maintain? We would just keep two variables"
     },
     {
       "segment_id": 378,
@@ -3058,7 +3060,7 @@
       "end": 932.8,
       "duration": 4.24,
       "text": "था। डीपी ऑफ़ थ्री हो जाएगा, उसके भी पीछे",
-      "text_en": "It was. DP of three will become, with its previous value as well"
+      "text_en": "It was. DP of three will become, behind it also"
     },
     {
       "segment_id": 382,
@@ -3066,7 +3068,7 @@
       "end": 934.8,
       "duration": 3.68,
       "text": "वाला वैल्यू। तो अगर हम लोग सिर्फ दो",
-      "text_en": "So if we only maintain two"
+      "text_en": "the value. So if we only keep two"
     },
     {
       "segment_id": 383,
@@ -3082,7 +3084,7 @@
       "end": 938.8,
       "duration": 4.0,
       "text": "चलें तो मेरा काम हो जाएगा। पूरा डीपीआरए",
-      "text_en": "then my work will be done. No need for the whole DP array"
+      "text_en": "we'll get the job done. The whole DP array"
     },
     {
       "segment_id": 385,
@@ -3090,7 +3092,7 @@
       "end": 941.199,
       "duration": 4.159,
       "text": "का जरूरत नहीं पड़ेगा। इसी चीज को क्या",
-      "text_en": "We won't need it. What is this called?"
+      "text_en": "won't be needed. What is this called?"
     },
     {
       "segment_id": 386,
@@ -3122,7 +3124,7 @@
       "end": 950.079,
       "duration": 4.24,
       "text": "इसमें बहुत सारे तरीके होते हैं। एक तो",
-      "text_en": "there are many techniques in this. One is"
+      "text_en": "there are many techniques in it. One is"
     },
     {
       "segment_id": 390,
@@ -3130,7 +3132,7 @@
       "end": 952.16,
       "duration": 4.48,
       "text": "आपका इसमें स्टैक वाला वो नहीं लगता। आप",
-      "text_en": "your stack-based one doesn't seem to fit here. You"
+      "text_en": "the stack one doesn't seem to fit here. You"
     },
     {
       "segment_id": 391,
@@ -3138,7 +3140,7 @@
       "end": 954.639,
       "duration": 4.56,
       "text": "लोग जानते हैं ना कि मतलब ये थोड़ा ओएस",
-      "text_en": "people know, right, that this is a bit of OS"
+      "text_en": "people know, right? It means this is a bit of OS"
     },
     {
       "segment_id": 392,
@@ -3146,7 +3148,7 @@
       "end": 956.639,
       "duration": 4.479,
       "text": "टाइप का नॉलेज है लेकिन हम बता देते हैं।",
-      "text_en": "type knowledge, but we will explain."
+      "text_en": "type knowledge, but we'll explain."
     },
     {
       "segment_id": 393,
@@ -3154,7 +3156,7 @@
       "end": 958.399,
       "duration": 3.76,
       "text": "हम बताए भी होंगे लेकिन फिर से बता देते",
-      "text_en": "We might have explained, but we will tell again"
+      "text_en": "We might have explained, but we'll say it again"
     },
     {
       "segment_id": 394,
@@ -3186,7 +3188,7 @@
       "end": 968.0,
       "duration": 4.64,
       "text": "चला तो कंप्यूटर क्या करेगा ना कि फन ऑफ",
-      "text_en": "runs, then what will the computer do? Not that the function of"
+      "text_en": "runs, what will the computer do? It will allocate memory for function of"
     },
     {
       "segment_id": 398,
@@ -3194,7 +3196,7 @@
       "end": 970.16,
       "duration": 4.641,
       "text": "फाइव के लिए एक मेमोरी बना देगा। कहां पे?",
-      "text_en": "five will allocate a memory. Where?"
+      "text_en": "five. Where?"
     },
     {
       "segment_id": 399,
@@ -3202,7 +3204,7 @@
       "end": 973.12,
       "duration": 5.12,
       "text": "स्टक में। स्टक मतलब स्टक डेटा स्ट्रक्चर",
-      "text_en": "In the stack. Stack meaning the stack data structure"
+      "text_en": "On the stack. Stack meaning the stack data structure."
     },
     {
       "segment_id": 400,
@@ -3210,7 +3212,7 @@
       "end": 975.199,
       "duration": 5.039,
       "text": "नहीं। ओएस में भी ओ मतलब ओएस या हम आपको",
-      "text_en": "No. In OS, O also means OS, or we ..."
+      "text_en": "No. In OS, O also means OS, or we..."
     },
     {
       "segment_id": 401,
@@ -3234,7 +3236,7 @@
       "end": 980.399,
       "duration": 3.519,
       "text": "अंदर एक स्पेस होता है उसको बोलते हैं",
-      "text_en": "inside there is a space, which we call"
+      "text_en": "inside has a space, which we call"
     },
     {
       "segment_id": 404,
@@ -3266,7 +3268,7 @@
       "end": 988.8,
       "duration": 4.64,
       "text": "है ना तो स्टैक वाले स्पेस में फन ऑफ़ फाइव",
-      "text_en": "it, in the stack space, function of five"
+      "text_en": "then in the stack space, function of five"
     },
     {
       "segment_id": 408,
@@ -3274,7 +3276,7 @@
       "end": 991.36,
       "duration": 4.8,
       "text": "के लिए कुछ मेमोरी एलोकेट होती है। कुछ",
-      "text_en": "has some memory allocated for it. Some"
+      "text_en": "is allocated some memory. Some"
     },
     {
       "segment_id": 409,
@@ -3290,7 +3292,7 @@
       "end": 996.639,
       "duration": 5.279,
       "text": "अब मान लीजिए फन ऑफ़ फाइव फन ऑफ़ फोर को कॉल",
-      "text_en": "Now suppose function of five calls function of four"
+      "text_en": "Now suppose function of five calls function of four."
     },
     {
       "segment_id": 411,
@@ -3298,7 +3300,7 @@
       "end": 999.199,
       "duration": 4.959,
       "text": "कर दिया। क्या होगा? स्टक में एक और",
-      "text_en": "What will happen? Another"
+      "text_en": "What will happen? In the stack, another"
     },
     {
       "segment_id": 412,
@@ -3306,7 +3308,7 @@
       "end": 1002.079,
       "duration": 5.44,
       "text": "मेमोरी एलोकेट होगा जो कि फन ऑफ़ फोर के",
-      "text_en": "memory will be allocated in the stack for function of four"
+      "text_en": "memory will be allocated for function of four."
     },
     {
       "segment_id": 413,
@@ -3322,7 +3324,7 @@
       "end": 1006.48,
       "duration": 4.401,
       "text": "ऑफ़ फोर मान लीजिए फन ऑफ़ थ्री को कॉल कर",
-      "text_en": "of four, suppose it calls function of three"
+      "text_en": "of four, suppose it calls function of three."
     },
     {
       "segment_id": 415,
@@ -3330,7 +3332,7 @@
       "end": 1009.44,
       "duration": 5.12,
       "text": "दिया। स्टैक में एक और मेमोरी एलोकेट",
-      "text_en": "Then another memory allocation will happen in the stack"
+      "text_en": "Then another memory will be allocated in the stack."
     },
     {
       "segment_id": 416,
@@ -3338,7 +3340,7 @@
       "end": 1010.88,
       "duration": 4.4,
       "text": "होगा। ये भी 10 MB का होगा जो कि फन ऑफ़",
-      "text_en": "It will also be 10 MB, which will be for function of"
+      "text_en": "It will also be 10 MB, which is for function of"
     },
     {
       "segment_id": 417,
@@ -3386,7 +3388,7 @@
       "end": 1024.16,
       "duration": 4.56,
       "text": "हो रहा है जिसमें कोई बेस केस नहीं है ना",
-      "text_en": "or is not terminating, which has no base case"
+      "text_en": "i.e., there is no base case"
     },
     {
       "segment_id": 423,
@@ -3394,7 +3396,7 @@
       "end": 1025.839,
       "duration": 4.239,
       "text": "तो आपका सेगमेंटेशन एरर या आपका आउट ऑफ",
-      "text_en": "then you get a segmentation error or your out-of"
+      "text_en": "then you get a segmentation error or your out-of-"
     },
     {
       "segment_id": 424,
@@ -3410,7 +3412,7 @@
       "end": 1029.679,
       "duration": 3.84,
       "text": "मतलब वो मेमोरी एलोकेट करता चला जाता है।",
-      "text_en": "It means it keeps allocating memory continuously."
+      "text_en": "It means it keeps allocating memory."
     },
     {
       "segment_id": 426,
@@ -3418,7 +3420,7 @@
       "end": 1032.079,
       "duration": 4.24,
       "text": "धीरे धीरे धीरे करके वो रैम खत्म हो जाता",
-      "text_en": "Gradually, it eventually runs out of RAM."
+      "text_en": "Gradually, it ends up exhausting the RAM."
     },
     {
       "segment_id": 427,
@@ -3426,7 +3428,7 @@
       "end": 1034.64,
       "duration": 4.961,
       "text": "है उसका। ठीक है? तो जभी भी आप रिकर्शन",
-      "text_en": "That's it. Okay? So whenever you write recursion"
+      "text_en": "That's it. Okay? So whenever you use recursion"
     },
     {
       "segment_id": 428,
@@ -3434,7 +3436,7 @@
       "end": 1036.72,
       "duration": 4.641,
       "text": "लिखते हैं ना उसमें कुछ एक्स्ट्रा स्पेस",
-      "text_en": "you write, there is some extra space"
+      "text_en": "when you write it, there is some extra space"
     },
     {
       "segment_id": 429,
@@ -3466,7 +3468,7 @@
       "end": 1044.799,
       "duration": 4.559,
       "text": "स्पेस लेता है। जब आप टैबुलेशन लिखते हैं",
-      "text_en": "takes space. When you write tabulation"
+      "text_en": "takes up space. When you write tabulation"
     },
     {
       "segment_id": 433,
@@ -3482,7 +3484,7 @@
       "end": 1048.64,
       "duration": 3.841,
       "text": "में तो आप लूप लिख रहे हैं ना भाई। आप लूप",
-      "text_en": "involves writing a loop, right? You are writing a loop"
+      "text_en": "in it you are writing a loop, right? You are writing a loop"
     },
     {
       "segment_id": 435,
@@ -3490,7 +3492,7 @@
       "end": 1050.64,
       "duration": 3.76,
       "text": "लिख रहे हैं। लूप के लिए कोई स्पेस एलोकेट",
-      "text_en": "writing. No separate space is allocated for a loop."
+      "text_en": "writing. No space is allocated for a loop"
     },
     {
       "segment_id": 436,
@@ -3498,7 +3500,7 @@
       "end": 1052.72,
       "duration": 4.08,
       "text": "नहीं होता है अलग से। लेकिन रिकर्शन का",
-      "text_en": "But for recursion"
+      "text_en": "separately. But for recursion"
     },
     {
       "segment_id": 437,
@@ -3506,7 +3508,7 @@
       "end": 1055.2,
       "duration": 4.56,
       "text": "फंक्शन चलाने के लिए अलग से स्पेस होता",
-      "text_en": "running the function requires separate space."
+      "text_en": "to run the function, separate space is required"
     },
     {
       "segment_id": 438,
@@ -3514,7 +3516,7 @@
       "end": 1057.919,
       "duration": 5.199,
       "text": "जाता है। होता जाता है। जब ये फन ऑफ थ्री",
-      "text_en": "It gets allocated. It keeps happening. When this function of three"
+      "text_en": "It gets allocated. It keeps getting allocated. When this function-of-three"
     },
     {
       "segment_id": 439,
@@ -3522,7 +3524,7 @@
       "end": 1060.0,
       "duration": 4.8,
       "text": "खत्म होगा ना तब जाके ये फन ऑफ़ थ्री वाला",
-      "text_en": "finishes, then the function‑of‑three's"
+      "text_en": "finishes, then only the function-of-three's"
     },
     {
       "segment_id": 440,
@@ -3530,7 +3532,7 @@
       "end": 1061.84,
       "duration": 3.921,
       "text": "स्पेस फ्री होगा। जब तक ये फन ऑफ थ्री",
-      "text_en": "space will be free. Until this function of three"
+      "text_en": "space will be freed. Until this function-of-three"
     },
     {
       "segment_id": 441,
@@ -3546,7 +3548,7 @@
       "end": 1065.039,
       "duration": 3.199,
       "text": "मेमोरी में। तो इसीलिए रिकर्शन को हम लोग",
-      "text_en": "memory. That's why we say recursion"
+      "text_en": "memory. That's why we refer to recursion"
     },
     {
       "segment_id": 443,
@@ -3554,7 +3556,7 @@
       "end": 1067.28,
       "duration": 3.68,
       "text": "बोलते हैं कि इसमें एक स्पेस ज्यादा",
-      "text_en": "requires one extra space."
+      "text_en": "as requiring one extra space"
     },
     {
       "segment_id": 444,
@@ -3562,7 +3564,7 @@
       "end": 1069.52,
       "duration": 4.481,
       "text": "रिक्वायर्ड होती है टैबुलेशन। क्योंकि लूप",
-      "text_en": "Tabulation requires it because loops"
+      "text_en": "required. Tabulation. Because loops"
     },
     {
       "segment_id": 445,
@@ -3570,7 +3572,7 @@
       "end": 1072.88,
       "duration": 5.6,
       "text": "में टैबुलेशन में लूप में स्पेस नहीं होता",
-      "text_en": "in tabulation do not have extra space."
+      "text_en": "in tabulation, loops do not have space"
     },
     {
       "segment_id": 446,
@@ -3578,7 +3580,7 @@
       "end": 1074.32,
       "duration": 4.8,
       "text": "है। इसीलिए भी इसको सुपीरियर बोला गया है",
-      "text_en": "Hence it is called superior"
+      "text_en": "there is. That's why it is called superior"
     },
     {
       "segment_id": 447,
@@ -3594,7 +3596,7 @@
       "end": 1079.36,
       "duration": 5.04,
       "text": "टैबुलेशन करके दिखाना चाहिए। तो बस यही",
-      "text_en": "you should demonstrate tabulation. So that's it"
+      "text_en": "you should demonstrate tabulation. So that's all"
     },
     {
       "segment_id": 449,
@@ -3602,7 +3604,7 @@
       "end": 1080.96,
       "duration": 3.921,
       "text": "यही ओवरऑल तो यही था। अब इसमें ऑब्वियसली",
-      "text_en": "That was the overall summary. Now obviously"
+      "text_en": "That was the overall point. Now obviously"
     },
     {
       "segment_id": 450,
@@ -3610,7 +3612,7 @@
       "end": 1082.72,
       "duration": 3.36,
       "text": "इतना छोटा तो नहीं था। बहुत सारे लेक्चर",
-      "text_en": "It wasn't that short; there are many lectures."
+      "text_en": "It wasn't that short. There are many lectures."
     },
     {
       "segment_id": 451,
@@ -3618,7 +3620,7 @@
       "end": 1084.08,
       "duration": 3.12,
       "text": "है। बहुत सारे क्वेश्चन हैं। तो हम उम्मीद",
-      "text_en": "There are many questions, so we expect"
+      "text_en": "There are many questions. So we expect"
     },
     {
       "segment_id": 452,
@@ -3626,7 +3628,7 @@
       "end": 1085.84,
       "duration": 3.12,
       "text": "करते हैं कि वो देख के आप ये देख रहे",
-      "text_en": "that after watching, you will be watching this"
+      "text_en": "that after watching, you are watching this"
     },
     {
       "segment_id": 453,
@@ -3634,7 +3636,7 @@
       "end": 1088.24,
       "duration": 4.16,
       "text": "होंगे। पहली बार ये नहीं देख रहे होंगे।",
-      "text_en": "You probably haven't seen this before."
+      "text_en": "you probably haven't seen this before."
     },
     {
       "segment_id": 454,
@@ -3682,7 +3684,7 @@
       "end": 1100.4,
       "duration": 3.92,
       "text": "डीपी। अ इससे ज्यादा डीपी नहीं पूछा जाता",
-      "text_en": "DP. And more DP is not asked"
+      "text_en": "DP. And more DP is not asked."
     },
     {
       "segment_id": 460,
@@ -3690,7 +3692,7 @@
       "end": 1102.64,
       "duration": 3.76,
       "text": "है। मतलब मेरे एक्सपीरियंस में तो नहीं",
-      "text_en": "anymore. In my experience, it is not"
+      "text_en": "meaning, in my experience, it is not"
     },
     {
       "segment_id": 461,
@@ -3706,7 +3708,7 @@
       "end": 1106.559,
       "duration": 3.919,
       "text": "कंपनी का बात कर रहे हैं तो ऑब्वियसली",
-      "text_en": "in a company, obviously"
+      "text_en": "company topics, so obviously"
     },
     {
       "segment_id": 463,
@@ -3730,7 +3732,7 @@
       "end": 1113.12,
       "duration": 4.081,
       "text": "आता नहीं है और कोई पूछता भी नहीं है। ठीक",
-      "text_en": "and no one even asks about it. Okay"
+      "text_en": "and no one even asks about it. Okay."
     },
     {
       "segment_id": 466,
@@ -3738,7 +3740,7 @@
       "end": 1114.64,
       "duration": 4.0,
       "text": "है? तो अब डीपी का रिवीजन खत्म हो चुका",
-      "text_en": "Right? So now the DP revision is over"
+      "text_en": "Right? So now the DP revision is over."
     },
     {
       "segment_id": 467,
@@ -3754,7 +3756,7 @@
       "end": 1118.88,
       "duration": 4.24,
       "text": "लिए आप लोग रुके हुए होंगे। नेक्स्ट स्टेप",
-      "text_en": "you all have been waiting for. The next step"
+      "text_en": "you all have been waiting for. Next step"
     },
     {
       "segment_id": 469,
@@ -3778,7 +3780,7 @@
       "end": 1125.12,
       "duration": 4.4,
       "text": "सिखाएंगे। ज्यादा नहीं सीखने की जरूरत है",
-      "text_en": "will teach. You don't need to learn a lot"
+      "text_en": "will teach. You don't need to learn much"
     },
     {
       "segment_id": 472,
@@ -3802,7 +3804,7 @@
       "end": 1130.16,
       "duration": 3.68,
       "text": "में नहीं आता है कि बाइट बिट क्या होता",
-      "text_en": "doesn't come naturally that what a byte or bit is."
+      "text_en": "doesn't come to them what a byte or bit is."
     },
     {
       "segment_id": 475,
@@ -3810,7 +3812,7 @@
       "end": 1132.24,
       "duration": 4.321,
       "text": "है? इसमें इसमें दो से तीन क्वेश्चन में",
-      "text_en": "What? In this, in two to three questions"
+      "text_en": "What? In this, in two to three questions."
     },
     {
       "segment_id": 476,
@@ -3818,7 +3820,7 @@
       "end": 1134.24,
       "duration": 4.08,
       "text": "आप इसको सीख जाएंगे। काम लायक सीख जाएंगे।",
-      "text_en": "You will learn this. You will learn something useful."
+      "text_en": "You will learn this. You'll learn something useful."
     },
     {
       "segment_id": 477,
@@ -3834,7 +3836,7 @@
       "end": 1138.799,
       "duration": 4.559,
       "text": "मतलब बहुत रेयरली पूछा जाता है। ठीक है?",
-      "text_en": "It means it is asked very rarely. Okay?"
+      "text_en": "I mean, it's asked very rarely. Okay?"
     },
     {
       "segment_id": 479,
@@ -3842,7 +3844,7 @@
       "end": 1140.08,
       "duration": 3.92,
       "text": "इसमें ज़र के क्वेश्चन बनते हैं। जनरली बिट",
-      "text_en": "In this, ZAR-type questions are asked. Generally bit"
+      "text_en": "In this, zero-type questions are asked. Generally bit."
     },
     {
       "segment_id": 480,
@@ -3850,7 +3852,7 @@
       "end": 1141.2,
       "duration": 2.401,
       "text": "मैनपुलेशन जो लोग कॉम्पिटिटिव",
-      "text_en": "manipulation for people who do competitive"
+      "text_en": "Manipulation for people who do competitive"
     },
     {
       "segment_id": 481,
@@ -3866,7 +3868,7 @@
       "end": 1146.24,
       "duration": 5.04,
       "text": "बहुतेंट है क्योंकि वहां बहुतेंट होता है।",
-      "text_en": "It is very important because it occurs a lot there."
+      "text_en": "It's very important because it occurs a lot there."
     },
     {
       "segment_id": 483,
@@ -3882,7 +3884,7 @@
       "end": 1149.84,
       "duration": 3.6,
       "text": "टॉपिक है नहीं। ठीक है? तो जनरली इसमें ज़र",
-      "text_en": "topic, is it? Okay? So generally in this ZAR"
+      "text_en": "topic, is it? Okay? So generally in this, zero"
     },
     {
       "segment_id": 485,
@@ -3922,7 +3924,7 @@
       "end": 1160.48,
       "duration": 3.84,
       "text": "डीक्यू छूटा हुआ है। डीक्यू क्या है?",
-      "text_en": "Deque is left out. What is a deque?"
+      "text_en": "Deque has been missed. What is a deque?"
     },
     {
       "segment_id": 490,
@@ -3938,7 +3940,7 @@
       "end": 1164.559,
       "duration": 4.079,
       "text": "हैं ना स्टैक और क्यू। स्टैक क्या होता",
-      "text_en": "right, stack and queue. What is a stack"
+      "text_en": "right? Stack and queue. What is a stack"
     },
     {
       "segment_id": 492,
@@ -3946,7 +3948,7 @@
       "end": 1166.32,
       "duration": 3.44,
       "text": "था? स्टैक होता था कि लास्ट इन फर्स्ट",
-      "text_en": "? A stack is last in first"
+      "text_en": "It was that a stack is Last In First"
     },
     {
       "segment_id": 493,
@@ -3954,7 +3956,7 @@
       "end": 1168.16,
       "duration": 3.601,
       "text": "आउट। जो सबसे लास्ट में जाएगा वो सबसे",
-      "text_en": "out. The one that goes last will be the first"
+      "text_en": "Out. The one that goes last will be the first"
     },
     {
       "segment_id": 494,
@@ -3970,7 +3972,7 @@
       "end": 1172.48,
       "duration": 4.32,
       "text": "फर्स्ट इन फर्स्ट आउट जो q मतलब q वाली",
-      "text_en": "First in first out, which means q, the q type"
+      "text_en": "First In First Out, which means the q (queue) type"
     },
     {
       "segment_id": 496,
@@ -3978,7 +3980,7 @@
       "end": 1175.2,
       "duration": 4.88,
       "text": "लाइन वाली। पहले जो आदमी गया उसी को पहले",
-      "text_en": "line. The person who went first gets the first"
+      "text_en": "line. The person who arrived first gets served first"
     },
     {
       "segment_id": 497,
@@ -3986,7 +3988,7 @@
       "end": 1177.52,
       "duration": 5.04,
       "text": "टिकट मिलेगा। dq इन दोनों का प्लस है।",
-      "text_en": "ticket. dq is the plus of both."
+      "text_en": "will get the ticket. dq is the plus of both."
     },
     {
       "segment_id": 498,
@@ -4010,7 +4012,7 @@
       "end": 1183.28,
       "duration": 3.76,
       "text": "होते हैं। इन दोनों को किसी तरीके से मिला",
-      "text_en": "They exist. These two need to be merged in some way."
+      "text_en": "They exist. These two are merged in some way."
     },
     {
       "segment_id": 501,
@@ -4058,7 +4060,7 @@
       "end": 1196.24,
       "duration": 5.04,
       "text": "क्वेश्चन है लेकिन समझा देंगे डीक्यू।",
-      "text_en": "question is there but we will explain deque."
+      "text_en": "It's a hard question, but we will explain deque."
     },
     {
       "segment_id": 507,
@@ -4074,7 +4076,7 @@
       "end": 1200.559,
       "duration": 4.319,
       "text": "लिए भी आपको दो से तीन क्वेश्चन करना",
-      "text_en": "For that, you will need to solve two to three questions"
+      "text_en": "For that you also need to solve two to three questions."
     },
     {
       "segment_id": 509,
@@ -4082,7 +4084,7 @@
       "end": 1202.08,
       "duration": 3.041,
       "text": "पड़ेगा क्योंकि आपको आईडिया लग जाए कि",
-      "text_en": "because you will get the idea that"
+      "text_en": "You will have to because you'll get the idea that"
     },
     {
       "segment_id": 510,
@@ -4106,7 +4108,7 @@
       "end": 1208.08,
       "duration": 4.32,
       "text": "मुश्किल है जज करना कि इसमें ग्रीडी।",
-      "text_en": "it's difficult to judge what is greedy in it."
+      "text_en": "hard to judge whether it is greedy."
     },
     {
       "segment_id": 513,
@@ -4122,7 +4124,7 @@
       "end": 1212.16,
       "duration": 4.08,
       "text": "का क्या मतलब होता है ना कि आप कोई",
-      "text_en": "means that you are not"
+      "text_en": "means that you are not, say, you are"
     },
     {
       "segment_id": 515,
@@ -4146,7 +4148,7 @@
       "end": 1217.679,
       "duration": 4.0,
       "text": "नहीं आता है कि कौन सा चॉइस लें। यही होता",
-      "text_en": "which choice to take. That's what used to happen"
+      "text_en": "which choice to take. That's what happens"
     },
     {
       "segment_id": 518,
@@ -4154,7 +4156,7 @@
       "end": 1220.0,
       "duration": 4.48,
       "text": "था थे ना? ग्रीडीली चॉइस बेस्ड होता है।",
-      "text_en": "right? Greedy is choice-based."
+      "text_en": "right? Greedy is choice based."
     },
     {
       "segment_id": 519,
@@ -4162,7 +4164,7 @@
       "end": 1222.559,
       "duration": 4.88,
       "text": "लेकिन उसमें आप अभी जो चॉइस सबसे अच्छा लग",
-      "text_en": "But in it, you take the choice that seems best right now"
+      "text_en": "but in it you take the choice that seems best right now"
     },
     {
       "segment_id": 520,
@@ -4170,7 +4172,7 @@
       "end": 1224.32,
       "duration": 4.32,
       "text": "रहा है ना अभी के लिए अभी जो चॉइस सबसे",
-      "text_en": "for now, the choice that looks best at the moment"
+      "text_en": "is, right? For now, the choice that is the best right now"
     },
     {
       "segment_id": 521,
@@ -4178,7 +4180,7 @@
       "end": 1226.559,
       "duration": 4.0,
       "text": "अच्छा लग रहा है ना उसको ले ले उसको",
-      "text_en": "take it, that's what we call greedy."
+      "text_en": "feels good, right? Take it, take that"
     },
     {
       "segment_id": 522,
@@ -4186,7 +4188,7 @@
       "end": 1228.64,
       "duration": 4.32,
       "text": "ग्रीडी बोलते हैं। फॉर एग्जांपल आज आपके",
-      "text_en": "We call it greedy. For example, today you have"
+      "text_en": "We call that greedy. For example, today you have"
     },
     {
       "segment_id": 523,
@@ -4194,7 +4196,7 @@
       "end": 1231.12,
       "duration": 4.561,
       "text": "पास दो चॉइस हैं कि भैया हमको रील देखना",
-      "text_en": "two choices: whether we should watch a reel"
+      "text_en": "two choices, brother, whether we should watch a reel"
     },
     {
       "segment_id": 524,
@@ -4210,7 +4212,7 @@
       "end": 1236.0,
       "duration": 4.88,
       "text": "तो डीटी में क्या होता कि आप सब करके देख",
-      "text_en": "So, in DT what happens is that you try everything and see."
+      "text_en": "So, what happens in DT is that you try everything and see."
     },
     {
       "segment_id": 526,
@@ -4218,7 +4220,7 @@
       "end": 1237.52,
       "duration": 3.76,
       "text": "लेते। आप रील बना के आगे जाके देख लेते कि",
-      "text_en": "You take. You make a reel and then go ahead to see that."
+      "text_en": "Take it. You make a reel and go ahead to see that."
     },
     {
       "segment_id": 527,
@@ -4226,7 +4228,7 @@
       "end": 1239.679,
       "duration": 3.679,
       "text": "रील बनाने से आपको पता चलता है कि रील",
-      "text_en": "By making a reel you realize that the reel."
+      "text_en": "By making a reel, you realize that the reel."
     },
     {
       "segment_id": 528,
@@ -4234,7 +4236,7 @@
       "end": 1242.159,
       "duration": 4.639,
       "text": "बनाने से आप भीखमंगा बन गए तो आप रील नहीं",
-      "text_en": "By making it you became a beggar, so you don't make reels."
+      "text_en": "Making it turns you into a beggar, so you don't make a reel."
     },
     {
       "segment_id": 529,
@@ -4242,7 +4244,7 @@
       "end": 1244.4,
       "duration": 4.721,
       "text": "बनाते। आपको पता चलता पढ़ाई करने से जॉब",
-      "text_en": "You make. You realize that studying gets you a job."
+      "text_en": "You make it. You realize that studying leads to a job."
     },
     {
       "segment_id": 530,
@@ -4250,7 +4252,7 @@
       "end": 1246.4,
       "duration": 4.241,
       "text": "लग जाएगा। बाद में पता चलता है कि चलो",
-      "text_en": "It will get you a job. Later you realize that let's."
+      "text_en": "It will get you a job. Later you realize, let's."
     },
     {
       "segment_id": 531,
@@ -4282,7 +4284,7 @@
       "end": 1254.559,
       "duration": 4.559,
       "text": "समय तो रील देखना अच्छा लग रहा है। ग्रीडी",
-      "text_en": "At this time, watching reels feels good. Greedy."
+      "text_en": "Time feels like watching reels is good. Greedy."
     },
     {
       "segment_id": 535,
@@ -4298,7 +4300,7 @@
       "end": 1260.0,
       "duration": 5.441,
       "text": "समझ रहे हो ना क्या बोल रहे हैं? दो चॉइस",
-      "text_en": "You understand, right, what I'm saying? Two choices."
+      "text_en": "You understand what they're saying, right? Two choices."
     },
     {
       "segment_id": 537,
@@ -4322,7 +4324,7 @@
       "end": 1267.84,
       "duration": 4.88,
       "text": "बोलता? दोनों करके देख लो। आपको पता चलेगा",
-      "text_en": "say? Try both. You will find out."
+      "text_en": "say? Try both. You'll find out."
     },
     {
       "segment_id": 540,
@@ -4330,7 +4332,7 @@
       "end": 1269.6,
       "duration": 4.48,
       "text": "खाना खाने से आप हो गए 100 किलो के और जिम",
-      "text_en": "By eating you become 100 kg and going to the gym."
+      "text_en": "By eating, you become 100 kg and gym."
     },
     {
       "segment_id": 541,
@@ -4338,7 +4340,7 @@
       "end": 1271.28,
       "duration": 3.44,
       "text": "जाने से आपका बन गया सिक्स पैक एब्स। तो",
-      "text_en": "by going you got six-pack abs. So."
+      "text_en": "going makes you get six‑pack abs. So."
     },
     {
       "segment_id": 542,
@@ -4354,7 +4356,7 @@
       "end": 1275.36,
       "duration": 4.08,
       "text": "पैक एब्स बनाना सही रहता। ग्रीडी क्या",
-      "text_en": "pack abs making is the right thing. What does greedy."
+      "text_en": "pack abs is the right thing. What does greedy."
     },
     {
       "segment_id": 544,
@@ -4370,7 +4372,7 @@
       "end": 1278.32,
       "duration": 2.96,
       "text": "ना। तो अभी क्या अच्छा? अभी तो खाना खाना",
-      "text_en": "right. So what is good now? Right now eating."
+      "text_en": "right? So what's good now? Right now eating."
     },
     {
       "segment_id": 546,
@@ -4378,7 +4380,7 @@
       "end": 1280.4,
       "duration": 3.44,
       "text": "अच्छा लग रहा है तो आप खाना खा के सो",
-      "text_en": "feels good so you eat and then sleep."
+      "text_en": "feels good, so you eat and then sleep."
     },
     {
       "segment_id": 547,
@@ -4394,7 +4396,7 @@
       "end": 1284.88,
       "duration": 4.48,
       "text": "बोलते हैं और सिंपल भाषा में बता रहे हैं।",
-      "text_en": "we call it and we are explaining it in simple language."
+      "text_en": "we say and explain it in simple language."
     },
     {
       "segment_id": 549,
@@ -4410,7 +4412,7 @@
       "end": 1292.159,
       "duration": 7.279,
       "text": "और एक दो चीजें बची हुई है क्या?",
-      "text_en": "Are there one or two things left?"
+      "text_en": "Are there one or two things remaining?"
     },
     {
       "segment_id": 551,
@@ -4418,7 +4420,7 @@
       "end": 1294.72,
       "duration": 5.76,
       "text": "अ और क्या बचा हुआ है भाई? हां, ठीक है।",
-      "text_en": "And what else is left, bro? Yeah, okay."
+      "text_en": "And what else is left, brother? Yes, okay."
     },
     {
       "segment_id": 552,
@@ -4426,7 +4428,7 @@
       "end": 1296.32,
       "duration": 4.161,
       "text": "इतना ही। ट्राई अगर टाइम मिलेगा तो ट्राई",
-      "text_en": "That's all. If we have time, we'll cover Trie."
+      "text_en": "That's it. If we get time, we'll cover Trie."
     },
     {
       "segment_id": 553,
@@ -4434,7 +4436,7 @@
       "end": 1297.84,
       "duration": 3.12,
       "text": "देख लेंगे। ट्राई का भी एक क्वेश्चन देख",
-      "text_en": "We'll see. We'll also look at a Trie question."
+      "text_en": "We'll see. Let's also look at a Trie question."
     },
     {
       "segment_id": 554,
@@ -4442,7 +4444,7 @@
       "end": 1300.48,
       "duration": 4.16,
       "text": "ही लेते हैं। ट्राई भी बहुत एडवांस",
-      "text_en": "Let's take it. Trie is also a very advanced concept."
+      "text_en": "We'll take that. Trie is also a very advanced concept."
     },
     {
       "segment_id": 555,
@@ -4466,7 +4468,7 @@
       "end": 1305.52,
       "duration": 3.68,
       "text": "जितना लगता है। ट्री का बात नहीं कर रहे",
-      "text_en": "We're not talking about trees."
+      "text_en": "We're not talking about Tree."
     },
     {
       "segment_id": 558,
@@ -4482,7 +4484,7 @@
       "end": 1309.6,
       "duration": 4.08,
       "text": "नेक्स्ट स्टेप्स है। आने वाले सात से आठ",
-      "text_en": "These are the next steps. In the next seven to eight"
+      "text_en": "is the next step. In the next seven to eight"
     },
     {
       "segment_id": 560,
@@ -4490,7 +4492,7 @@
       "end": 1312.96,
       "duration": 5.2,
       "text": "दिनों में ये पूरा खत्म हो जाएगा। तब तक",
-      "text_en": "days, this will be completely finished. By then"
+      "text_en": "days this will be completed. Until then"
     },
     {
       "segment_id": 561,
@@ -4498,7 +4500,7 @@
       "end": 1314.88,
       "duration": 5.28,
       "text": "हम आपको सजेस्ट करेंगे कि आप ना धीरे-धीरे",
-      "text_en": "We will suggest that you, gradually"
+      "text_en": "we will suggest that you slowly"
     },
     {
       "segment_id": 562,
@@ -4506,7 +4508,7 @@
       "end": 1316.64,
       "duration": 3.68,
       "text": "जो आप पहले कर चुके हैं ना उनको रिवाइज़",
-      "text_en": "revise what you have already done."
+      "text_en": "revise what you have already done"
     },
     {
       "segment_id": 563,
@@ -4514,7 +4516,7 @@
       "end": 1318.4,
       "duration": 3.52,
       "text": "करते रहा करिए। उनको भूल मत जाया करिए।",
-      "text_en": "keep doing it. Don't forget them."
+      "text_en": "keep doing that. Don't forget them."
     },
     {
       "segment_id": 564,
@@ -4522,7 +4524,7 @@
       "end": 1321.28,
       "duration": 4.64,
       "text": "ठीक है? तो चलिए मिलते हैं अगले लेक्चर",
-      "text_en": "Okay? Then let's meet in the next lecture."
+      "text_en": "Okay? Then let's meet in the next lecture"
     },
     {
       "segment_id": 565,
@@ -4530,7 +4532,7 @@
       "end": 1321.28,
       "duration": 2.88,
       "text": "में। मिलते हैं।",
-      "text_en": "in. See you."
+      "text_en": "Alright. See you."
     }
   ]
 }
