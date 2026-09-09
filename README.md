@@ -1,286 +1,393 @@
 # DSA Revision Analyzer
 
-An AI-powered, timestamp-aware RAG system for learning and
-revising DSA concepts directly from YouTube lectures.
+An AI-powered DSA revision system that converts educational video content into a
+structured, searchable knowledge base and uses semantic retrieval to provide
+pattern-aware revision support.
 
-The system is designed around a simple idea:
-
-> Ask a DSA question → find the most relevant lecture section
-> → identify the exact video → identify the exact timestamp
-> → open that part directly in the UI.
+The system is designed around **DSA patterns**, not individual random problems.
 
 ---
 
-# 1. Problem Statement
+## 🎯 Project Goal
 
-When revising DSA, the actual problem is often not understanding
-the concept itself.
+The goal of DSA Revision Analyzer is to help a learner revise DSA concepts from
+the educational content they have already studied.
 
-The problem is finding where the concept was explained.
-
-For example:
-
-Suppose the user remembers that a Two Pointer concept was
-explained somewhere inside a playlist containing 6-7 videos.
-
-Without an intelligent retrieval system, the user may need to:
-
-1. Open every video.
-2. Search through the lecture.
-3. Remember approximately where the concept was discussed.
-4. Watch multiple unrelated sections.
-5. Finally find the required explanation.
-
-This project aims to automate that process.
-
-Instead of searching manually:
-
-```text
-User Question
-      ↓
-AI Retrieval
-      ↓
-Relevant Video
-      ↓
-Relevant Timestamp
-      ↓
-Direct Revision
-````
-
----
-
-# 2. Main Goal
-
-Build a DSA-specific RAG system that understands a complete
-YouTube DSA course and can retrieve the most relevant lecture
-section for a user's question.
-
-The system should preserve:
-
-* Video identity
-* Playlist/pattern information
-* Transcript
-* English translation
-* Timestamp
-* DSA pattern
-* DSA sub-pattern
-* Relevant contextual chunks
-
----
-
-# 3. Core User Experience
-
-The intended user experience is:
-
-```text
-User asks:
-
-"Explain the two pointer pattern where
-both pointers move towards each other."
-```
-
-The system should:
-
-```text
-1. Understand the query.
-2. Identify the DSA pattern.
-3. Identify the relevant sub-pattern.
-4. Search only the relevant knowledge space.
-5. Retrieve the most relevant transcript chunks.
-6. Identify the source video.
-7. Identify the exact timestamp.
-8. Generate a concise explanation.
-9. Show the relevant video section in the UI.
-```
-
----
-
-# 4. Planned Architecture
-
-```text
-                ┌─────────────────────┐
-                │      Frontend       │
-                │      React UI       │
-                └──────────┬──────────┘
-                           │
-                           │ REST API
-                           ▼
-                ┌─────────────────────┐
-                │       FastAPI       │
-                │      Backend        │
-                └──────────┬──────────┘
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
-          ▼                ▼                ▼
-    Query Analysis      Retrieval        Generation
-          │                │                │
-          │                ▼                │
-          │             Qdrant              │
-          │          Vector Database        │
-          │                                 │
-          └───────────────┬─────────────────┘
-                          │
-                          ▼
-                        Groq
-                          │
-                          ▼
-                   Final Answer
-```
-
----
-
-# 5. Current Data Pipeline
-
-The ingestion and retrieval pipeline currently processes
-YouTube lecture transcripts through multiple stages.
+Instead of treating a YouTube transcript as plain text, the system builds a
+structured pipeline:
 
 ```text
 YouTube Video
       ↓
 Transcript Extraction
       ↓
-Timestamped Transcript
-      ↓
 English Translation
       ↓
 Smart Chunking
       ↓
-Chunked Transcript
+DSA Pattern Metadata
       ↓
 Embedding Generation
       ↓
-Qdrant Vector Ingestion
+Qdrant Vector Database
       ↓
-Semantic Retrieval
-```
+Query Understanding
+      ↓
+Metadata-Aware Retrieval
+      ↓
+Relevant Revision Content
+````
 
-The complete ingestion pipeline currently consists of:
+The long-term system will also use completed topics to generate
+**pattern-specific practice problems without hints**.
+
+---
+
+# 🧠 Core Architecture
+
+The project currently follows a modular architecture:
 
 ```text
-youtube_transcribe.py
-      ↓
-translate_transcript.py
-      ↓
-chunk_transcript.py
-      ↓
-ingest_embeddings.py
-```
-
-The retrieval pipeline currently uses:
-
-```text
-search_chunks.py
-      ↓
-Query Embedding
-      ↓
-Qdrant Similarity Search
-      ↓
-Top-K Relevant Chunks
+                    ┌──────────────────────┐
+                    │    YouTube Video     │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ Transcript Extraction│
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │    Translation       │
+                    │      → English       │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │    Smart Chunking    │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │  DSA Taxonomy /      │
+                    │  Metadata Enrichment │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ Sentence Transformer │
+                    │    Embeddings        │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │        Qdrant        │
+                    │    Vector Database   │
+                    └──────────┬───────────┘
+                               │
+                               │
+                     User Query
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ Query Understanding  │
+                    ├──────────────────────┤
+                    │ Intent               │
+                    │ Pattern              │
+                    │ Sub-pattern          │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ Metadata-Aware        │
+                    │ Retrieval             │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │ Relevant Chunks       │
+                    └──────────────────────┘
 ```
 
 ---
 
-# 6. Implemented Components
+# 📁 Project Structure
 
-## 6.1 YouTube Transcript Extraction
+```text
+dsa_revision_analyzer/
+│
+├── backend/
+│   │
+│   ├── app/
+│   │   └── services/
+│   │       ├── dsa_taxonomy.py
+│   │       ├── metadata_storage.py
+│   │       ├── query_understanding.py
+│   │       ├── retrieval.py
+│   │       └── video_metadata_schema.py
+│   │
+│   ├── data/
+│   │   ├── transcripts/
+│   │   ├── translated/
+│   │   └── chunks/
+│   │
+│   ├── scripts/
+│   │   ├── youtube_transcribe.py
+│   │   ├── translate_transcript.py
+│   │   ├── chunk_transcript.py
+│   │   ├── ingest_embeddings.py
+│   │   └── test_retrieval_pipeline.py
+│   │
+│   ├── .env
+│   └── README.md
+│
+└── frontend/
+    └── ...
+```
 
-File:
+---
+
+# 🗂️ DSA Taxonomy
+
+The project uses a **canonical DSA taxonomy**.
+
+The taxonomy is the single source of truth for:
+
+* Pattern classification
+* Sub-pattern validation
+* Playlist mapping
+* Metadata enrichment
+* Qdrant filtering
+* Query understanding
+* Revision organization
+* Future practice generation
+
+Current taxonomy:
+
+```text
+13 Core DSA Patterns
+71 Sub-patterns
+```
+
+The taxonomy intentionally contains only patterns relevant to the target DSA
+learning system.
+
+## Current Core Patterns
+
+```text
+1. Two Pointer
+2. Sliding Window
+3. Hashing
+4. Prefix Sum
+5. Binary Search
+6. Sorting + Sweep
+7. Intervals
+8. Fast & Slow Pointer
+9. Stack
+10. Heap
+11. Recursion
+12. Backtracking
+13. Dynamic Programming
+```
+
+> The taxonomy should be extended only when a genuine DSA pattern is required.
+> Individual sorting algorithms such as Bubble Sort, Insertion Sort, Selection
+> Sort, Radix Sort, etc. are NOT treated as standalone DSA patterns.
+
+---
+
+# 🏷️ Pattern and Sub-pattern Design
+
+Each chunk can contain canonical metadata such as:
+
+```json
+{
+  "pattern": "two_pointer",
+  "sub_pattern": "pair_search",
+  "playlist": "DSA_Patterns_Two_Pointer"
+}
+```
+
+The system distinguishes between:
+
+```text
+Pattern
+    ↓
+Sub-pattern
+    ↓
+Transcript chunks
+```
+
+For example:
+
+```text
+two_pointer
+├── opposite_direction
+├── same_direction
+├── pair_search
+├── three_sum
+├── four_sum
+└── partitioning
+```
+
+Another example:
+
+```text
+dynamic_programming
+├── memoization
+├── tabulation
+├── state_definition
+├── transition
+└── space_optimization
+```
+
+The exact supported values are controlled by `dsa_taxonomy.py`.
+
+---
+
+# 📚 Playlist Mapping
+
+Each canonical pattern maps to a logical playlist namespace.
+
+Example:
+
+```text
+two_pointer
+    ↓
+DSA_Patterns_Two_Pointer
+
+dynamic_programming
+    ↓
+DSA_Patterns_Dynamic_Programming
+
+sliding_window
+    ↓
+DSA_Patterns_Sliding_Window
+```
+
+The playlist name is **derived from the canonical taxonomy**.
+
+It is not manually constructed during embedding ingestion.
+
+This prevents inconsistent metadata such as:
+
+```text
+Two Pointer
+two-pointer
+two pointer
+2 pointer
+```
+
+from becoming separate categories.
+
+---
+
+# 🎥 Transcript Pipeline
+
+## 1. YouTube Transcript Extraction
+
+Script:
 
 ```text
 backend/scripts/youtube_transcribe.py
 ```
 
-Purpose:
+Usage:
 
-* Extract transcript segments from a YouTube video.
-* Preserve the original transcript text.
-* Preserve segment-level timestamps.
-* Store video metadata.
-* Save the transcript as JSON.
-
-Output location:
-
-```text
-backend/data/transcripts/<video_id>.json
+```powershell
+python .\scripts\youtube_transcribe.py <VIDEO_ID>
 ```
 
-Each transcript segment preserves information such as:
+Example:
 
-* `segment_id`
-* `start`
-* `end`
-* `duration`
-* `text`
+```powershell
+python .\scripts\youtube_transcribe.py PvyEr3CeKzE
+```
 
-This timestamp information is important for the final
-timestamp-aware retrieval experience.
+Output:
+
+```text
+data/transcripts/<VIDEO_ID>.json
+```
+
+The transcript retains:
+
+* Video ID
+* Video title
+* Timestamp information
+* Transcript segments
 
 ---
 
-## 6.2 Transcript Translation
+# 🌐 Translation Pipeline
 
-File:
+The transcript is translated into English before chunking and embedding.
+
+Script:
 
 ```text
 backend/scripts/translate_transcript.py
 ```
 
-Purpose:
+Usage:
 
-* Read the timestamped transcript.
-* Translate transcript text into English.
-* Process segments in batches.
-* Validate that translated output maps correctly to the
-  original segment indexes.
-* Retry failed batches.
-* Preserve the original timestamps and transcript structure.
-
-Output location:
-
-```text
-backend/data/translated/<video_id>.json
+```powershell
+python .\scripts\translate_transcript.py <VIDEO_ID>
 ```
 
-The translated transcript adds:
+Example:
 
-```text
-text_en
+```powershell
+python .\scripts\translate_transcript.py PvyEr3CeKzE
 ```
 
-while keeping the original:
+Output:
 
 ```text
-text
+data/translated/<VIDEO_ID>.json
 ```
 
-This allows the system to retain both the original transcript
-and the English representation used by downstream retrieval.
+The translation pipeline uses batching and retry logic.
+
+Current configuration:
+
+```text
+Model:
+openai/gpt-oss-120b
+
+Batch size:
+25 segments
+```
+
+Translation failures caused by temporary API/network issues are retried.
 
 ---
 
-## 6.3 Smart Transcript Chunking
+# ✂️ Smart Chunking
 
-File:
+Script:
 
 ```text
 backend/scripts/chunk_transcript.py
 ```
 
-Purpose:
+Usage:
 
-* Convert many small transcript segments into meaningful
-  retrieval chunks.
-* Keep individual transcript segments intact.
-* Prefer natural sentence boundaries.
-* Keep chunks around a configurable target size.
-* Apply a maximum chunk size.
-* Preserve timestamp information.
-* Add a small overlap between neighboring chunks.
-* Prevent duplicate tail chunks when the final chunk already
-  reaches the end of the transcript.
+```powershell
+python .\scripts\chunk_transcript.py <VIDEO_ID>
+```
 
-Current default configuration:
+Example:
+
+```powershell
+python .\scripts\chunk_transcript.py PvyEr3CeKzE
+```
+
+The chunking system creates semantically useful transcript chunks instead of
+splitting the transcript at arbitrary fixed intervals.
+
+Current configuration:
 
 ```text
 Target characters : 1000
@@ -288,541 +395,743 @@ Maximum characters: 1400
 Overlap segments  : 2
 ```
 
-Output location:
+Example result:
 
 ```text
-backend/data/chunks/<video_id>.json
+Input segments : 766
+Output chunks   : 33
+Average chunk size: ~1154 characters
 ```
 
-Each chunk contains:
-
-* `video_id`
-* `chunk_id`
-* `segment_start`
-* `segment_end`
-* `start`
-* `end`
-* `duration`
-* `text`
-* `text_en`
-* `segment_count`
-
-Example flow:
+Output:
 
 ```text
-566 transcript segments
-          ↓
-   Smart Chunking
-          ↓
-   Meaningful chunks
-          ↓
-   Timestamp-aware JSON
+data/chunks/<VIDEO_ID>.json
 ```
-
-The chunking stage is deterministic and currently does not
-require an additional NLP dependency.
 
 ---
 
-## 6.4 Embedding Generation and Qdrant Ingestion
+# 🧾 Metadata Enrichment
 
-File:
+Metadata enrichment connects video-level DSA information to individual
+transcript chunks.
+
+The metadata layer propagates:
+
+```text
+video_id
+video_title
+pattern
+playlist
+playlist_id
+video_order
+source_url
+```
+
+where available.
+
+Sub-pattern behavior is intentionally conservative.
+
+### If a chunk already has a valid sub-pattern
+
+It is preserved.
+
+### If the video contains exactly one sub-pattern
+
+The chunk may inherit that sub-pattern.
+
+### If the video contains multiple sub-patterns
+
+The system does **not** guess.
+
+The chunk remains without a sub-pattern unless it has explicit chunk-level
+metadata.
+
+This prevents an entire multi-topic video from being incorrectly labeled as
+one sub-pattern.
+
+---
+
+# 🔢 Embedding Generation
+
+Script:
 
 ```text
 backend/scripts/ingest_embeddings.py
 ```
 
-Purpose:
-
-* Read processed transcript chunks.
-* Prepare searchable English text.
-* Generate dense vector embeddings.
-* Create the Qdrant collection when required.
-* Store embeddings together with chunk metadata.
-* Upload the vectors to Qdrant.
-
-Current embedding model:
+Embedding model:
 
 ```text
 sentence-transformers/all-MiniLM-L6-v2
 ```
 
-Current vector dimension:
+Vector dimension:
 
 ```text
 384
 ```
 
-Current Qdrant collection:
+The ingestion pipeline:
 
 ```text
-dsa_revision_chunks
-```
-
-The ingestion pipeline preserves important chunk metadata,
-including:
-
-* Video ID
-* Chunk ID
-* Segment range
-* Start timestamp
-* End timestamp
-* Transcript text
-* English transcript text
-* Segment count
-
-Example flow:
-
-```text
-Chunked Transcript
-        ↓
+Chunk
+  ↓
+Metadata Enrichment
+  ↓
+English Text
+  ↓
 Embedding Model
-        ↓
-384-dimensional vectors
-        ↓
+  ↓
+384-dimensional vector
+  ↓
 Qdrant
-        ↓
+```
+
+---
+
+# 🗄️ Qdrant
+
+Vector database:
+
+```text
+Qdrant
+```
+
+Collection:
+
+```text
 dsa_revision_chunks
 ```
 
----
-
-## 6.5 Semantic Chunk Retrieval
-
-File:
+Payload indexes currently include:
 
 ```text
-backend/scripts/search_chunks.py
+pattern
+sub_pattern
 ```
 
-Purpose:
+These indexes allow metadata-aware retrieval.
 
-* Accept a natural-language search query.
-* Generate an embedding for the query.
-* Search the Qdrant vector collection.
-* Retrieve the most semantically similar transcript chunks.
-* Display retrieval scores and timestamp information.
+---
+
+# 📥 Embedding Ingestion
+
+Basic usage:
+
+```powershell
+python .\scripts\ingest_embeddings.py <VIDEO_ID> --pattern <PATTERN>
+```
 
 Example:
 
-```bash
-python .\scripts\search_chunks.py "dynamic programming recursion"
+```powershell
+python .\scripts\ingest_embeddings.py PvyEr3CeKzE --pattern two_pointer
 ```
 
-A custom Top-K value can also be provided:
+With a sub-pattern:
 
-```bash
-python .\scripts\search_chunks.py "dynamic programming recursion" 10
+```powershell
+python .\scripts\ingest_embeddings.py dyG4JBKh6tA `
+    --pattern dynamic_programming `
+    --sub-pattern memoization
 ```
 
-The current retrieval output includes:
+The ingestion pipeline validates the pattern against the canonical taxonomy.
 
-* Similarity score
-* Video ID
-* Chunk ID
-* Segment range
-* Start timestamp
-* End timestamp
-* English transcript
-* Original transcript
+A missing pattern is treated as an error rather than guessed.
+
+---
+
+# 🔍 Query Understanding
+
+Script:
+
+```text
+backend/app/services/query_understanding.py
+```
+
+The query-understanding layer converts a natural-language query into structured
+metadata.
 
 Example:
 
 ```text
-Query:
-dynamic programming recursion
+User:
+"Explain dynamic programming memoization"
 
         ↓
 
-Query Embedding
-        ↓
+Intent:
+implementation
 
-Qdrant Semantic Search
-        ↓
+Pattern:
+dynamic_programming
 
-Top-K Results
-        ↓
+Sub-pattern:
+memoization
 
-Relevant Chunks
-        ↓
-
-Timestamp Information
+Confidence:
+0.99
 ```
 
-The current retrieval implementation is based on semantic
-similarity. Query classification, DSA pattern detection,
-metadata filtering, and reranking are planned for later stages.
-
----
-
-# 7. Data Directory Structure
+Another example:
 
 ```text
-backend/
-│
-├── data/
-│   ├── transcripts/
-│   │   └── <video_id>.json
-│   │
-│   ├── translated/
-│   │   └── <video_id>.json
-│   │
-│   └── chunks/
-│       └── <video_id>.json
-│
-├── scripts/
-│   ├── youtube_transcribe.py
-│   ├── translate_transcript.py
-│   ├── chunk_transcript.py
-│   ├── ingest_embeddings.py
-│   └── search_chunks.py
-│
-└── app/
-    └── services/
-        └── vector_store.py
+User:
+"How does two pointer work?"
+
+        ↓
+
+Intent:
+how_it_works
+
+Pattern:
+two_pointer
+
+Sub-pattern:
+None
 ```
 
-Generated data files are kept separate from the processing
-scripts so that the ingestion pipeline remains organized.
+Supported query dimensions include:
+
+```text
+Intent
+Pattern
+Sub-pattern
+Confidence
+```
 
 ---
 
-# 8. Current Retrieval Metadata
+# 🎯 Query Intents
 
-The current vector ingestion layer stores chunk-level metadata
-required for timestamp-aware retrieval.
+The current system recognizes intents such as:
 
-Current metadata includes:
+```text
+explanation
+how_it_works
+implementation
+complexity
+practice
+comparison
+optimization
+```
 
-* Video ID
-* Chunk ID
-* Segment range
-* Start timestamp
-* End timestamp
-* Duration
-* Transcript text
-* English transcript text
-* Segment count
+The query understanding layer is intentionally separated from retrieval.
 
-The final retrieval layer is expected to extend this metadata
-with:
-
-* Video title
-* Playlist
-* DSA pattern
-* DSA sub-pattern
-
-This metadata will allow retrieval to become more precise than
-pure semantic similarity.
+This keeps classification and search independently testable.
 
 ---
 
-# 9. Current Retrieval Pipeline
+# 🔎 Metadata-Aware Retrieval
 
-The currently implemented retrieval workflow is:
+Script:
+
+```text
+backend/app/services/retrieval.py
+```
+
+Retrieval pipeline:
 
 ```text
 User Query
-      ↓
+    ↓
+Query Understanding
+    ↓
+Pattern / Sub-pattern
+    ↓
 Query Embedding
-      ↓
-Qdrant Vector Search
-      ↓
-Top-K Semantic Results
-      ↓
-Relevant Transcript Chunks
-      ↓
-Timestamp Information
+    ↓
+Qdrant Metadata Filter
+    ↓
+Vector Search
+    ↓
+Relevant Chunks
 ```
+
+The retrieval service supports:
+
+1. Pure semantic retrieval
+2. Pattern-aware retrieval
+3. Sub-pattern-aware retrieval
+4. Safe semantic fallback
+5. Structured retrieval results
+
+---
+
+# 🧩 Retrieval Result
+
+Retrieved chunks are converted into a stable application-level result model.
+
+A result contains:
+
+```text
+score
+pattern
+sub_pattern
+playlist
+video_id
+video_title
+chunk_id
+start
+end
+duration
+text
+```
+
+This prevents the rest of the application from depending directly on Qdrant's
+internal response structure.
+
+---
+
+# 🧪 Testing
+
+The project includes self-checks and integration tests.
+
+## Taxonomy Self-check
+
+Run:
+
+```powershell
+python .\app\services\dsa_taxonomy.py
+```
+
+Expected:
+
+```text
+VALIDATION : PASSED
+```
+
+The self-check validates:
+
+* Canonical patterns
+* Canonical sub-patterns
+* Natural-language resolution
+* Playlist mapping
+* Unsupported-topic protection
+
+---
+
+## Query Understanding Self-check
+
+Run:
+
+```powershell
+python -m app.services.query_understanding
+```
+
+Expected:
+
+```text
+Passed : 14
+Failed : 0
+
+✓ Self-check completed successfully.
+```
+
+The `-m` form is recommended because it executes the module from the backend
+package context.
+
+Running:
+
+```powershell
+python .\app\services\query_understanding.py
+```
+
+directly may cause:
+
+```text
+ModuleNotFoundError: No module named 'app'
+```
+
+because of Python package path resolution.
+
+---
+
+# 🔗 Retrieval Pipeline Integration Test
+
+Script:
+
+```text
+backend/scripts/test_retrieval_pipeline.py
+```
+
+Run:
+
+```powershell
+python .\scripts\test_retrieval_pipeline.py
+```
+
+The integration test verifies:
+
+```text
+User Query
+    ↓
+Query Understanding
+    ↓
+Intent Validation
+    ↓
+Pattern Validation
+    ↓
+Sub-pattern Validation
+    ↓
+Metadata-Aware Retrieval
+    ↓
+Qdrant
+    ↓
+Retrieved Chunk Validation
+```
+
+The test validates that retrieved chunks satisfy the expected metadata
+constraints.
+
+Example:
+
+```text
+Expected pattern:
+dynamic_programming
+
+Expected sub-pattern:
+memoization
+
+Expected playlist:
+DSA_Patterns_Dynamic_Programming
+```
+
+All returned chunks must satisfy these constraints.
+
+---
+
+# ✅ Current Validation Status
+
+Current pipeline validation:
+
+```text
+DSA Taxonomy
+    ✓ Passed
+
+Query Understanding
+    ✓ 14/14 checks passed
+
+Retrieval Integration
+    ✓ Dynamic Programming + Memoization
+    ✓ Two Pointer
+
+Retrieval Metadata Validation
+    ✓ Pattern constraints
+    ✓ Sub-pattern constraints
+    ✓ Playlist constraints
+```
+
+Latest retrieval integration result:
+
+```text
+Total tests : 2
+Passed      : 2
+Failed      : 0
+
+✓ All retrieval pipeline tests passed.
+```
+
+---
+
+# ⚠️ Important Design Decisions
+
+## 1. No Fake Pattern Generation
+
+The system must not invent a pattern merely because a query contains a known
+DSA term.
 
 For example:
 
 ```text
-"d​​ynamic programming recursion"
+"Explain bubble sort"
+"Explain insertion sort"
+"Explain selection sort"
+"Explain radix sort"
+"Explain heap sort"
 ```
 
-can retrieve lecture chunks containing discussions around:
+must not automatically become:
 
-* Recursion
-* Dynamic Programming
-* Overlapping subproblems
-* Memoization
-* Tabulation
-* Space optimization
+```text
+sorting_sweep
+```
 
-The retrieved chunks retain their original lecture timestamps,
-which will later allow the frontend to navigate directly to the
-relevant section of the YouTube video.
+unless the taxonomy explicitly supports that concept as a valid pattern in the
+relevant context.
+
+This prevents retrieval from returning unrelated educational content.
 
 ---
 
-# 10. Planned RAG Pipeline
+## 2. Sorting Algorithms Are Not Automatically DSA Patterns
 
-The planned complete RAG workflow is:
+Algorithms such as:
 
 ```text
-User Question
-      ↓
-Query Understanding
-      ↓
-Pattern Detection
-      ↓
-Sub-pattern Detection
-      ↓
-Metadata Filtering
-      ↓
-Vector Retrieval
-      ↓
-Reranking
-      ↓
-Relevant Lecture Chunks
-      ↓
-Timestamp Resolution
-      ↓
-Grounded LLM Generation
-      ↓
-Final Answer + Video Timestamp
+Bubble Sort
+Insertion Sort
+Selection Sort
+Radix Sort
 ```
 
-The LLM should generate answers from retrieved lecture evidence
-rather than relying only on its general knowledge.
+are not automatically treated as independent pattern categories.
+
+The taxonomy represents **problem-solving patterns**, not every individual
+algorithm.
 
 ---
 
-# 11. Planned Query Intelligence
+## 3. Missing Metadata Is Safer Than Guessing
 
-The current system performs semantic retrieval directly from the
-user's query.
-
-The next retrieval intelligence layer will analyze the query
-before searching.
-
-Example:
+If the system cannot confidently determine a sub-pattern:
 
 ```text
-User Query:
-
-"Explain the two pointer pattern where
-both pointers move towards each other."
+sub_pattern = None
 ```
 
-Planned analysis:
+is preferred over assigning an incorrect label.
 
-```text
-Pattern:
-Two Pointer
-
-Sub-pattern:
-Opposite Direction
-
-Intent:
-Concept Explanation
-```
-
-The analyzed query can then be used for:
-
-```text
-Query
-  ↓
-Pattern Detection
-  ↓
-Sub-pattern Detection
-  ↓
-Metadata Filtering
-  ↓
-Semantic Retrieval
-  ↓
-Reranking
-```
-
-This should reduce irrelevant retrieval results and improve
-DSA-specific search precision.
+Incorrect metadata can permanently damage retrieval quality.
 
 ---
 
-# 12. Planned Adaptive Practice System
+## 4. Playlist Names Come From the Taxonomy
 
-After completing a DSA pattern or playlist, the system is
-planned to generate practice problems based on the concepts
-covered in the lectures.
+The ingestion layer does not manually invent playlist names.
 
-Example:
+Instead:
 
 ```text
-Two Pointer Pattern
+Canonical Pattern
       ↓
-Lecture Completion
+Taxonomy
       ↓
-Concept / Sub-pattern Analysis
+Playlist Name
+```
+
+This keeps metadata consistent across the system.
+
+---
+
+# 🔐 Environment Variables
+
+Create:
+
+```text
+backend/.env
+```
+
+Example configuration:
+
+```env
+GROQ_API_KEY=your_key_here
+
+QDRANT_URL=your_qdrant_url
+QDRANT_API_KEY=your_qdrant_api_key
+
+QDRANT_COLLECTION=dsa_revision_chunks
+
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+SEARCH_TOP_K=5
+FILTERED_SEARCH_MULTIPLIER=3
+```
+
+Never commit API keys to Git.
+
+---
+
+# 🚀 End-to-End Example
+
+For a new YouTube video:
+
+### Step 1 — Extract transcript
+
+```powershell
+python .\scripts\youtube_transcribe.py PvyEr3CeKzE
+```
+
+### Step 2 — Translate
+
+```powershell
+python .\scripts\translate_transcript.py PvyEr3CeKzE
+```
+
+### Step 3 — Chunk
+
+```powershell
+python .\scripts\chunk_transcript.py PvyEr3CeKzE
+```
+
+### Step 4 — Ingest embeddings
+
+```powershell
+python .\scripts\ingest_embeddings.py PvyEr3CeKzE --pattern two_pointer
+```
+
+### Step 5 — Run taxonomy validation
+
+```powershell
+python .\app\services\dsa_taxonomy.py
+```
+
+### Step 6 — Run query understanding validation
+
+```powershell
+python -m app.services.query_understanding
+```
+
+### Step 7 — Run retrieval integration test
+
+```powershell
+python .\scripts\test_retrieval_pipeline.py
+```
+
+---
+
+# 🛣️ Roadmap
+
+## Phase 1 — Foundation
+
+* [x] YouTube transcript extraction
+* [x] Transcript translation
+* [x] Smart transcript chunking
+* [x] Embedding generation
+* [x] Qdrant ingestion
+
+## Phase 2 — DSA Intelligence
+
+* [x] Canonical DSA taxonomy
+* [x] Pattern validation
+* [x] Sub-pattern validation
+* [x] Playlist mapping
+* [x] Metadata enrichment
+* [x] Pattern-aware retrieval
+* [x] Query understanding
+* [x] Intent classification
+
+## Phase 3 — Revision Intelligence
+
+* [ ] Evidence-grounded answer generation
+* [ ] Context-aware revision explanations
+* [ ] Timestamp-aware revision
+* [ ] Topic completion tracking
+* [ ] Pattern progress tracking
+
+## Phase 4 — AI Practice Engine
+
+After a learner completes a DSA pattern/topic:
+
+```text
+Completed Topic
       ↓
-4-5 Practice Problems
+AI analyzes covered concepts
       ↓
-No Hint
+Generate 4–5 problems
       ↓
-User Attempts
+No hints
+      ↓
+Learner solves
+      ↓
+AI evaluates solution
+      ↓
+Weakness detection
+```
+
+The goal is to test whether the learner can recognize and apply a pattern
+without being explicitly told which pattern to use.
+
+## Phase 5 — Adaptive Revision
+
+Future versions will support:
+
+```text
+Learning History
+      ↓
+Weak Topic Detection
+      ↓
+Revision Recommendation
+      ↓
+Targeted Retrieval
+      ↓
+Practice
       ↓
 Performance Tracking
       ↓
-Weakness Detection
-      ↓
-Targeted Revision
+Adaptive Next Step
 ```
-
-The goal is to make the system adaptive rather than simply
-providing static questions.
 
 ---
 
-# 13. Planned Technology Stack
+# 🧠 Long-Term Vision
 
-### Backend
+The final system is intended to become more than a transcript search engine.
 
-* Python
-* FastAPI
+The long-term vision is:
 
-### Retrieval
+```text
+                    DSA Learning History
+                            │
+                            ▼
+                    Pattern Knowledge
+                            │
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+        Revision Engine              Practice Engine
+              │                           │
+              ▼                           ▼
+      Relevant Video Content        New Problems
+              │                           │
+              └─────────────┬─────────────┘
+                            ▼
+                     Learner Progress
+                            │
+                            ▼
+                    Adaptive Revision
+```
 
-* Qdrant
-* Sentence Transformers
-* Vector embeddings
-* Hybrid / metadata-aware retrieval
-* Reranking
+The system should gradually understand:
 
-### LLM
-
-* Groq
-
-### Frontend
-
-* React
-
-### Data Sources
-
-* YouTube lecture transcripts
+* What the learner has studied
+* Which DSA patterns they know
+* Which sub-patterns they have covered
+* Which concepts are weak
+* Which concepts need revision
+* Which problems should be practiced next
 
 ---
 
-# 14. Current Development Status
+# 🧰 Main Technologies
 
-## Completed
-
-* [x] YouTube transcript extraction
-* [x] Timestamp preservation
-* [x] Transcript JSON storage
-* [x] English transcript translation
-* [x] Batch translation
-* [x] Translation validation and retry handling
-* [x] Smart transcript chunking
-* [x] Timestamp-aware chunk metadata
-* [x] Chunk overlap
-* [x] Duplicate final-tail prevention
-* [x] Embedding generation
-* [x] Sentence Transformer integration
-* [x] 384-dimensional vector generation
-* [x] Qdrant collection setup
-* [x] Vector ingestion
-* [x] Chunk metadata storage in Qdrant
-* [x] Semantic query embedding
-* [x] Top-K semantic retrieval
-* [x] Retrieval score output
-* [x] Timestamp-aware search results
-* [x] Original and English transcript retrieval
-
-## In Progress / Next
-
-* [ ] Reusable vector retrieval service
-* [ ] Multi-video ingestion
-* [ ] Query classification
-* [ ] DSA pattern detection
-* [ ] DSA sub-pattern detection
-* [ ] Metadata filtering
-* [ ] Hybrid retrieval
-* [ ] Reranking
-* [ ] Grounded RAG generation
-* [ ] FastAPI retrieval endpoint
-* [ ] Timestamp-aware UI
-* [ ] Adaptive practice generation
-* [ ] Weakness detection
-* [ ] Targeted revision
-* [ ] Retrieval evaluation
-* [ ] Automated tests
-* [ ] Deployment
+```text
+Python
+Sentence Transformers
+Qdrant
+Groq API
+YouTube Transcript API
+JSON-based intermediate storage
+```
 
 ---
 
-# 15. Development Progress
+# 📌 Current Project Status
 
-The current system has successfully progressed from raw YouTube
-lecture data to a working semantic retrieval system.
-
-```text
-YouTube Lecture
-      ↓
-Transcript Extraction          ✅
-      ↓
-Timestamp Preservation         ✅
-      ↓
-English Translation            ✅
-      ↓
-Smart Chunking                 ✅
-      ↓
-Embedding Generation           ✅
-      ↓
-Qdrant Vector Ingestion        ✅
-      ↓
-Semantic Retrieval             ✅
-      ↓
-Query Intelligence             ⏳
-      ↓
-Reranking                      ⏳
-      ↓
-Grounded RAG                   ⏳
-      ↓
-Timestamp-aware UI             ⏳
-      ↓
-Adaptive Practice              ⏳
-```
-
-The current backend can already retrieve relevant timestamped
-lecture chunks from Qdrant using natural-language queries.
-
----
-
-# 16. Project Vision
-
-The long-term goal is to turn the system from a simple
-question-answering tool into an adaptive DSA learning system.
-
-Instead of:
+The current backend has a working:
 
 ```text
-"Here is an answer."
+YouTube → Transcript → Translation → Chunking
+        → Metadata → Embedding → Qdrant
+        → Query Understanding → Retrieval
 ```
 
-the system should eventually provide:
+pipeline with successful taxonomy, query-understanding, and retrieval
+integration validation.
 
-```text
-"Here is the exact part of the lecture where this was taught,
- here is a concise explanation grounded in that lecture,
- and here are problems that test whether you actually learned it."
+The next major step is to move from **retrieval correctness** toward
+**answer generation and adaptive DSA revision intelligence**.
+
+```pattern/sub-pattern filtering architecture-ও current implementation অনুযায়ী রাখা হয়েছে। :contentReference[oaicite:2]{index=2}
 ```
-
-The final system should connect:
-
-```text
-Lecture Knowledge
-      +
-Retrieval
-      +
-Timestamp Navigation
-      +
-Pattern Intelligence
-      +
-Practice
-      +
-Performance Analysis
-      +
-Adaptive Revision
-```
-
-into one learning workflow.
