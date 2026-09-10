@@ -1,20 +1,21 @@
 # DSA Revision Analyzer
 
 An AI-powered DSA revision system that converts educational video content into a
-structured, searchable knowledge base and uses semantic retrieval to provide
-pattern-aware revision support.
+structured, searchable knowledge base and uses pattern-aware retrieval to provide
+grounded revision support.
 
-The system is designed around **DSA patterns**, not individual random problems.
+The system is designed around **DSA problem-solving patterns**, not individual
+random problems.
 
 ---
 
-## 🎯 Project Goal
+# 🎯 Project Goal
 
 The goal of DSA Revision Analyzer is to help a learner revise DSA concepts from
-the educational content they have already studied.
+educational content they have already studied.
 
 Instead of treating a YouTube transcript as plain text, the system builds a
-structured pipeline:
+structured knowledge pipeline:
 
 ```text
 YouTube Video
@@ -35,79 +36,116 @@ Query Understanding
       ↓
 Metadata-Aware Retrieval
       ↓
-Relevant Revision Content
+Hybrid Search
+      ↓
+Reranking
+      ↓
+Relevant Revision Context
+      ↓
+Grounded Answer Generation
 ````
 
-The long-term system will also use completed topics to generate
+The long-term system will also use completed topics and patterns to generate
 **pattern-specific practice problems without hints**.
 
 ---
 
 # 🧠 Core Architecture
 
-The project currently follows a modular architecture:
+The current system is evolving from a semantic-only retrieval system into a
+hybrid retrieval and reranking architecture.
 
 ```text
-                    ┌──────────────────────┐
-                    │    YouTube Video     │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │ Transcript Extraction│
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │    Translation       │
-                    │      → English       │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │    Smart Chunking    │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │  DSA Taxonomy /      │
-                    │  Metadata Enrichment │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │ Sentence Transformer │
-                    │    Embeddings        │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │        Qdrant        │
-                    │    Vector Database   │
-                    └──────────┬───────────┘
-                               │
-                               │
-                     User Query
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │ Query Understanding  │
-                    ├──────────────────────┤
-                    │ Intent               │
-                    │ Pattern              │
-                    │ Sub-pattern          │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │ Metadata-Aware        │
-                    │ Retrieval             │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │ Relevant Chunks       │
-                    └──────────────────────┘
+                         ┌──────────────────────┐
+                         │    YouTube Video     │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Transcript Extraction│
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Translation → English│
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │    Smart Chunking    │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ DSA Taxonomy /       │
+                         │ Metadata Enrichment  │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Sentence Transformer │
+                         │    Embeddings        │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │        Qdrant        │
+                         │    Vector Database   │
+                         └──────────┬───────────┘
+                                    │
+                                    │
+                              User Query
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Query Understanding  │
+                         ├──────────────────────┤
+                         │ Intent               │
+                         │ Pattern              │
+                         │ Sub-pattern          │
+                         │ Confidence            │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Metadata Constraints │
+                         └──────────┬───────────┘
+                                    │
+                      ┌─────────────┴─────────────┐
+                      │                           │
+                      ▼                           ▼
+              ┌──────────────┐           ┌──────────────┐
+              │   Semantic   │           │     BM25     │
+              │    Search    │           │   Lexical    │
+              │   Qdrant     │           │    Search    │
+              └──────┬───────┘           └──────┬───────┘
+                     │                          │
+                     └────────────┬─────────────┘
+                                  ▼
+                         ┌──────────────────────┐
+                         │ RRF Candidate Fusion │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Cross-Encoder        │
+                         │ Reranking            │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │     Final Top-K      │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Context Assembly     │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Grounded LLM Answer  │
+                         └──────────────────────┘
 ```
 
 ---
@@ -137,14 +175,28 @@ dsa_revision_analyzer/
 │   │   ├── translate_transcript.py
 │   │   ├── chunk_transcript.py
 │   │   ├── ingest_embeddings.py
-│   │   └── test_retrieval_pipeline.py
+│   │   ├── search_chunks.py
+│   │   ├── test_retrieval_pipeline.py
+│   │   │
+│   │   ├── local_translation.py
+│   │   ├── indictrans_onnx_test.py
+│   │   ├── benchmark_indictrans.py
+│   │   ├── benchmark_indictrans_50.py
+│   │   ├── context_translation_test.py
+│   │   └── test_local_context.py
 │   │
 │   ├── .env
+│   ├── pyproject.toml
 │   └── README.md
 │
-└── frontend/
-    └── ...
+├── frontend/
+│   └── ...
+│
+└── ...
 ```
+
+The local IndicTrans2-related scripts are currently **experimental utilities**.
+They are not part of the authoritative production translation pipeline.
 
 ---
 
@@ -170,9 +222,6 @@ Current taxonomy:
 71 Sub-patterns
 ```
 
-The taxonomy intentionally contains only patterns relevant to the target DSA
-learning system.
-
 ## Current Core Patterns
 
 ```text
@@ -191,15 +240,17 @@ learning system.
 13. Dynamic Programming
 ```
 
-> The taxonomy should be extended only when a genuine DSA pattern is required.
-> Individual sorting algorithms such as Bubble Sort, Insertion Sort, Selection
-> Sort, Radix Sort, etc. are NOT treated as standalone DSA patterns.
+The taxonomy intentionally contains only patterns relevant to the target DSA
+learning system.
+
+Individual sorting algorithms such as Bubble Sort, Insertion Sort, Selection
+Sort, Radix Sort, etc. are **not treated as standalone DSA patterns**.
 
 ---
 
 # 🏷️ Pattern and Sub-pattern Design
 
-Each chunk can contain canonical metadata such as:
+Each transcript chunk can contain canonical metadata such as:
 
 ```json
 {
@@ -209,17 +260,17 @@ Each chunk can contain canonical metadata such as:
 }
 ```
 
-The system distinguishes between:
+The system maintains the hierarchy:
 
 ```text
 Pattern
-    ↓
+   ↓
 Sub-pattern
-    ↓
-Transcript chunks
+   ↓
+Transcript Chunks
 ```
 
-For example:
+Example:
 
 ```text
 two_pointer
@@ -254,23 +305,22 @@ Example:
 
 ```text
 two_pointer
-    ↓
+      ↓
 DSA_Patterns_Two_Pointer
 
 dynamic_programming
-    ↓
+      ↓
 DSA_Patterns_Dynamic_Programming
 
 sliding_window
-    ↓
+      ↓
 DSA_Patterns_Sliding_Window
 ```
 
-The playlist name is **derived from the canonical taxonomy**.
+Playlist names are **derived from the canonical taxonomy** rather than manually
+constructed during ingestion.
 
-It is not manually constructed during embedding ingestion.
-
-This prevents inconsistent metadata such as:
+This prevents inconsistent categories such as:
 
 ```text
 Two Pointer
@@ -279,7 +329,7 @@ two pointer
 2 pointer
 ```
 
-from becoming separate categories.
+from becoming separate metadata categories.
 
 ---
 
@@ -302,7 +352,7 @@ python .\scripts\youtube_transcribe.py <VIDEO_ID>
 Example:
 
 ```powershell
-python .\scripts\youtube_transcribe.py PvyEr3CeKzE
+python .\scripts\youtube_transcribe.py Fu7LD_mIo00
 ```
 
 Output:
@@ -311,12 +361,13 @@ Output:
 data/transcripts/<VIDEO_ID>.json
 ```
 
-The transcript retains:
+The transcript preserves:
 
 * Video ID
 * Video title
 * Timestamp information
 * Transcript segments
+* Segment ordering
 
 ---
 
@@ -339,7 +390,7 @@ python .\scripts\translate_transcript.py <VIDEO_ID>
 Example:
 
 ```powershell
-python .\scripts\translate_transcript.py PvyEr3CeKzE
+python .\scripts\translate_transcript.py Fu7LD_mIo00
 ```
 
 Output:
@@ -348,19 +399,97 @@ Output:
 data/translated/<VIDEO_ID>.json
 ```
 
-The translation pipeline uses batching and retry logic.
+## Translation Model
 
-Current configuration:
+Current production translation model:
 
 ```text
-Model:
 openai/gpt-oss-120b
+```
 
-Batch size:
+Current batch size:
+
+```text
 25 segments
 ```
 
-Translation failures caused by temporary API/network issues are retried.
+## Resume-Safe Translation
+
+The translation pipeline is designed to survive temporary API failures and
+rate-limit interruptions.
+
+Successful batches are checkpointed to:
+
+```text
+data/translated/<VIDEO_ID>.partial.json
+```
+
+The checkpoint preserves:
+
+* Video metadata
+* Segment IDs
+* Original transcript text
+* English translation
+* Start timestamp
+* End timestamp
+* Duration
+
+If translation stops midway, the script can resume from the existing checkpoint
+instead of retranslating completed segments.
+
+After all segments are successfully translated:
+
+```text
+.partial.json
+      ↓
+final .json
+```
+
+The temporary checkpoint is then removed.
+
+---
+
+# 🧪 Local Translation Experiment
+
+An offline IndicTrans2-based ONNX translation pipeline was also evaluated.
+
+Relevant scripts include:
+
+```text
+backend/scripts/local_translation.py
+backend/scripts/indictrans_onnx_test.py
+backend/scripts/benchmark_indictrans.py
+backend/scripts/benchmark_indictrans_50.py
+backend/scripts/context_translation_test.py
+backend/scripts/test_local_context.py
+```
+
+The tested model is:
+
+```text
+hari31416/indictrans2-indic-en-dist-200M-ONNX-int8
+```
+
+The model runs locally through ONNX Runtime and is suitable for CPU-based
+experimentation.
+
+However, contextual benchmark testing showed that the local model can introduce
+semantic errors in conversational DSA explanations.
+
+Therefore:
+
+```text
+Groq translation
+      ↓
+Authoritative production translation
+
+Local IndicTrans2
+      ↓
+Experimental / optional offline fallback
+```
+
+The local translation implementation is **not currently used to replace the
+production translation pipeline**.
 
 ---
 
@@ -381,10 +510,16 @@ python .\scripts\chunk_transcript.py <VIDEO_ID>
 Example:
 
 ```powershell
-python .\scripts\chunk_transcript.py PvyEr3CeKzE
+python .\scripts\chunk_transcript.py Fu7LD_mIo00
 ```
 
-The chunking system creates semantically useful transcript chunks instead of
+Output:
+
+```text
+data/chunks/<VIDEO_ID>.json
+```
+
+The chunking system creates semantically useful transcript chunks rather than
 splitting the transcript at arbitrary fixed intervals.
 
 Current configuration:
@@ -398,16 +533,13 @@ Overlap segments  : 2
 Example result:
 
 ```text
-Input segments : 766
-Output chunks   : 33
-Average chunk size: ~1154 characters
+Input segments : 1243
+Output chunks  : 53
+Average chunk size: ~1118 characters
 ```
 
-Output:
-
-```text
-data/chunks/<VIDEO_ID>.json
-```
+Timestamp information is retained so that future retrieval results can be
+connected back to the original video location.
 
 ---
 
@@ -430,7 +562,7 @@ source_url
 
 where available.
 
-Sub-pattern behavior is intentionally conservative.
+## Conservative Sub-pattern Assignment
 
 ### If a chunk already has a valid sub-pattern
 
@@ -442,13 +574,13 @@ The chunk may inherit that sub-pattern.
 
 ### If the video contains multiple sub-patterns
 
-The system does **not** guess.
+The system does **not guess**.
 
-The chunk remains without a sub-pattern unless it has explicit chunk-level
-metadata.
+The chunk remains without a sub-pattern unless explicit chunk-level metadata
+exists.
 
-This prevents an entire multi-topic video from being incorrectly labeled as
-one sub-pattern.
+This prevents an entire multi-topic video from being incorrectly labeled as a
+single sub-pattern.
 
 ---
 
@@ -488,6 +620,16 @@ Embedding Model
 Qdrant
 ```
 
+The same embedding model must be used for both:
+
+```text
+Document Embeddings
+        +
+Query Embeddings
+```
+
+to keep vector retrieval consistent.
+
 ---
 
 # 🗄️ Qdrant
@@ -504,6 +646,28 @@ Collection:
 dsa_revision_chunks
 ```
 
+The Qdrant payload stores both transcript information and DSA metadata.
+
+Important payload fields include:
+
+```text
+video_id
+chunk_id
+text
+text_en
+video_title
+playlist
+pattern
+sub_pattern
+video_sub_patterns
+video_order
+source_url
+topic
+start
+end
+duration
+```
+
 Payload indexes currently include:
 
 ```text
@@ -511,7 +675,18 @@ pattern
 sub_pattern
 ```
 
-These indexes allow metadata-aware retrieval.
+These indexes support metadata-aware retrieval.
+
+## Deterministic Point IDs
+
+Qdrant point IDs are deterministically generated from:
+
+```text
+video_id + chunk_id
+```
+
+Therefore, re-running ingestion for the same chunk updates the corresponding
+point rather than creating duplicate vector records.
 
 ---
 
@@ -526,7 +701,7 @@ python .\scripts\ingest_embeddings.py <VIDEO_ID> --pattern <PATTERN>
 Example:
 
 ```powershell
-python .\scripts\ingest_embeddings.py PvyEr3CeKzE --pattern two_pointer
+python .\scripts\ingest_embeddings.py Fu7LD_mIo00 --pattern two_pointer
 ```
 
 With a sub-pattern:
@@ -537,9 +712,10 @@ python .\scripts\ingest_embeddings.py dyG4JBKh6tA `
     --sub-pattern memoization
 ```
 
-The ingestion pipeline validates the pattern against the canonical taxonomy.
+The ingestion pipeline validates the supplied pattern against the canonical
+taxonomy.
 
-A missing pattern is treated as an error rather than guessed.
+A missing or invalid pattern is treated as an error rather than guessed.
 
 ---
 
@@ -602,6 +778,9 @@ Sub-pattern
 Confidence
 ```
 
+The query-understanding layer is intentionally separated from retrieval so that
+classification and search remain independently testable.
+
 ---
 
 # 🎯 Query Intents
@@ -618,21 +797,35 @@ comparison
 optimization
 ```
 
-The query understanding layer is intentionally separated from retrieval.
+The classifier also protects the system against unsupported algorithm queries.
 
-This keeps classification and search independently testable.
+For example:
+
+```text
+merge sort
+bubble sort
+insertion sort
+selection sort
+quick sort
+radix sort
+heap sort
+counting sort
+```
+
+must not automatically become a broader DSA pattern unless the canonical taxonomy
+explicitly supports that classification.
 
 ---
 
 # 🔎 Metadata-Aware Retrieval
 
-Script:
+Current retrieval implementation:
 
 ```text
 backend/app/services/retrieval.py
 ```
 
-Retrieval pipeline:
+The current stable semantic retrieval pipeline is:
 
 ```text
 User Query
@@ -650,7 +843,7 @@ Vector Search
 Relevant Chunks
 ```
 
-The retrieval service supports:
+Supported behavior includes:
 
 1. Pure semantic retrieval
 2. Pattern-aware retrieval
@@ -658,13 +851,108 @@ The retrieval service supports:
 4. Safe semantic fallback
 5. Structured retrieval results
 
+Metadata constraints remain authoritative.
+
+---
+
+# 🔀 Hybrid Search and Reranking
+
+## Phase 11 Architecture
+
+The next retrieval layer extends semantic search with lexical search and
+cross-encoder reranking.
+
+```text
+User Query
+     ↓
+Query Understanding
+     ↓
+Metadata Constraints
+     ↓
+ ┌──────────────────────────────┐
+ │                              │
+ ▼                              ▼
+Semantic Search                BM25
+(Qdrant)                     (Lexical)
+ │                              │
+ └──────────────┬───────────────┘
+                ↓
+        Candidate Fusion
+          RRF / RRF Fusion
+                ↓
+        Candidate Pool
+                ↓
+        Cross-Encoder
+          Reranking
+                ↓
+           Final Top-K
+```
+
+### Semantic Search
+
+Semantic retrieval captures conceptual similarity.
+
+Example:
+
+```text
+"Why do we move the two pointers independently?"
+```
+
+can retrieve conceptually relevant chunks even when the exact wording differs.
+
+### BM25
+
+BM25 provides lexical matching for important exact terms.
+
+For example:
+
+```text
+sorted array
+two pointer
+left
+right
+merge
+```
+
+can receive strong lexical relevance.
+
+### Reciprocal Rank Fusion
+
+Semantic and BM25 rankings will be combined using **Reciprocal Rank Fusion
+(RRF)** rather than directly adding their raw scores.
+
+This avoids treating scores from different retrieval systems as if they were
+directly comparable.
+
+### Cross-Encoder Reranking
+
+The fused candidate pool will then be reranked using a cross-encoder.
+
+The reranker evaluates:
+
+```text
+(query, candidate chunk)
+```
+
+together and produces a more precise relevance score.
+
+The final retrieval layer will therefore optimize for:
+
+```text
+Semantic relevance
+        +
+Lexical relevance
+        +
+Query-specific reranking
+```
+
 ---
 
 # 🧩 Retrieval Result
 
 Retrieved chunks are converted into a stable application-level result model.
 
-A result contains:
+A result currently contains:
 
 ```text
 score
@@ -680,8 +968,21 @@ duration
 text
 ```
 
-This prevents the rest of the application from depending directly on Qdrant's
-internal response structure.
+This abstraction prevents the rest of the application from depending directly on
+Qdrant's internal response structures.
+
+During hybrid retrieval, internal candidate objects may additionally track:
+
+```text
+semantic_score
+bm25_score
+rrf_score
+reranker_score
+final_score
+```
+
+These internal scores do not need to become part of the public retrieval
+contract.
 
 ---
 
@@ -713,7 +1014,7 @@ The self-check validates:
 
 ---
 
-## Query Understanding Self-check
+# Query Understanding Self-check
 
 Run:
 
@@ -763,7 +1064,7 @@ Run:
 python .\scripts\test_retrieval_pipeline.py
 ```
 
-The integration test verifies:
+The integration test validates:
 
 ```text
 User Query
@@ -783,29 +1084,14 @@ Qdrant
 Retrieved Chunk Validation
 ```
 
-The test validates that retrieved chunks satisfy the expected metadata
+The test verifies that retrieved chunks satisfy the expected metadata
 constraints.
-
-Example:
-
-```text
-Expected pattern:
-dynamic_programming
-
-Expected sub-pattern:
-memoization
-
-Expected playlist:
-DSA_Patterns_Dynamic_Programming
-```
-
-All returned chunks must satisfy these constraints.
 
 ---
 
 # ✅ Current Validation Status
 
-Current pipeline validation:
+Current backend foundation:
 
 ```text
 DSA Taxonomy
@@ -824,14 +1110,37 @@ Retrieval Metadata Validation
     ✓ Playlist constraints
 ```
 
-Latest retrieval integration result:
+Latest semantic retrieval integration result:
 
 ```text
 Total tests : 2
 Passed      : 2
 Failed      : 0
+Top-K       : 5
 
 ✓ All retrieval pipeline tests passed.
+```
+
+The semantic retrieval foundation is working and validated.
+
+The project is now transitioning from:
+
+```text
+Retrieval Correctness
+```
+
+toward:
+
+```text
+Retrieval Quality
+    ↓
+Hybrid Search
+    ↓
+Reranking
+    ↓
+Context Assembly
+    ↓
+Grounded Generation
 ```
 
 ---
@@ -840,8 +1149,8 @@ Failed      : 0
 
 ## 1. No Fake Pattern Generation
 
-The system must not invent a pattern merely because a query contains a known
-DSA term.
+The system must not invent a pattern merely because a query contains a known DSA
+term.
 
 For example:
 
@@ -859,16 +1168,16 @@ must not automatically become:
 sorting_sweep
 ```
 
-unless the taxonomy explicitly supports that concept as a valid pattern in the
-relevant context.
-
-This prevents retrieval from returning unrelated educational content.
+unless the taxonomy explicitly supports that concept in the relevant context.
 
 ---
 
-## 2. Sorting Algorithms Are Not Automatically DSA Patterns
+## 2. DSA Patterns Are Not Individual Algorithms
 
-Algorithms such as:
+The taxonomy represents **problem-solving patterns**, not every individual
+algorithm.
+
+Therefore, algorithms such as:
 
 ```text
 Bubble Sort
@@ -877,10 +1186,7 @@ Selection Sort
 Radix Sort
 ```
 
-are not automatically treated as independent pattern categories.
-
-The taxonomy represents **problem-solving patterns**, not every individual
-algorithm.
+are not automatically independent pattern categories.
 
 ---
 
@@ -916,6 +1222,57 @@ This keeps metadata consistent across the system.
 
 ---
 
+## 5. Metadata Filtering Remains Authoritative
+
+Hybrid retrieval must respect pattern and sub-pattern constraints.
+
+The intended order is:
+
+```text
+Query Understanding
+      ↓
+Metadata Constraints
+      ↓
+Semantic Search + BM25
+      ↓
+RRF
+      ↓
+Reranking
+      ↓
+Final Top-K
+```
+
+Metadata filtering should not be treated as an optional ranking signal when the
+query explicitly specifies a supported pattern or sub-pattern.
+
+---
+
+## 6. Translation Quality Matters
+
+Translation is part of the retrieval foundation.
+
+The pipeline is:
+
+```text
+Translation
+      ↓
+Chunking
+      ↓
+Embedding
+      ↓
+Retrieval
+      ↓
+RAG
+```
+
+Therefore, translation errors can propagate into chunking, embeddings, retrieval,
+and ultimately generated answers.
+
+For this reason, the higher-quality production translation pipeline remains the
+authoritative path.
+
+---
+
 # 🔐 Environment Variables
 
 Create:
@@ -936,11 +1293,13 @@ QDRANT_COLLECTION=dsa_revision_chunks
 
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
+EMBEDDING_BATCH_SIZE=32
+
 SEARCH_TOP_K=5
 FILTERED_SEARCH_MULTIPLIER=3
 ```
 
-Never commit API keys to Git.
+Never commit API keys or other secrets to Git.
 
 ---
 
@@ -948,43 +1307,43 @@ Never commit API keys to Git.
 
 For a new YouTube video:
 
-### Step 1 — Extract transcript
+## Step 1 — Extract transcript
 
 ```powershell
-python .\scripts\youtube_transcribe.py PvyEr3CeKzE
+python .\scripts\youtube_transcribe.py <VIDEO_ID>
 ```
 
-### Step 2 — Translate
+## Step 2 — Translate
 
 ```powershell
-python .\scripts\translate_transcript.py PvyEr3CeKzE
+python .\scripts\translate_transcript.py <VIDEO_ID>
 ```
 
-### Step 3 — Chunk
+## Step 3 — Chunk
 
 ```powershell
-python .\scripts\chunk_transcript.py PvyEr3CeKzE
+python .\scripts\chunk_transcript.py <VIDEO_ID>
 ```
 
-### Step 4 — Ingest embeddings
+## Step 4 — Ingest embeddings
 
 ```powershell
-python .\scripts\ingest_embeddings.py PvyEr3CeKzE --pattern two_pointer
+python .\scripts\ingest_embeddings.py <VIDEO_ID> --pattern <PATTERN>
 ```
 
-### Step 5 — Run taxonomy validation
+## Step 5 — Run taxonomy validation
 
 ```powershell
 python .\app\services\dsa_taxonomy.py
 ```
 
-### Step 6 — Run query understanding validation
+## Step 6 — Run query understanding validation
 
 ```powershell
 python -m app.services.query_understanding
 ```
 
-### Step 7 — Run retrieval integration test
+## Step 7 — Run retrieval integration test
 
 ```powershell
 python .\scripts\test_retrieval_pipeline.py
@@ -996,34 +1355,132 @@ python .\scripts\test_retrieval_pipeline.py
 
 ## Phase 1 — Foundation
 
-* [x] YouTube transcript extraction
-* [x] Transcript translation
-* [x] Smart transcript chunking
-* [x] Embedding generation
-* [x] Qdrant ingestion
+* [x] Project structure
+* [x] Environment configuration
+* [x] Core backend foundation
 
-## Phase 2 — DSA Intelligence
+## Phase 2 — YouTube Transcript Ingestion
+
+* [x] YouTube transcript extraction
+* [x] Transcript storage
+* [x] Timestamp preservation
+
+## Phase 3 — Transcript Translation
+
+* [x] Translation pipeline
+* [x] Batched translation
+* [x] Retry handling
+* [x] Resume-safe checkpoints
+* [ ] Complete translation of the remaining representative dataset
+
+## Phase 4 — Intelligent Transcript Chunking
+
+* [x] Character-aware chunking
+* [x] Chunk overlap
+* [x] Timestamp preservation
+* [x] Chunk JSON generation
+
+## Phase 5 — Embedding Generation
+
+* [x] Sentence Transformer integration
+* [x] 384-dimensional embeddings
+* [x] Local embedding generation
+
+## Phase 6 — Qdrant Vector Database
+
+* [x] Qdrant collection
+* [x] Vector ingestion
+* [x] Payload metadata
+* [x] Payload indexes
+* [x] Deterministic point IDs
+
+## Phase 7 — Semantic Retrieval
+
+* [x] Query embedding
+* [x] Vector search
+* [x] Top-K retrieval
+* [x] Structured retrieval results
+
+## Phase 8 — DSA Knowledge & Metadata Layer
 
 * [x] Canonical DSA taxonomy
-* [x] Pattern validation
-* [x] Sub-pattern validation
+* [x] Sub-pattern taxonomy
 * [x] Playlist mapping
-* [x] Metadata enrichment
-* [x] Pattern-aware retrieval
-* [x] Query understanding
+* [x] Metadata validation
+* [x] Chunk metadata enrichment
+
+## Phase 9 — Query Understanding
+
 * [x] Intent classification
+* [x] Pattern detection
+* [x] Sub-pattern detection
+* [x] Confidence scoring
+* [x] Unsupported algorithm protection
 
-## Phase 3 — Revision Intelligence
+## Phase 10 — Metadata-Aware Retrieval
 
-* [ ] Evidence-grounded answer generation
-* [ ] Context-aware revision explanations
-* [ ] Timestamp-aware revision
-* [ ] Topic completion tracking
-* [ ] Pattern progress tracking
+* [x] Pattern filtering
+* [x] Sub-pattern filtering
+* [x] Metadata validation
+* [x] Safe fallback behavior
+* [x] Retrieval integration testing
 
-## Phase 4 — AI Practice Engine
+## Phase 11 — Hybrid Search + Reranking
 
-After a learner completes a DSA pattern/topic:
+* [ ] BM25 lexical search
+* [ ] Reusable BM25 index
+* [ ] Semantic + lexical candidate retrieval
+* [ ] Reciprocal Rank Fusion
+* [ ] Cross-encoder reranking
+* [ ] Final Top-K ranking
+* [ ] Integration with existing `retrieve_chunks()` interface
+
+## Phase 12 — Context Assembly
+
+* [ ] Context selection
+* [ ] Context deduplication
+* [ ] Relevance ordering
+* [ ] Token-aware context construction
+
+## Phase 13 — Grounded RAG Generation
+
+* [ ] LLM answer generation
+* [ ] Source-grounded responses
+* [ ] Retrieval-context prompting
+* [ ] Hallucination-aware answer structure
+
+## Phase 14 — Timestamp-Aware Retrieval
+
+* [ ] Timestamp-aware result formatting
+* [ ] Video jump links
+* [ ] Relevant time-range extraction
+* [ ] Timestamp-grounded explanations
+
+## Phase 15 — FastAPI Backend
+
+* [ ] Retrieval API
+* [ ] Query API
+* [ ] RAG API
+* [ ] Metadata endpoints
+* [ ] Request validation
+
+## Phase 16 — React Frontend
+
+* [ ] Search interface
+* [ ] Revision interface
+* [ ] Retrieved source display
+* [ ] Video/timestamp navigation
+
+## Phase 17 — Pattern / Playlist Navigation
+
+* [ ] Pattern browser
+* [ ] Playlist navigation
+* [ ] Video ordering
+* [ ] Topic progression
+
+## Phase 18 — Adaptive Practice System
+
+After completing a topic or pattern:
 
 ```text
 Completed Topic
@@ -1037,16 +1494,19 @@ No hints
 Learner solves
       ↓
 AI evaluates solution
-      ↓
-Weakness detection
 ```
 
-The goal is to test whether the learner can recognize and apply a pattern
+The goal is to test whether the learner can recognize and apply a DSA pattern
 without being explicitly told which pattern to use.
 
-## Phase 5 — Adaptive Revision
+## Phase 19 — Performance & Weakness Detection
 
-Future versions will support:
+* [ ] Track practice performance
+* [ ] Detect weak sub-patterns
+* [ ] Detect recurring mistakes
+* [ ] Identify knowledge gaps
+
+## Phase 20 — Adaptive Revision Engine
 
 ```text
 Learning History
@@ -1064,33 +1524,65 @@ Performance Tracking
 Adaptive Next Step
 ```
 
+## Phase 21 — Evaluation System
+
+* [ ] Retrieval evaluation dataset
+* [ ] Recall@K
+* [ ] Precision@K
+* [ ] MRR
+* [ ] Reranking evaluation
+* [ ] RAG answer evaluation
+
+## Phase 22 — Automated Testing
+
+* [ ] Unit tests
+* [ ] Integration tests
+* [ ] Retrieval regression tests
+* [ ] API tests
+* [ ] End-to-end tests
+
+## Phase 23 — Production Hardening
+
+* [ ] Logging
+* [ ] Error handling
+* [ ] Performance optimization
+* [ ] Model caching
+* [ ] Security hardening
+* [ ] Configuration cleanup
+
+## Phase 24 — Deployment
+
+* [ ] Backend deployment
+* [ ] Frontend deployment
+* [ ] Production Qdrant
+* [ ] Monitoring
+* [ ] Production documentation
+
 ---
 
 # 🧠 Long-Term Vision
 
 The final system is intended to become more than a transcript search engine.
 
-The long-term vision is:
-
 ```text
-                    DSA Learning History
-                            │
-                            ▼
-                    Pattern Knowledge
-                            │
-              ┌─────────────┴─────────────┐
-              ▼                           ▼
-        Revision Engine              Practice Engine
-              │                           │
-              ▼                           ▼
-      Relevant Video Content        New Problems
-              │                           │
-              └─────────────┬─────────────┘
-                            ▼
-                     Learner Progress
-                            │
-                            ▼
-                    Adaptive Revision
+                     DSA Learning History
+                              │
+                              ▼
+                     Pattern Knowledge
+                              │
+                ┌─────────────┴─────────────┐
+                ▼                           ▼
+         Revision Engine              Practice Engine
+                │                           │
+                ▼                           ▼
+       Relevant Video Content        New Problems
+                │                           │
+                └─────────────┬─────────────┘
+                              ▼
+                       Learner Progress
+                              │
+                              ▼
+                       Adaptive Revision
 ```
 
 The system should gradually understand:
@@ -1112,6 +1604,9 @@ Sentence Transformers
 Qdrant
 Groq API
 YouTube Transcript API
+BM25
+Cross-Encoder
+ONNX Runtime
 JSON-based intermediate storage
 ```
 
@@ -1119,19 +1614,67 @@ JSON-based intermediate storage
 
 # 📌 Current Project Status
 
-The current backend has a working:
+The DSA Revision Analyzer currently has a working and validated foundation:
 
 ```text
-YouTube → Transcript → Translation → Chunking
-        → Metadata → Embedding → Qdrant
-        → Query Understanding → Retrieval
+YouTube
+   ↓
+Transcript
+   ↓
+Translation
+   ↓
+Chunking
+   ↓
+Metadata
+   ↓
+Embedding
+   ↓
+Qdrant
+   ↓
+Query Understanding
+   ↓
+Metadata-Aware Semantic Retrieval
 ```
 
-pipeline with successful taxonomy, query-understanding, and retrieval
-integration validation.
+The project has completed the core retrieval foundation through **Phase 10**.
 
-The next major step is to move from **retrieval correctness** toward
-**answer generation and adaptive DSA revision intelligence**.
+The current development stage is:
 
-```pattern/sub-pattern filtering architecture-ও current implementation অনুযায়ী রাখা হয়েছে। :contentReference[oaicite:2]{index=2}
+```text
+Phase 11 — Hybrid Search + Reranking
 ```
+
+The next major retrieval upgrade is:
+
+```text
+Semantic Search
+      +
+BM25
+      ↓
+RRF Fusion
+      ↓
+Cross-Encoder Reranking
+      ↓
+Final Top-K
+```
+
+After retrieval quality is improved, development will move toward:
+
+```text
+Context Assembly
+      ↓
+Grounded RAG Generation
+      ↓
+Timestamp-Aware Revision
+      ↓
+Adaptive Practice
+      ↓
+Weakness Detection
+      ↓
+Adaptive Revision
+```
+
+The long-term objective is to transform the project from a
+**transcript retrieval system** into an **adaptive AI-powered DSA revision and
+practice engine**.
+
