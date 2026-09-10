@@ -5,13 +5,15 @@ This script:
 
 1. Loads a transcript JSON from data/transcripts/.
 2. Reads the original Hindi/Hinglish transcript segments.
-3. Preserves source video metadata such as video_title and source_url.
+3. Preserves source video metadata.
 4. Sends transcript segments to Groq in small batches.
 5. Translates Hindi/Hinglish into clear technical English.
 6. Preserves timestamps and original segment IDs.
-7. Validates the LLM response.
-8. Retries failed translation batches.
-9. Saves the translated transcript under data/translated/.
+7. Validates every LLM response.
+8. Retries temporary translation failures.
+9. Saves progress after every successful batch.
+10. Resumes automatically from an existing partial translation.
+11. Saves the final translated transcript under data/translated/.
 
 Example:
 
@@ -27,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import time
 from pathlib import Path
 from typing import Any
@@ -47,6 +50,7 @@ from groq import Groq
 # parents[1] -> backend/
 BASE_DIR = Path(__file__).resolve().parents[1]
 
+
 # Original Hindi/Hinglish transcripts.
 TRANSCRIPT_DIR = (
     BASE_DIR
@@ -54,12 +58,14 @@ TRANSCRIPT_DIR = (
     / "transcripts"
 )
 
+
 # English translated transcripts.
 TRANSLATED_DIR = (
     BASE_DIR
     / "data"
     / "translated"
 )
+
 
 # Environment file.
 ENV_FILE = BASE_DIR / ".env"
@@ -77,22 +83,31 @@ load_dotenv(ENV_FILE)
 #
 # Smaller batches:
 # - reduce prompt size
-# - reduce risk of malformed responses
+# - reduce malformed JSON risk
 # - make failures easier to retry
 #
 # Larger batches:
 # - reduce number of API requests
 #
-# 25 is a safer starting point for this project.
+# 25 remains the default.
 DEFAULT_BATCH_SIZE = 25
 
 
-# Maximum number of attempts for a failed batch.
+# Maximum number of attempts for ordinary failed batches.
 MAX_RETRIES = 3
 
 
 # Groq model used for translation.
 GROQ_MODEL = "openai/gpt-oss-120b"
+
+
+# Seconds between ordinary retry attempts.
+RETRY_DELAY_BASE_SECONDS = 2
+
+
+# When a rate-limit response contains a "try again in X seconds"
+# message, wait at least this many seconds before retrying.
+RATE_LIMIT_MIN_WAIT_SECONDS = 5
 
 
 # ============================================================
@@ -111,9 +126,7 @@ def get_groq_client() -> Groq:
         GROQ_API_KEY=...
     """
 
-    api_key = os.getenv(
-        "GROQ_API_KEY"
-    )
+    api_key = os.getenv("GROQ_API_KEY")
 
     if not api_key:
         raise RuntimeError(
@@ -138,23 +151,6 @@ def load_transcript(
     Example:
 
         data/transcripts/dyG4JBKh6tA.json
-
-    The current transcript format contains:
-
-        {
-            "video_id": "...",
-            "video_title": "...",
-            "source": "...",
-            "source_url": "...",
-            "segment_count": 566,
-            "segments": [...]
-        }
-
-    Important:
-
-    The video metadata is intentionally loaded as part of the
-    complete transcript object so downstream stages do not lose
-    the actual YouTube video identity.
     """
 
     file_path = (
@@ -162,7 +158,6 @@ def load_transcript(
         / f"{video_id}.json"
     )
 
-    # Print useful debugging information.
     print()
     print("=" * 60)
     print("Transcript configuration")
@@ -173,20 +168,17 @@ def load_transcript(
     print(f"EXISTS         : {file_path.exists()}")
     print("=" * 60)
 
-    # Fail early if the transcript does not exist.
     if not file_path.exists():
         raise FileNotFoundError(
             f"Transcript not found: {file_path}"
         )
 
-    # Read JSON using UTF-8 so Hindi characters are preserved.
     with file_path.open(
         "r",
         encoding="utf-8",
     ) as file:
         data = json.load(file)
 
-    # Validate the expected top-level structure.
     if "segments" not in data:
         raise ValueError(
             "Transcript JSON does not contain 'segments'."
@@ -200,7 +192,6 @@ def load_transcript(
             "'segments' must be a list."
         )
 
-    # Validate video identity.
     stored_video_id = data.get("video_id")
 
     if stored_video_id and stored_video_id != video_id:
@@ -210,14 +201,12 @@ def load_transcript(
             f"Stored: {stored_video_id}"
         )
 
-    # The title should already exist because youtube_transcribe.py
-    # now stores the actual YouTube title.
-    #
-    # We fail explicitly instead of silently replacing the title
-    # with the video ID.
     video_title = data.get("video_title")
 
-    if not isinstance(video_title, str) or not video_title.strip():
+    if not isinstance(
+        video_title,
+        str,
+    ) or not video_title.strip():
         raise ValueError(
             "Transcript JSON does not contain a valid 'video_title'. "
             "Re-run youtube_transcribe.py so the actual YouTube "
@@ -238,7 +227,7 @@ def build_translation_input(
     Convert transcript segments into a minimal structure for
     the LLM.
 
-    Every segment receives an explicit index.
+    Every segment receives its absolute transcript index.
 
     Example:
 
@@ -253,21 +242,13 @@ def build_translation_input(
             }
         ]
 
-    Why explicit indexes?
-
-    Because LLMs can occasionally:
-    - merge items
-    - skip items
-    - reorder items
-
-    The index allows us to detect those failures.
+    Explicit indexes help detect skipped, merged, or reordered
+    segments.
     """
 
     items: list[dict[str, Any]] = []
 
-    for index, segment in enumerate(
-        segments
-    ):
+    for index, segment in enumerate(segments):
         items.append(
             {
                 "index": index,
@@ -291,15 +272,11 @@ def parse_json_response(
     """
     Parse the JSON returned by Groq.
 
-    The model should return JSON only.
-
-    However, defensive parsing is still useful because an LLM
-    may occasionally wrap JSON inside markdown code fences.
+    Defensive parsing handles accidental markdown code fences.
     """
 
     content = content.strip()
 
-    # Remove accidental markdown code fences.
     if content.startswith("```"):
         lines = content.splitlines()
 
@@ -315,15 +292,10 @@ def parse_json_response(
         ):
             lines = lines[:-1]
 
-        content = "\n".join(
-            lines
-        ).strip()
+        content = "\n".join(lines).strip()
 
-    # Parse JSON.
     try:
-        data = json.loads(
-            content
-        )
+        data = json.loads(content)
 
     except json.JSONDecodeError as error:
         raise RuntimeError(
@@ -331,7 +303,6 @@ def parse_json_response(
             f"Raw response:\n{content}"
         ) from error
 
-    # We expect an object, not a JSON array.
     if not isinstance(
         data,
         dict,
@@ -354,7 +325,7 @@ def validate_translations(
     """
     Validate the structure returned by Groq.
 
-    Expected response:
+    Expected:
 
         {
             "translations": [
@@ -365,18 +336,16 @@ def validate_translations(
             ]
         }
 
-    Validation checks:
+    Validation:
 
-    1. translations exists.
-    2. translations is a list.
-    3. Number of translations matches input segments.
-    4. Every item is a JSON object.
-    5. Every item contains an index.
-    6. Every item contains a translation.
-    7. Index order is correct.
-    8. Translation is a non-empty string.
-
-    If anything fails, the batch will be retried.
+    1. translations exists
+    2. translations is a list
+    3. count matches input
+    4. every item is an object
+    5. every item contains index
+    6. every item contains translation
+    7. index order is correct
+    8. translation is non-empty
     """
 
     translations = response_data.get(
@@ -392,8 +361,6 @@ def validate_translations(
             "a 'translations' list."
         )
 
-    # The model must return exactly one translation
-    # for every input segment.
     expected_count = len(
         segments
     )
@@ -407,7 +374,6 @@ def validate_translations(
 
     result: list[str] = []
 
-    # Validate every translation item.
     for position, item in enumerate(
         translations
     ):
@@ -435,7 +401,6 @@ def validate_translations(
 
         index = item["index"]
 
-        # Make sure the model didn't reorder the segments.
         if index != position:
             raise RuntimeError(
                 "Translation index mismatch.\n"
@@ -469,6 +434,95 @@ def validate_translations(
 
 
 # ============================================================
+# RATE LIMIT HELPERS
+# ============================================================
+
+def is_rate_limit_error(
+    error: Exception,
+) -> bool:
+    """
+    Determine whether an exception represents a rate-limit
+    response.
+    """
+
+    error_text = str(error).lower()
+
+    rate_limit_markers = (
+        "rate limit",
+        "rate_limit_exceeded",
+        "too many requests",
+        "429",
+        "tokens per day",
+        "tpd",
+    )
+
+    return any(
+        marker in error_text
+        for marker in rate_limit_markers
+    )
+
+
+def extract_wait_seconds(
+    error: Exception,
+) -> int | None:
+    """
+    Try to extract a server-provided retry delay.
+
+    Supports messages such as:
+
+        "try again in 16m55.6s"
+
+        "try again in 20 seconds"
+    """
+
+    error_text = str(error)
+
+    # Match minutes + optional decimal seconds.
+    minute_match = re.search(
+        r"try again in\s+(\d+)m(?:(\d+(?:\.\d+)?)s)?",
+        error_text,
+        flags=re.IGNORECASE,
+    )
+
+    if minute_match:
+        minutes = int(
+            minute_match.group(1)
+        )
+
+        seconds_text = minute_match.group(2)
+
+        seconds = (
+            float(seconds_text)
+            if seconds_text
+            else 0.0
+        )
+
+        return max(
+            RATE_LIMIT_MIN_WAIT_SECONDS,
+            int(minutes * 60 + seconds) + 1,
+        )
+
+    # Match seconds only.
+    second_match = re.search(
+        r"try again in\s+(\d+(?:\.\d+)?)s",
+        error_text,
+        flags=re.IGNORECASE,
+    )
+
+    if second_match:
+        seconds = float(
+            second_match.group(1)
+        )
+
+        return max(
+            RATE_LIMIT_MIN_WAIT_SECONDS,
+            int(seconds) + 1,
+        )
+
+    return None
+
+
+# ============================================================
 # TRANSLATE ONE BATCH
 # ============================================================
 
@@ -479,23 +533,16 @@ def translate_batch(
     """
     Translate one batch of transcript segments.
 
-    We send only the segment index and original text.
-
-    Timestamp information is NOT sent to the LLM because
-    timestamps do not need translation.
-
-    The original timestamp information remains untouched in
-    the final JSON.
+    Timestamps are not sent to the LLM because timestamps do
+    not need translation.
     """
 
-    # Build structured LLM input.
     translation_input = (
         build_translation_input(
             segments
         )
     )
 
-    # Convert Python objects into readable JSON.
     input_json = json.dumps(
         translation_input,
         ensure_ascii=False,
@@ -576,14 +623,11 @@ INPUT:
             },
         ],
         temperature=0,
-
-        # Ask the model to return a JSON object.
         response_format={
             "type": "json_object"
         },
     )
 
-    # Extract model response.
     content = (
         response
         .choices[0]
@@ -596,14 +640,12 @@ INPUT:
             "Groq returned an empty response."
         )
 
-    # Parse JSON.
     response_data = (
         parse_json_response(
             content
         )
     )
 
-    # Validate and return translations.
     return validate_translations(
         response_data,
         segments,
@@ -620,17 +662,16 @@ def translate_batch_with_retry(
     start_index: int,
 ) -> list[str]:
     """
-    Retry a translation batch if the Groq request or response
-    validation fails.
+    Retry a translation batch.
 
-    Retry delays:
+    Ordinary failures use short exponential-style delays.
 
-        Attempt 1 fails -> wait 2 seconds
-        Attempt 2 fails -> wait 4 seconds
-        Attempt 3 fails -> stop
+    Rate-limit failures are handled differently:
 
-    This protects the pipeline from temporary API failures
-    and occasional malformed LLM responses.
+    - detect 429/rate-limit errors
+    - extract server-provided wait time when available
+    - wait for that amount
+    - retry
     """
 
     last_error: Exception | None = None
@@ -663,15 +704,30 @@ def translate_batch_with_retry(
                 f"{error}"
             )
 
-            # Do not sleep after the final attempt.
-            if attempt < MAX_RETRIES:
+            if attempt >= MAX_RETRIES:
+                break
+
+            # ------------------------------------------------
+            # RATE LIMIT
+            # ------------------------------------------------
+
+            if is_rate_limit_error(error):
 
                 wait_seconds = (
-                    attempt * 2
+                    extract_wait_seconds(
+                        error
+                    )
+                )
+
+                if wait_seconds is None:
+                    wait_seconds = 60
+
+                print(
+                    f"  Rate limit detected."
                 )
 
                 print(
-                    f"  Retrying in "
+                    f"  Waiting approximately "
                     f"{wait_seconds} seconds..."
                 )
 
@@ -679,7 +735,26 @@ def translate_batch_with_retry(
                     wait_seconds
                 )
 
-    # Every attempt failed.
+                continue
+
+            # ------------------------------------------------
+            # ORDINARY FAILURE
+            # ------------------------------------------------
+
+            wait_seconds = (
+                attempt
+                * RETRY_DELAY_BASE_SECONDS
+            )
+
+            print(
+                f"  Retrying in "
+                f"{wait_seconds} seconds..."
+            )
+
+            time.sleep(
+                wait_seconds
+            )
+
     raise RuntimeError(
         f"Translation failed for batch "
         f"starting at segment {start_index} "
@@ -688,10 +763,27 @@ def translate_batch_with_retry(
 
 
 # ============================================================
-# SAVE TRANSLATED TRANSCRIPT
+# PARTIAL TRANSLATION HELPERS
 # ============================================================
 
-def save_translated_transcript(
+def get_partial_path(
+    video_id: str,
+) -> Path:
+    """
+    Return the checkpoint file path.
+
+    Example:
+
+        data/translated/Fu7LD_mIo00.partial.json
+    """
+
+    return (
+        TRANSLATED_DIR
+        / f"{video_id}.partial.json"
+    )
+
+
+def save_partial_transcript(
     video_id: str,
     video_title: str,
     source: str,
@@ -699,61 +791,21 @@ def save_translated_transcript(
     translated_segments: list[dict[str, Any]],
 ) -> Path:
     """
-    Save the translated transcript.
+    Save the current translation checkpoint.
 
-    Important:
-
-    Metadata from the original transcript is preserved:
-
-        video_id
-        video_title
-        source
-        source_url
-
-    The translated segments preserve:
-
-        segment_id
-        start
-        end
-        duration
-        text
-
-    and add:
-
-        text_en
-
-    Therefore a translated segment looks like:
-
-        {
-            "segment_id": 0,
-            "start": 0.8,
-            "end": 4.88,
-            "duration": 4.08,
-            "text": "original Hindi text",
-            "text_en": "English translation"
-        }
-
-    This structure is extremely useful for the future RAG
-    system because semantic search can use text_en while
-    timestamp navigation can use start/end.
+    This function is called after every successfully translated
+    batch so progress survives process/API failures.
     """
 
-    # Make sure the destination directory exists.
     TRANSLATED_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    output_path = (
-        TRANSLATED_DIR
-        / f"{video_id}.json"
+    partial_path = get_partial_path(
+        video_id
     )
 
-    # Build final JSON.
-
-    # We intentionally carry forward video_title and source_url
-    # instead of rebuilding them from the video ID. This prevents
-    # downstream stages from losing source metadata.
     output_data = {
         "video_id": video_id,
         "video_title": video_title,
@@ -766,8 +818,15 @@ def save_translated_transcript(
         "segments": translated_segments,
     }
 
-    # Write UTF-8 JSON.
-    with output_path.open(
+    # Write to a temporary checkpoint first.
+    #
+    # This reduces the chance of leaving a half-written JSON
+    # file if the process is interrupted during writing.
+    temp_path = partial_path.with_suffix(
+        ".partial.tmp"
+    )
+
+    with temp_path.open(
         "w",
         encoding="utf-8",
     ) as file:
@@ -778,6 +837,256 @@ def save_translated_transcript(
             ensure_ascii=False,
             indent=2,
         )
+
+        file.flush()
+        os.fsync(
+            file.fileno()
+        )
+
+    # Replace the previous checkpoint atomically.
+    temp_path.replace(
+        partial_path
+    )
+
+    return partial_path
+
+
+def load_partial_transcript(
+    video_id: str,
+) -> dict[str, Any] | None:
+    """
+    Load an existing partial translation if present.
+
+    Returns None when no usable checkpoint exists.
+    """
+
+    partial_path = get_partial_path(
+        video_id
+    )
+
+    if not partial_path.exists():
+        return None
+
+    try:
+        with partial_path.open(
+            "r",
+            encoding="utf-8",
+        ) as file:
+
+            data = json.load(file)
+
+    except (
+        json.JSONDecodeError,
+        OSError,
+    ) as error:
+
+        print(
+            f"Warning: unable to load partial "
+            f"translation checkpoint: {error}"
+        )
+
+        print(
+            "Starting translation from the beginning."
+        )
+
+        return None
+
+    if not isinstance(
+        data,
+        dict,
+    ):
+        print(
+            "Warning: partial translation checkpoint "
+            "has an invalid structure."
+        )
+
+        return None
+
+    segments = data.get(
+        "segments"
+    )
+
+    if not isinstance(
+        segments,
+        list,
+    ):
+        print(
+            "Warning: partial translation checkpoint "
+            "does not contain a valid segments list."
+        )
+
+        return None
+
+    return data
+
+
+def validate_partial_progress(
+    partial_data: dict[str, Any],
+    source_segments: list[dict[str, Any]],
+) -> int:
+    """
+    Validate and return the number of completed segments.
+
+    The partial file must contain a sequential prefix of the
+    original transcript.
+
+    Example:
+
+        source segments: 0 ... 1188
+        partial segments: 0 ... 1124
+
+    Result:
+
+        1125
+    """
+
+    partial_segments = partial_data.get(
+        "segments"
+    )
+
+    if not isinstance(
+        partial_segments,
+        list,
+    ):
+        raise ValueError(
+            "Partial translation does not contain "
+            "a valid segments list."
+        )
+
+    completed_count = len(
+        partial_segments
+    )
+
+    if completed_count > len(
+        source_segments
+    ):
+        raise ValueError(
+            "Partial translation contains more segments "
+            "than the source transcript."
+        )
+
+    for index in range(
+        completed_count
+    ):
+
+        partial_segment = (
+            partial_segments[index]
+        )
+
+        source_segment = (
+            source_segments[index]
+        )
+
+        partial_segment_id = (
+            partial_segment.get(
+                "segment_id"
+            )
+        )
+
+        source_segment_id = (
+            source_segment.get(
+                "segment_id"
+            )
+        )
+
+        if (
+            partial_segment_id
+            != source_segment_id
+        ):
+            raise ValueError(
+                "Partial translation checkpoint does not match "
+                "the source transcript at segment "
+                f"{index}."
+            )
+
+        if "text_en" not in partial_segment:
+            raise ValueError(
+                "Partial translation checkpoint is missing "
+                f"text_en at segment {index}."
+            )
+
+        text_en = partial_segment.get(
+            "text_en"
+        )
+
+        if not isinstance(
+            text_en,
+            str,
+        ) or not text_en.strip():
+            raise ValueError(
+                "Partial translation contains an empty "
+                f"translation at segment {index}."
+            )
+
+    return completed_count
+
+
+# ============================================================
+# SAVE FINAL TRANSLATED TRANSCRIPT
+# ============================================================
+
+def save_translated_transcript(
+    video_id: str,
+    video_title: str,
+    source: str,
+    source_url: str,
+    translated_segments: list[dict[str, Any]],
+) -> Path:
+    """
+    Save the final translated transcript.
+
+    Final output:
+
+        data/translated/<video_id>.json
+    """
+
+    TRANSLATED_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    output_path = (
+        TRANSLATED_DIR
+        / f"{video_id}.json"
+    )
+
+    output_data = {
+        "video_id": video_id,
+        "video_title": video_title,
+        "source": source,
+        "source_url": source_url,
+        "translation": "English",
+        "segment_count": len(
+            translated_segments
+        ),
+        "segments": translated_segments,
+    }
+
+    # Write final output atomically as well.
+    temp_path = output_path.with_suffix(
+        ".tmp"
+    )
+
+    with temp_path.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+
+        json.dump(
+            output_data,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+        file.flush()
+        os.fsync(
+            file.fileno()
+        )
+
+    temp_path.replace(
+        output_path
+    )
 
     return output_path
 
@@ -791,47 +1100,44 @@ def translate_transcript(
     batch_size: int = DEFAULT_BATCH_SIZE,
 ) -> Path:
     """
-    Complete translation pipeline.
+    Complete resume-safe translation pipeline.
 
     Flow:
 
         transcript JSON
               ↓
-        load transcript + metadata
+        load transcript
               ↓
-        split into batches
+        detect checkpoint
               ↓
-        translate batch
+        resume from completed segments
+              ↓
+        translate next batch
               ↓
         validate response
               ↓
-        preserve timestamps
+        save checkpoint
               ↓
-        preserve video metadata
+        repeat
               ↓
-        save translated JSON
+        save final translated JSON
+              ↓
+        remove checkpoint
     """
 
-    # Prevent invalid batch sizes.
     if batch_size <= 0:
         raise ValueError(
             "batch_size must be greater than 0."
         )
 
-    # Create Groq client.
-    client = get_groq_client()
+    # --------------------------------------------------------
+    # LOAD SOURCE TRANSCRIPT
+    # --------------------------------------------------------
 
-    # Load original transcript.
     transcript = load_transcript(
         video_id
     )
 
-    # --------------------------------------------------------
-    # LOAD SOURCE METADATA
-    # --------------------------------------------------------
-
-    # These fields were created by youtube_transcribe.py.
-    # They are carried through unchanged.
     stored_video_id = transcript.get(
         "video_id",
         video_id,
@@ -851,7 +1157,6 @@ def translate_transcript(
         f"https://www.youtube.com/watch?v={video_id}",
     )
 
-    # Defensive validation.
     if stored_video_id != video_id:
         raise ValueError(
             "Loaded transcript video ID does not match "
@@ -866,7 +1171,6 @@ def translate_transcript(
             "A valid video_title is required."
         )
 
-    # Extract transcript segments.
     segments = transcript[
         "segments"
     ]
@@ -876,14 +1180,174 @@ def translate_transcript(
             "Transcript contains no segments."
         )
 
-    # This will contain the final translated segments.
+    total_segments = len(
+        segments
+    )
+
+    # --------------------------------------------------------
+    # LOAD EXISTING CHECKPOINT
+    # --------------------------------------------------------
+
     translated_segments: list[
         dict[str, Any]
     ] = []
 
-    total_segments = len(
-        segments
+    partial_data = (
+        load_partial_transcript(
+            video_id
+        )
     )
+
+    if partial_data is not None:
+
+        try:
+            completed_count = (
+                validate_partial_progress(
+                    partial_data,
+                    segments,
+                )
+            )
+
+        except ValueError as error:
+
+            print()
+            print(
+                "Warning: existing partial checkpoint "
+                "cannot be safely resumed."
+            )
+
+            print(
+                f"Reason: {error}"
+            )
+
+            print(
+                "Starting translation from the beginning."
+            )
+
+            completed_count = 0
+            partial_data = None
+
+        if partial_data is not None:
+
+            translated_segments = list(
+                partial_data["segments"]
+            )
+
+            print()
+            print("=" * 60)
+            print("Existing translation checkpoint found")
+            print("=" * 60)
+            print(
+                f"Completed segments : "
+                f"{completed_count}/{total_segments}"
+            )
+            print(
+                f"Remaining segments : "
+                f"{total_segments - completed_count}"
+            )
+            print(
+                f"Checkpoint         : "
+                f"{get_partial_path(video_id)}"
+            )
+            print("=" * 60)
+
+    # --------------------------------------------------------
+    # IF FINAL FILE ALREADY EXISTS
+    # --------------------------------------------------------
+
+    final_path = (
+        TRANSLATED_DIR
+        / f"{video_id}.json"
+    )
+
+    if final_path.exists():
+
+        try:
+            with final_path.open(
+                "r",
+                encoding="utf-8",
+            ) as file:
+
+                existing_final = json.load(
+                    file
+                )
+
+            existing_segments = (
+                existing_final.get(
+                    "segments"
+                )
+            )
+
+            if (
+                isinstance(
+                    existing_segments,
+                    list,
+                )
+                and len(existing_segments)
+                == total_segments
+            ):
+
+                print()
+                print("=" * 60)
+                print("Translation already completed")
+                print("=" * 60)
+                print(
+                    f"File: {final_path}"
+                )
+                print(
+                    f"Segments: {len(existing_segments)}"
+                )
+                print("=" * 60)
+
+                return final_path
+
+        except (
+            json.JSONDecodeError,
+            OSError,
+        ):
+            print(
+                "Existing final translation file is invalid "
+                "or unreadable. It will be rebuilt."
+            )
+
+    # --------------------------------------------------------
+    # IF NOTHING REMAINS
+    # --------------------------------------------------------
+
+    if len(
+        translated_segments
+    ) >= total_segments:
+
+        output_path = (
+            save_translated_transcript(
+                video_id=video_id,
+                video_title=video_title,
+                source=source,
+                source_url=source_url,
+                translated_segments=translated_segments,
+            )
+        )
+
+        partial_path = get_partial_path(
+            video_id
+        )
+
+        if partial_path.exists():
+            partial_path.unlink()
+
+        print()
+        print(
+            "All segments were already translated "
+            "in the checkpoint."
+        )
+
+        return output_path
+
+    # --------------------------------------------------------
+    # CREATE GROQ CLIENT ONLY WHEN WORK REMAINS
+    # --------------------------------------------------------
+
+    client = get_groq_client()
 
     # --------------------------------------------------------
     # PIPELINE INFORMATION
@@ -911,7 +1375,22 @@ def translate_transcript(
     )
 
     print(
+        f"Already done  : "
+        f"{len(translated_segments)}"
+    )
+
+    print(
+        f"Remaining     : "
+        f"{total_segments - len(translated_segments)}"
+    )
+
+    print(
         f"Model         : {GROQ_MODEL}"
+    )
+
+    print(
+        f"Checkpoint    : "
+        f"{get_partial_path(video_id)}"
     )
 
     print("=" * 60)
@@ -920,19 +1399,21 @@ def translate_transcript(
     # PROCESS TRANSCRIPT IN BATCHES
     # --------------------------------------------------------
 
+    start_index = len(
+        translated_segments
+    )
+
     for start_index in range(
-        0,
+        start_index,
         total_segments,
         batch_size,
     ):
 
-        # Calculate the end of this batch.
         end_index = min(
             start_index + batch_size,
             total_segments,
         )
 
-        # Extract current batch.
         batch = segments[
             start_index:end_index
         ]
@@ -944,7 +1425,10 @@ def translate_transcript(
             f"{end_index - 1}"
         )
 
-        # Translate current batch with retry support.
+        # ----------------------------------------------------
+        # TRANSLATE CURRENT BATCH
+        # ----------------------------------------------------
+
         translations = (
             translate_batch_with_retry(
                 client=client,
@@ -956,19 +1440,6 @@ def translate_transcript(
         # ----------------------------------------------------
         # MERGE ORIGINAL + TRANSLATED DATA
         # ----------------------------------------------------
-        #
-        # We NEVER replace the original segment.
-        #
-        # Instead:
-        #
-        # original:
-        #     text
-        #
-        # new:
-        #     text_en
-        #
-        # This keeps the original transcript available for
-        # debugging, auditing and multilingual retrieval.
 
         for segment, translation in zip(
             batch,
@@ -984,9 +1455,22 @@ def translate_transcript(
                 translated_segment
             )
 
-        # Progress information.
+        # ----------------------------------------------------
+        # SAVE CHECKPOINT IMMEDIATELY
+        # ----------------------------------------------------
+
         completed = len(
             translated_segments
+        )
+
+        checkpoint_path = (
+            save_partial_transcript(
+                video_id=video_id,
+                video_title=video_title,
+                source=source,
+                source_url=source_url,
+                translated_segments=translated_segments,
+            )
         )
 
         print(
@@ -994,8 +1478,13 @@ def translate_transcript(
             f"{completed}/{total_segments}"
         )
 
+        print(
+            f"  ✓ Checkpoint saved: "
+            f"{checkpoint_path.name}"
+        )
+
     # --------------------------------------------------------
-    # SAVE RESULT
+    # SAVE FINAL RESULT
     # --------------------------------------------------------
 
     output_path = (
@@ -1007,6 +1496,21 @@ def translate_transcript(
             translated_segments=translated_segments,
         )
     )
+
+    # --------------------------------------------------------
+    # REMOVE CHECKPOINT
+    # --------------------------------------------------------
+
+    partial_path = get_partial_path(
+        video_id
+    )
+
+    if partial_path.exists():
+        partial_path.unlink()
+
+    # --------------------------------------------------------
+    # FINAL SUMMARY
+    # --------------------------------------------------------
 
     print()
     print("=" * 60)
@@ -1025,6 +1529,10 @@ def translate_transcript(
     print(
         f"Video title preserved: "
         f"{video_title}"
+    )
+
+    print(
+        "Checkpoint removed: True"
     )
 
     return output_path
@@ -1051,7 +1559,8 @@ def main() -> None:
         description=(
             "Translate a YouTube transcript "
             "from Hindi/Hinglish to English "
-            "while preserving video metadata."
+            "while preserving video metadata "
+            "and translation progress."
         )
     )
 
@@ -1073,13 +1582,15 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Start translation pipeline.
     translate_transcript(
         video_id=args.video_id,
         batch_size=args.batch_size,
     )
 
 
-# Run CLI only when this file is executed directly.
+# ============================================================
+# PYTHON ENTRY POINT
+# ============================================================
+
 if __name__ == "__main__":
     main()
