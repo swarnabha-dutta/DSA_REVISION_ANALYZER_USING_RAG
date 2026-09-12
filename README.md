@@ -1,3 +1,4 @@
+
 # DSA Revision Analyzer
 
 An AI-powered DSA revision system that converts educational video content into a
@@ -38,7 +39,9 @@ Metadata-Aware Retrieval
       ↓
 Hybrid Search
       ↓
-Reranking
+RRF Candidate Fusion
+      ↓
+Cross-Encoder Reranking
       ↓
 Relevant Revision Context
       ↓
@@ -52,7 +55,7 @@ The long-term system will also use completed topics and patterns to generate
 
 # 🧠 Core Architecture
 
-The current system is evolving from a semantic-only retrieval system into a
+The current system has evolved from a semantic-only retrieval system into a
 hybrid retrieval and reranking architecture.
 
 ```text
@@ -128,6 +131,12 @@ hybrid retrieval and reranking architecture.
                                     │
                                     ▼
                          ┌──────────────────────┐
+                         │  Candidate Pool      │
+                         │  (Expanded Top-K)     │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
                          │ Cross-Encoder        │
                          │ Reranking            │
                          └──────────┬───────────┘
@@ -163,12 +172,16 @@ dsa_revision_analyzer/
 │   │       ├── metadata_storage.py
 │   │       ├── query_understanding.py
 │   │       ├── retrieval.py
+│   │       ├── bm25_index.py
+│   │       ├── hybrid_retrieval.py
+│   │       ├── rrf.py
 │   │       └── video_metadata_schema.py
 │   │
 │   ├── data/
 │   │   ├── transcripts/
 │   │   ├── translated/
-│   │   └── chunks/
+│   │   ├── chunks/
+│   │   └── bm25/
 │   │
 │   ├── scripts/
 │   │   ├── youtube_transcribe.py
@@ -176,7 +189,12 @@ dsa_revision_analyzer/
 │   │   ├── chunk_transcript.py
 │   │   ├── ingest_embeddings.py
 │   │   ├── search_chunks.py
+│   │   ├── search_bm25.py
+│   │   ├── build_bm25_index.py
 │   │   ├── test_retrieval_pipeline.py
+│   │   ├── test_semantic_retrieval.py
+│   │   ├── test_hybrid_retrieval.py
+│   │   ├── test_rrf.py
 │   │   │
 │   │   ├── local_translation.py
 │   │   ├── indictrans_onnx_test.py
@@ -479,7 +497,7 @@ semantic errors in conversational DSA explanations.
 Therefore:
 
 ```text
-Groq translation
+Production translation
       ↓
 Authoritative production translation
 
@@ -528,14 +546,6 @@ Current configuration:
 Target characters : 1000
 Maximum characters: 1400
 Overlap segments  : 2
-```
-
-Example result:
-
-```text
-Input segments : 1243
-Output chunks  : 53
-Average chunk size: ~1118 characters
 ```
 
 Timestamp information is retained so that future retrieval results can be
@@ -819,13 +829,13 @@ explicitly supports that classification.
 
 # 🔎 Metadata-Aware Retrieval
 
-Current retrieval implementation:
+Current stable retrieval implementation:
 
 ```text
 backend/app/services/retrieval.py
 ```
 
-The current stable semantic retrieval pipeline is:
+The semantic retrieval pipeline is:
 
 ```text
 User Query
@@ -855,12 +865,11 @@ Metadata constraints remain authoritative.
 
 ---
 
-# 🔀 Hybrid Search and Reranking
+# 🔀 Phase 11 — Hybrid Search + Reranking
 
-## Phase 11 Architecture
+The retrieval architecture has now been extended beyond semantic-only retrieval.
 
-The next retrieval layer extends semantic search with lexical search and
-cross-encoder reranking.
+Current Phase 11 pipeline:
 
 ```text
 User Query
@@ -877,30 +886,18 @@ Semantic Search                BM25
  │                              │
  └──────────────┬───────────────┘
                 ↓
-        Candidate Fusion
-          RRF / RRF Fusion
+        Candidate Retrieval
                 ↓
-        Candidate Pool
+        Reciprocal Rank Fusion
                 ↓
-        Cross-Encoder
-          Reranking
+          Expanded Candidate Pool
                 ↓
-           Final Top-K
+        Cross-Encoder Reranking
+                ↓
+             Final Top-K
 ```
 
-### Semantic Search
-
-Semantic retrieval captures conceptual similarity.
-
-Example:
-
-```text
-"Why do we move the two pointers independently?"
-```
-
-can retrieve conceptually relevant chunks even when the exact wording differs.
-
-### BM25
+## 1. BM25 Lexical Search
 
 BM25 provides lexical matching for important exact terms.
 
@@ -912,39 +909,144 @@ two pointer
 left
 right
 merge
+memoization
 ```
 
 can receive strong lexical relevance.
 
-### Reciprocal Rank Fusion
+The BM25 index is stored locally and can be reused instead of rebuilding the
+lexical index for every query.
 
-Semantic and BM25 rankings will be combined using **Reciprocal Rank Fusion
-(RRF)** rather than directly adding their raw scores.
+---
 
-This avoids treating scores from different retrieval systems as if they were
-directly comparable.
+## 2. Semantic Candidate Retrieval
 
-### Cross-Encoder Reranking
+Semantic retrieval continues to use Qdrant and the existing embedding model.
 
-The fused candidate pool will then be reranked using a cross-encoder.
+For hybrid retrieval, the system retrieves an expanded candidate pool rather
+than immediately returning the final Top-K.
 
-The reranker evaluates:
-
-```text
-(query, candidate chunk)
-```
-
-together and produces a more precise relevance score.
-
-The final retrieval layer will therefore optimize for:
+Example:
 
 ```text
-Semantic relevance
-        +
-Lexical relevance
-        +
-Query-specific reranking
+Final Top-K = 5
+Candidate multiplier = 3
+
+5 × 3 = 15 candidates
 ```
+
+This gives later ranking stages more candidates to evaluate.
+
+---
+
+## 3. Reciprocal Rank Fusion
+
+Semantic and BM25 rankings are combined using **Reciprocal Rank Fusion
+(RRF)**.
+
+RRF combines rankings rather than directly adding raw scores from different
+retrieval systems.
+
+Conceptually:
+
+```text
+Semantic Ranking
+      +
+BM25 Ranking
+      ↓
+RRF
+      ↓
+Unified Candidate Ranking
+```
+
+The implementation uses a configurable RRF constant:
+
+```text
+RRF K = 60
+```
+
+The RRF layer preserves stable document/point IDs so that candidates from
+different retrievers can be matched correctly.
+
+---
+
+## 4. Current Hybrid Retrieval Validation
+
+The hybrid retrieval integration test currently validates:
+
+```text
+✓ Query validation
+✓ Metadata filter validation
+✓ Semantic candidate retrieval
+✓ BM25 candidate retrieval
+✓ Candidate ID compatibility
+✓ Cross-retriever overlap
+✓ RRF fusion
+✓ Stable point ID preservation
+✓ Final Top-K constraint
+✓ Metadata restoration
+```
+
+A representative test produced:
+
+```text
+Semantic candidates : 15
+BM25 candidates     : 3
+Overlapping points  : 3
+Final fused results : 5
+```
+
+The complete hybrid retrieval test passed successfully.
+
+Example command:
+
+```powershell
+python scripts/test_hybrid_retrieval.py
+```
+
+---
+
+## 5. Cross-Encoder Reranking
+
+**Current Phase 11 remaining major component:**
+
+```text
+Cross-Encoder Reranking
+```
+
+The cross-encoder evaluates the query and candidate chunk together:
+
+```text
+(query, candidate_chunk)
+          ↓
+    Cross-Encoder
+          ↓
+  relevance score
+```
+
+Unlike independent embedding similarity, the cross-encoder can evaluate the
+relationship between the query and candidate text directly.
+
+The intended final pipeline is:
+
+```text
+Semantic Search
+      +
+BM25
+      ↓
+RRF
+      ↓
+Candidate Pool
+      ↓
+Cross-Encoder
+      ↓
+Reranked Candidates
+      ↓
+Final Top-K
+```
+
+Cross-encoder reranking is **not yet marked complete** until its implementation,
+integration, and validation are finished.
 
 ---
 
@@ -1089,7 +1191,59 @@ constraints.
 
 ---
 
-# ✅ Current Validation Status
+# 🔀 Hybrid Retrieval Integration Test
+
+Script:
+
+```text
+backend/scripts/test_hybrid_retrieval.py
+```
+
+Run:
+
+```powershell
+python .\scripts\test_hybrid_retrieval.py
+```
+
+The current integration test validates:
+
+```text
+User Query
+      ↓
+Query Understanding
+      ↓
+Metadata Constraints
+      ↓
+ ┌──────────────┐
+ │              │
+ ▼              ▼
+Semantic       BM25
+ │              │
+ └──────┬───────┘
+        ↓
+       RRF
+        ↓
+   Final Top-K
+```
+
+Current validation result:
+
+```text
+✓ Semantic retrieval validated
+✓ BM25 retrieval validated
+✓ RRF fusion validated
+✓ Stable point_id preservation validated
+✓ Final Top-K constraint passed
+✓ Metadata restoration passed
+
+✓ COMPLETE HYBRID RETRIEVAL TEST PASSED
+```
+
+Cross-encoder-specific validation will be added after the reranker is integrated.
+
+---
+
+# 📊 Current Validation Status
 
 Current backend foundation:
 
@@ -1108,38 +1262,38 @@ Retrieval Metadata Validation
     ✓ Pattern constraints
     ✓ Sub-pattern constraints
     ✓ Playlist constraints
-```
 
-Latest semantic retrieval integration result:
+Hybrid Retrieval
+    ✓ Semantic candidate retrieval
+    ✓ BM25 candidate retrieval
+    ✓ RRF fusion
+    ✓ Candidate compatibility
+    ✓ Final Top-K
+    ✓ Metadata restoration
 
-```text
-Total tests : 2
-Passed      : 2
-Failed      : 0
-Top-K       : 5
-
-✓ All retrieval pipeline tests passed.
+Cross-Encoder
+    ⏳ Pending
 ```
 
 The semantic retrieval foundation is working and validated.
 
-The project is now transitioning from:
+The hybrid retrieval foundation is also working and validated.
+
+The project is now completing the final component of Phase 11:
 
 ```text
 Retrieval Correctness
-```
-
-toward:
-
-```text
-Retrieval Quality
-    ↓
+        ↓
 Hybrid Search
-    ↓
-Reranking
-    ↓
+        ↓
+RRF Fusion
+        ↓
+Cross-Encoder Reranking  ← CURRENT TASK
+        ↓
+Retrieval Quality
+        ↓
 Context Assembly
-    ↓
+        ↓
 Grounded Generation
 ```
 
@@ -1237,7 +1391,7 @@ Semantic Search + BM25
       ↓
 RRF
       ↓
-Reranking
+Cross-Encoder Reranking
       ↓
 Final Top-K
 ```
@@ -1297,6 +1451,8 @@ EMBEDDING_BATCH_SIZE=32
 
 SEARCH_TOP_K=5
 FILTERED_SEARCH_MULTIPLIER=3
+
+RRF_K=60
 ```
 
 Never commit API keys or other secrets to Git.
@@ -1325,28 +1481,40 @@ python .\scripts\translate_transcript.py <VIDEO_ID>
 python .\scripts\chunk_transcript.py <VIDEO_ID>
 ```
 
-## Step 4 — Ingest embeddings
+## Step 4 — Build / update BM25 index
+
+```powershell
+python .\scripts\build_bm25_index.py
+```
+
+## Step 5 — Ingest embeddings
 
 ```powershell
 python .\scripts\ingest_embeddings.py <VIDEO_ID> --pattern <PATTERN>
 ```
 
-## Step 5 — Run taxonomy validation
+## Step 6 — Run taxonomy validation
 
 ```powershell
 python .\app\services\dsa_taxonomy.py
 ```
 
-## Step 6 — Run query understanding validation
+## Step 7 — Run query understanding validation
 
 ```powershell
 python -m app.services.query_understanding
 ```
 
-## Step 7 — Run retrieval integration test
+## Step 8 — Run semantic retrieval integration test
 
 ```powershell
 python .\scripts\test_retrieval_pipeline.py
+```
+
+## Step 9 — Run hybrid retrieval integration test
+
+```powershell
+python .\scripts\test_hybrid_retrieval.py
 ```
 
 ---
@@ -1427,13 +1595,38 @@ python .\scripts\test_retrieval_pipeline.py
 
 ## Phase 11 — Hybrid Search + Reranking
 
-* [ ] BM25 lexical search
-* [ ] Reusable BM25 index
-* [ ] Semantic + lexical candidate retrieval
-* [ ] Reciprocal Rank Fusion
+* [x] BM25 lexical search
+* [x] Reusable BM25 index
+* [x] Semantic + lexical candidate retrieval
+* [x] Reciprocal Rank Fusion
+* [x] RRF integration
+* [x] Candidate pool generation
+* [x] Final Top-K after RRF
 * [ ] Cross-encoder reranking
-* [ ] Final Top-K ranking
-* [ ] Integration with existing `retrieve_chunks()` interface
+* [ ] Reranker integration with hybrid retrieval
+* [ ] Reranked Top-K validation
+* [ ] Phase 11 end-to-end retrieval quality validation
+
+### Current Phase 11 Status
+
+```text
+BM25
+   ↓
+Semantic + BM25 Candidate Retrieval
+   ↓
+RRF Fusion
+   ↓
+Final Candidate Pool
+   ↓
+Cross-Encoder Reranking  ← NEXT
+   ↓
+Final Top-K
+```
+
+Phase 11 is **not yet complete** until the cross-encoder stage and its
+integration tests pass.
+
+---
 
 ## Phase 12 — Context Assembly
 
@@ -1605,6 +1798,7 @@ Qdrant
 Groq API
 YouTube Transcript API
 BM25
+Reciprocal Rank Fusion (RRF)
 Cross-Encoder
 ONNX Runtime
 JSON-based intermediate storage
@@ -1614,7 +1808,8 @@ JSON-based intermediate storage
 
 # 📌 Current Project Status
 
-The DSA Revision Analyzer currently has a working and validated foundation:
+The DSA Revision Analyzer currently has a working and validated retrieval
+foundation:
 
 ```text
 YouTube
@@ -1634,31 +1829,53 @@ Qdrant
 Query Understanding
    ↓
 Metadata-Aware Semantic Retrieval
+   ↓
+BM25
+   ↓
+RRF Fusion
+   ↓
+Candidate Pool
 ```
 
 The project has completed the core retrieval foundation through **Phase 10**.
 
-The current development stage is:
+**Phase 11 is currently in progress.**
+
+Completed:
 
 ```text
-Phase 11 — Hybrid Search + Reranking
+Semantic Retrieval
+      ✓
+
+BM25
+      ✓
+
+Hybrid Candidate Retrieval
+      ✓
+
+RRF Fusion
+      ✓
+
+Final Top-K after RRF
+      ✓
+
+Hybrid Integration Tests
+      ✓
 ```
 
-The next major retrieval upgrade is:
+Remaining:
 
 ```text
-Semantic Search
-      +
-BM25
-      ↓
-RRF Fusion
-      ↓
 Cross-Encoder Reranking
       ↓
-Final Top-K
+Reranker Integration
+      ↓
+Reranked Top-K Validation
+      ↓
+Phase 11 Completion
 ```
 
-After retrieval quality is improved, development will move toward:
+After retrieval quality is fully improved, development will move toward:
 
 ```text
 Context Assembly
