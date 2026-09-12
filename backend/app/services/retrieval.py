@@ -1,41 +1,54 @@
 """
-Semantic Retrieval Service
-==========================
+Semantic retrieval service for the DSA Revision Analyzer.
 
-Purpose:
-    Retrieve transcript chunks from Qdrant using semantic similarity.
+Responsibilities
+----------------
+1. Load the sentence-transformers embedding model.
+2. Generate an embedding for a user query.
+3. Connect to Qdrant.
+4. Apply optional DSA metadata filters.
+5. Perform semantic vector search.
+6. Convert Qdrant results into stable RetrievalResult objects.
 
-Responsibilities:
-    1. Generate query embeddings.
-    2. Search the Qdrant collection.
-    3. Apply metadata filters.
-    4. Convert Qdrant points into stable RetrievalResult objects.
-    5. Preserve the original Qdrant point_id for downstream
-       hybrid retrieval and Reciprocal Rank Fusion (RRF).
+This module intentionally does NOT know about:
+- BM25
+- RRF
+- Hybrid retrieval
+- Query orchestration
 
-This module does NOT:
-    - perform BM25 retrieval
-    - perform RRF fusion
-    - perform reranking
-
-Those responsibilities belong to separate services.
+Those responsibilities belong to higher-level services.
 """
 
 from __future__ import annotations
 
+# ============================================================
+# STANDARD LIBRARY
+# ============================================================
+
 import os
-import time
 from dataclasses import dataclass
 from typing import Any
 
+
+# ============================================================
+# THIRD-PARTY
+# ============================================================
+
+from dotenv import load_dotenv
 from qdrant_client import QdrantClient
-from qdrant_client.http.exceptions import ResponseHandlingException
 from qdrant_client.models import (
     FieldCondition,
     Filter,
     MatchValue,
 )
 from sentence_transformers import SentenceTransformer
+
+
+# ============================================================
+# ENVIRONMENT
+# ============================================================
+
+load_dotenv()
 
 
 # ============================================================
@@ -50,17 +63,20 @@ QDRANT_URL = os.getenv(
 QDRANT_API_KEY = os.getenv(
     "QDRANT_API_KEY",
     "",
-)
+).strip()
+
 
 QDRANT_COLLECTION = os.getenv(
     "QDRANT_COLLECTION",
     "dsa_revision_chunks",
 )
 
+
 EMBEDDING_MODEL_NAME = os.getenv(
     "EMBEDDING_MODEL",
     "sentence-transformers/all-MiniLM-L6-v2",
 )
+
 
 DEFAULT_TOP_K = int(
     os.getenv(
@@ -69,91 +85,27 @@ DEFAULT_TOP_K = int(
     )
 )
 
-# ------------------------------------------------------------
-# Qdrant network configuration
-# ------------------------------------------------------------
-#
-# Qdrant Cloud requests can occasionally take longer than the
-# default HTTP timeout because of:
-#
-#   - temporary network latency
-#   - cloud cluster wake-up
-#   - transient service load
-#   - slower response transmission
-#
-# We therefore use an extended timeout and retry failed
-# requests with exponential backoff.
-# ------------------------------------------------------------
 
-QDRANT_TIMEOUT = int(
+FILTERED_SEARCH_MULTIPLIER = int(
     os.getenv(
-        "QDRANT_TIMEOUT",
-        "120",
-    )
-)
-
-QDRANT_RETRIES = int(
-    os.getenv(
-        "QDRANT_RETRIES",
+        "FILTERED_SEARCH_MULTIPLIER",
         "3",
     )
 )
 
 
 # ============================================================
-# EMBEDDING MODEL
-# ============================================================
-
-_embedding_model: SentenceTransformer | None = None
-
-
-def get_embedding_model() -> SentenceTransformer:
-    """
-    Load and cache the SentenceTransformer embedding model.
-
-    The model is loaded only once per Python process.
-
-    Returns
-    -------
-    SentenceTransformer
-        Cached embedding model.
-    """
-
-    global _embedding_model
-
-    if _embedding_model is None:
-
-        print(
-            f"Loading embedding model: "
-            f"{EMBEDDING_MODEL_NAME}"
-        )
-
-        _embedding_model = SentenceTransformer(
-            EMBEDDING_MODEL_NAME
-        )
-
-    return _embedding_model
-
-
-# ============================================================
-# RETRIEVAL RESULT
+# RESULT MODEL
 # ============================================================
 
 @dataclass(frozen=True)
 class RetrievalResult:
     """
-    Stable application-level representation of a retrieved
-    transcript chunk.
+    Stable application-level representation of one
+    semantically retrieved transcript chunk.
 
-    point_id:
-        Original Qdrant point ID.
-
-        This is the stable identity used by hybrid retrieval
-        and Reciprocal Rank Fusion (RRF) to determine whether
-        semantic and BM25 results refer to the same chunk.
-
-    score:
-        Semantic similarity score returned by Qdrant.
+    The rest of the application should depend on this
+    model instead of Qdrant's ScoredPoint directly.
     """
 
     point_id: str
@@ -180,6 +132,48 @@ class RetrievalResult:
 
     text: str
 
+    @property
+    def start_seconds(self) -> float:
+        """Backward-compatible alias for the chunk start timestamp."""
+        return self.start
+
+    @property
+    def end_seconds(self) -> float:
+        """Backward-compatible alias for the chunk end timestamp."""
+        return self.end
+
+
+# ============================================================
+# EMBEDDING MODEL
+# ============================================================
+
+_embedding_model: SentenceTransformer | None = None
+
+
+def get_embedding_model() -> SentenceTransformer:
+    """
+    Load the embedding model lazily.
+
+    The same model must be used during:
+        ingestion
+        +
+        query-time retrieval
+    """
+
+    global _embedding_model
+
+    if _embedding_model is None:
+        print(
+            f"Loading embedding model: "
+            f"{EMBEDDING_MODEL_NAME}"
+        )
+
+        _embedding_model = SentenceTransformer(
+            EMBEDDING_MODEL_NAME
+        )
+
+    return _embedding_model
+
 
 # ============================================================
 # QDRANT CLIENT
@@ -187,34 +181,58 @@ class RetrievalResult:
 
 def get_qdrant_client() -> QdrantClient:
     """
-    Create a Qdrant client.
+    Create a Qdrant client using environment configuration.
 
-    The client uses:
-        - QDRANT_URL
-        - QDRANT_API_KEY when configured
-        - extended HTTP timeout
-
-    The extended timeout is important for Qdrant Cloud,
-    where a request can occasionally take longer than the
-    default client timeout.
-
-    Returns
-    -------
-    QdrantClient
-        Configured Qdrant client.
+    Supports:
+        - local Qdrant
+        - Qdrant Cloud
     """
 
-    client_kwargs: dict[str, Any] = {
-        "url": QDRANT_URL,
-        "timeout": QDRANT_TIMEOUT,
-    }
-
     if QDRANT_API_KEY:
-        client_kwargs["api_key"] = QDRANT_API_KEY
+        return QdrantClient(
+            url=QDRANT_URL,
+            api_key=QDRANT_API_KEY,
+        )
 
     return QdrantClient(
-        **client_kwargs,
+        url=QDRANT_URL,
     )
+
+
+# ============================================================
+# QUERY EMBEDDING
+# ============================================================
+
+def create_query_embedding(
+    query: str,
+) -> list[float]:
+    """
+    Convert a natural-language query into an embedding.
+    """
+
+    if not isinstance(
+        query,
+        str,
+    ):
+        raise TypeError(
+            "query must be a string."
+        )
+
+    query = query.strip()
+
+    if not query:
+        raise ValueError(
+            "Query cannot be empty."
+        )
+
+    model = get_embedding_model()
+
+    embedding = model.encode(
+        query,
+        normalize_embeddings=True,
+    )
+
+    return embedding.tolist()
 
 
 # ============================================================
@@ -222,31 +240,27 @@ def get_qdrant_client() -> QdrantClient:
 # ============================================================
 
 def build_metadata_filter(
-    *,
     pattern: str | None = None,
     sub_pattern: str | None = None,
 ) -> Filter | None:
     """
-    Build a Qdrant metadata filter.
+    Build a Qdrant filter.
 
-    Parameters
-    ----------
-    pattern:
-        Optional DSA pattern filter.
+    Cases
+    -----
+    pattern + sub_pattern
+        Filter using both fields.
 
-    sub_pattern:
-        Optional DSA sub-pattern filter.
+    pattern only
+        Filter using pattern.
 
-    Returns
-    -------
-    Filter | None
-        Qdrant filter if one or more conditions exist.
+    neither
+        Return None.
     """
 
     conditions: list[FieldCondition] = []
 
-    if pattern is not None:
-
+    if pattern:
         conditions.append(
             FieldCondition(
                 key="pattern",
@@ -256,8 +270,7 @@ def build_metadata_filter(
             )
         )
 
-    if sub_pattern is not None:
-
+    if sub_pattern:
         conditions.append(
             FieldCondition(
                 key="sub_pattern",
@@ -276,22 +289,22 @@ def build_metadata_filter(
 
 
 # ============================================================
-# PAYLOAD HELPERS
+# SAFE PAYLOAD HELPERS
 # ============================================================
 
 def _get_payload_value(
     payload: dict[str, Any],
-    key: str,
-    default: Any = None,
+    *keys: str,
 ) -> Any:
     """
-    Safely retrieve a value from a Qdrant payload.
+    Return the first existing payload value.
     """
 
-    return payload.get(
-        key,
-        default,
-    )
+    for key in keys:
+        if key in payload:
+            return payload[key]
+
+    return None
 
 
 def _safe_float(
@@ -299,20 +312,19 @@ def _safe_float(
     default: float = 0.0,
 ) -> float:
     """
-    Safely convert a value to float.
+    Convert a value to float safely.
     """
 
-    try:
+    if value is None:
+        return default
 
-        return float(
-            value
-        )
+    try:
+        return float(value)
 
     except (
         TypeError,
         ValueError,
     ):
-
         return default
 
 
@@ -320,20 +332,15 @@ def _safe_string(
     value: Any,
 ) -> str | None:
     """
-    Safely convert a value to a string.
+    Convert a payload value to a clean string.
     """
 
     if value is None:
         return None
 
-    value = str(
-        value
-    ).strip()
+    value = str(value).strip()
 
-    if not value:
-        return None
-
-    return value
+    return value or None
 
 
 # ============================================================
@@ -345,98 +352,20 @@ def convert_qdrant_result(
 ) -> RetrievalResult:
     """
     Convert a Qdrant ScoredPoint into RetrievalResult.
-
-    Important:
-        result.id is preserved as point_id.
-
-        The BM25 index also stores this same Qdrant point ID.
-        Therefore semantic and lexical retrieval can later be
-        fused correctly using RRF.
     """
 
-    payload = (
-        result.payload
-        or {}
-    )
-
-    if not isinstance(
-        payload,
-        dict,
-    ):
-
-        payload = {}
-
-    # --------------------------------------------------------
-    # Stable Qdrant point identity
-    # --------------------------------------------------------
+    payload = result.payload or {}
 
     point_id = str(
-        getattr(
-            result,
-            "id",
-            "",
-        )
+        result.id
     )
-
-    # --------------------------------------------------------
-    # Metadata
-    # --------------------------------------------------------
-
-    pattern = _safe_string(
-        _get_payload_value(
-            payload,
-            "pattern",
-        )
-    )
-
-    sub_pattern = _safe_string(
-        _get_payload_value(
-            payload,
-            "sub_pattern",
-        )
-    )
-
-    playlist = _safe_string(
-        _get_payload_value(
-            payload,
-            "playlist",
-        )
-    )
-
-    video_id = _safe_string(
-        _get_payload_value(
-            payload,
-            "video_id",
-        )
-    )
-
-    video_title = _safe_string(
-        _get_payload_value(
-            payload,
-            "video_title",
-            _get_payload_value(
-                payload,
-                "title",
-            ),
-        )
-    )
-
-    chunk_id = _safe_string(
-        _get_payload_value(
-            payload,
-            "chunk_id",
-        )
-    )
-
-    # --------------------------------------------------------
-    # Timestamp
-    # --------------------------------------------------------
 
     start = _safe_float(
         _get_payload_value(
             payload,
             "start",
-            0.0,
+            "start_seconds",
+            "timestamp_start",
         )
     )
 
@@ -444,7 +373,8 @@ def convert_qdrant_result(
         _get_payload_value(
             payload,
             "end",
-            0.0,
+            "end_seconds",
+            "timestamp_end",
         )
     )
 
@@ -452,149 +382,78 @@ def convert_qdrant_result(
         _get_payload_value(
             payload,
             "duration",
-            end - start,
-        )
-    )
-
-    # --------------------------------------------------------
-    # Transcript text
-    # --------------------------------------------------------
-
-    text = str(
-        _get_payload_value(
-            payload,
-            "text",
-            "",
-        )
-    )
-
-    # --------------------------------------------------------
-    # Semantic score
-    # --------------------------------------------------------
-
-    score = _safe_float(
-        getattr(
-            result,
-            "score",
+        ),
+        default=max(
             0.0,
-        )
+            end - start,
+        ),
     )
 
     return RetrievalResult(
         point_id=point_id,
-        score=score,
-        pattern=pattern,
-        sub_pattern=sub_pattern,
-        playlist=playlist,
-        video_id=video_id,
-        video_title=video_title,
-        chunk_id=chunk_id,
+
+        score=_safe_float(
+            result.score
+        ),
+
+        pattern=_safe_string(
+            _get_payload_value(
+                payload,
+                "pattern",
+            )
+        ),
+
+        sub_pattern=_safe_string(
+            _get_payload_value(
+                payload,
+                "sub_pattern",
+            )
+        ),
+
+        playlist=_safe_string(
+            _get_payload_value(
+                payload,
+                "playlist",
+            )
+        ),
+
+        video_id=_safe_string(
+            _get_payload_value(
+                payload,
+                "video_id",
+            )
+        ),
+
+        video_title=_safe_string(
+            _get_payload_value(
+                payload,
+                "video_title",
+                "title",
+            )
+        ),
+
+        chunk_id=_safe_string(
+            _get_payload_value(
+                payload,
+                "chunk_id",
+            )
+        ),
+
         start=start,
+
         end=end,
+
         duration=duration,
-        text=text,
+
+        text=_safe_string(
+            _get_payload_value(
+                payload,
+                "text",
+                "chunk_text",
+                "content",
+            )
+        ) or "",
     )
-
-
-# ============================================================
-# QDRANT SEARCH WITH RETRY
-# ============================================================
-
-def _query_qdrant_with_retry(
-    *,
-    client: QdrantClient,
-    query_vector: list[float],
-    query_filter: Filter | None,
-    top_k: int,
-) -> Any:
-    """
-    Execute a Qdrant semantic search with retry handling.
-
-    Retry behavior:
-        Attempt 1 -> immediate request
-        Attempt 2 -> wait 1 second
-        Attempt 3 -> wait 2 seconds
-
-    The retry logic is intentionally limited so that a genuine
-    Qdrant failure does not result in an infinite loop.
-
-    Parameters
-    ----------
-    client:
-        Configured Qdrant client.
-
-    query_vector:
-        Normalized query embedding.
-
-    query_filter:
-        Optional metadata filter.
-
-    top_k:
-        Number of candidates to retrieve.
-
-    Returns
-    -------
-    Any
-        Qdrant QueryResponse.
-    """
-
-    last_error: Exception | None = None
-
-    for attempt in range(
-        1,
-        QDRANT_RETRIES + 1,
-    ):
-
-        try:
-
-            print(
-                f"Qdrant search attempt "
-                f"{attempt}/{QDRANT_RETRIES}..."
-            )
-
-            result = client.query_points(
-                collection_name=QDRANT_COLLECTION,
-                query=query_vector,
-                query_filter=query_filter,
-                limit=top_k,
-                with_payload=True,
-            )
-
-            print(
-                "Qdrant search successful."
-            )
-
-            return result
-
-        except ResponseHandlingException as exc:
-
-            last_error = exc
-
-            if attempt >= QDRANT_RETRIES:
-
-                raise RuntimeError(
-                    "Qdrant semantic search failed "
-                    f"after {QDRANT_RETRIES} attempts. "
-                    f"Qdrant URL: {QDRANT_URL}. "
-                    f"Collection: {QDRANT_COLLECTION}."
-                ) from exc
-
-            wait_seconds = 2 ** (
-                attempt - 1
-            )
-
-            print(
-                "Qdrant request failed or timed out. "
-                f"Retrying in {wait_seconds}s..."
-            )
-
-            time.sleep(
-                wait_seconds
-            )
-
-    raise RuntimeError(
-        "Qdrant semantic search failed."
-    ) from last_error
 
 
 # ============================================================
@@ -614,10 +473,10 @@ def retrieve(
     Parameters
     ----------
     query:
-        Natural-language query.
+        Natural-language search query.
 
     top_k:
-        Number of semantic candidates to retrieve.
+        Number of results requested.
 
     pattern:
         Optional DSA pattern filter.
@@ -628,34 +487,43 @@ def retrieve(
     Returns
     -------
     list[RetrievalResult]
-        Semantic retrieval results ordered by Qdrant score.
+        Results ordered by semantic similarity.
     """
 
     # --------------------------------------------------------
     # Validate query
     # --------------------------------------------------------
 
-    if not query or not query.strip():
+    if not isinstance(
+        query,
+        str,
+    ):
+        raise TypeError(
+            "query must be a string."
+        )
 
-        return []
+    query = query.strip()
+
+    if not query:
+        raise ValueError(
+            "Query cannot be empty."
+        )
+
+    # --------------------------------------------------------
+    # Validate top_k
+    # --------------------------------------------------------
 
     if top_k <= 0:
-
-        return []
-
-    # --------------------------------------------------------
-    # Load embedding model
-    # --------------------------------------------------------
-
-    model = get_embedding_model()
+        raise ValueError(
+            "top_k must be greater than 0."
+        )
 
     # --------------------------------------------------------
-    # Generate query embedding
+    # Create query embedding
     # --------------------------------------------------------
 
-    query_embedding = model.encode(
-        query.strip(),
-        normalize_embeddings=True,
+    query_vector = create_query_embedding(
+        query
     )
 
     # --------------------------------------------------------
@@ -665,7 +533,7 @@ def retrieve(
     client = get_qdrant_client()
 
     # --------------------------------------------------------
-    # Metadata filters
+    # Metadata filter
     # --------------------------------------------------------
 
     query_filter = build_metadata_filter(
@@ -674,35 +542,51 @@ def retrieve(
     )
 
     # --------------------------------------------------------
+    # Candidate size
+    # --------------------------------------------------------
+
+    if query_filter is not None:
+        search_limit = (
+            top_k
+            * FILTERED_SEARCH_MULTIPLIER
+        )
+    else:
+        search_limit = top_k
+
+    # --------------------------------------------------------
     # Semantic search
     # --------------------------------------------------------
 
-    search_result = _query_qdrant_with_retry(
-        client=client,
-        query_vector=query_embedding.tolist(),
+    search_result = client.query_points(
+        collection_name=QDRANT_COLLECTION,
+        query=query_vector,
         query_filter=query_filter,
-        top_k=top_k,
+        limit=search_limit,
+        with_payload=True,
     )
 
+    points = search_result.points
+
     # --------------------------------------------------------
-    # Convert Qdrant results
+    # Convert results
     # --------------------------------------------------------
 
-    results: list[RetrievalResult] = []
-
-    for point in search_result.points:
-
-        results.append(
-            convert_qdrant_result(
-                point
-            )
+    results = [
+        convert_qdrant_result(
+            point
         )
+        for point in points
+    ]
 
-    return results
+    # --------------------------------------------------------
+    # Safety trim
+    # --------------------------------------------------------
+
+    return results[:top_k]
 
 
 # ============================================================
-# DISPLAY RESULTS
+# DISPLAY HELPER
 # ============================================================
 
 def print_results(
@@ -713,25 +597,12 @@ def print_results(
     """
 
     print()
-
-    print(
-        "=" * 60
-    )
-
-    print(
-        "SEMANTIC RETRIEVAL RESULTS"
-    )
-
-    print(
-        "=" * 60
-    )
+    print("=" * 60)
+    print("SEMANTIC RETRIEVAL RESULTS")
+    print("=" * 60)
 
     if not results:
-
-        print(
-            "No results found."
-        )
-
+        print("No results.")
         return
 
     for rank, result in enumerate(
@@ -739,59 +610,45 @@ def print_results(
         start=1,
     ):
 
-        print()
-
         print(
             f"[{rank}] "
-            f"Semantic Score: "
-            f"{result.score:.4f}"
+            f"score={result.score:.4f}"
         )
 
         print(
-            f"Point ID   : "
+            f"    point_id   : "
             f"{result.point_id}"
         )
 
         print(
-            f"Chunk ID   : "
+            f"    chunk_id   : "
             f"{result.chunk_id}"
         )
 
         print(
-            f"Video ID   : "
+            f"    video_id   : "
             f"{result.video_id}"
         )
 
         print(
-            f"Title      : "
-            f"{result.video_title}"
-        )
-
-        print(
-            f"Pattern    : "
+            f"    pattern    : "
             f"{result.pattern}"
         )
 
         print(
-            f"Sub-pattern: "
+            f"    sub_pattern: "
             f"{result.sub_pattern}"
         )
 
         print(
-            f"Playlist   : "
-            f"{result.playlist}"
-        )
-
-        print(
-            f"Timestamp  : "
-            f"{result.start:.2f}s"
-            f" → "
+            f"    timestamp  : "
+            f"{result.start:.2f}s → "
             f"{result.end:.2f}s"
         )
 
         print(
-            f"Text       : "
-            f"{result.text[:300]}"
+            f"    text       : "
+            f"{result.text[:180]}"
         )
 
 
@@ -801,26 +658,13 @@ def print_results(
 
 def self_check() -> None:
     """
-    Lightweight module self-check.
-
-    This verifies:
-        1. Qdrant client construction.
-        2. Embedding model import.
-        3. Embedding model loading.
-        4. Query embedding generation.
+    Verify that the retrieval service can initialize
+    successfully.
     """
 
-    print(
-        "=" * 60
-    )
-
-    print(
-        "RETRIEVAL SERVICE SELF-CHECK"
-    )
-
-    print(
-        "=" * 60
-    )
+    print("=" * 60)
+    print("RETRIEVAL SERVICE SELF-CHECK")
+    print("=" * 60)
 
     print(
         f"Qdrant URL       : "
@@ -842,23 +686,11 @@ def self_check() -> None:
         f"{DEFAULT_TOP_K}"
     )
 
-    print(
-        f"Qdrant timeout   : "
-        f"{QDRANT_TIMEOUT}s"
-    )
-
-    print(
-        f"Qdrant retries   : "
-        f"{QDRANT_RETRIES}"
-    )
-
-    print()
-
     # --------------------------------------------------------
-    # Qdrant client
+    # Qdrant
     # --------------------------------------------------------
 
-    get_qdrant_client()
+    client = get_qdrant_client()
 
     print(
         "✓ Qdrant client created."
@@ -875,11 +707,11 @@ def self_check() -> None:
     )
 
     # --------------------------------------------------------
-    # Test embedding generation
+    # Test embedding
     # --------------------------------------------------------
 
     test_embedding = model.encode(
-        "dynamic programming",
+        "memoization",
         normalize_embeddings=True,
     )
 
@@ -892,8 +724,14 @@ def self_check() -> None:
         f"{len(test_embedding)}"
     )
 
-    print()
+    # --------------------------------------------------------
+    # Client is intentionally retained so connection
+    # construction is validated.
+    # --------------------------------------------------------
 
+    _ = client
+
+    print()
     print(
         "✓ Retrieval service self-check passed."
     )
@@ -904,5 +742,4 @@ def self_check() -> None:
 # ============================================================
 
 if __name__ == "__main__":
-
     self_check()

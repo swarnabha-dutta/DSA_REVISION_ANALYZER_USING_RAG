@@ -1,13 +1,17 @@
 """
-Integration test for the hybrid retrieval service.
+Integration test for the complete hybrid retrieval pipeline.
 
-Validates that:
+Validates:
 
-1. Semantic retrieval runs successfully.
-2. BM25 retrieval runs successfully.
-3. Both retrievers respect metadata filters.
-4. Both result sets are returned independently.
-5. Candidate retrieval works before RRF fusion.
+1. Semantic retrieval works.
+2. BM25 retrieval works.
+3. Metadata filters are respected.
+4. Candidate pool size is correct.
+5. Semantic and BM25 use stable point IDs.
+6. RRF fusion is executed.
+7. Final fused result count is <= Top-K.
+8. RRF ranking information is preserved.
+9. Semantic/BM25 metadata is restored after fusion.
 
 Run from backend root:
 
@@ -27,7 +31,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
+    sys.path.insert(
+        0,
+        str(BASE_DIR),
+    )
 
 
 # ============================================================
@@ -37,6 +44,7 @@ if str(BASE_DIR) not in sys.path:
 from app.services.hybrid_retrieval import (
     DEFAULT_CANDIDATE_MULTIPLIER,
     DEFAULT_HYBRID_TOP_K,
+    HybridResult,
     retrieve_hybrid,
 )
 
@@ -58,43 +66,124 @@ TOP_K = 5
 # ASSERTION HELPERS
 # ============================================================
 
+def assert_semantic_result(
+    result,
+) -> None:
+    """
+    Validate one semantic RetrievalResult.
+    """
 
-def assert_semantic_result(result) -> None:
-    """Validate one semantic RetrievalResult."""
+    assert result.point_id, (
+        "Semantic result missing point_id."
+    )
 
-    assert result.point_id, "Semantic result missing point_id."
-    assert result.chunk_id is not None, "Semantic result missing chunk_id."
-    assert result.video_id, "Semantic result missing video_id."
+    assert result.chunk_id is not None, (
+        "Semantic result missing chunk_id."
+    )
+
+    assert result.video_id, (
+        "Semantic result missing video_id."
+    )
+
     assert result.pattern == PATTERN, (
-        f"Unexpected semantic pattern: {result.pattern}"
+        f"Unexpected semantic pattern: "
+        f"{result.pattern}"
     )
+
     assert result.sub_pattern == SUB_PATTERN, (
-        f"Unexpected semantic sub-pattern: {result.sub_pattern}"
+        f"Unexpected semantic sub-pattern: "
+        f"{result.sub_pattern}"
     )
-    assert isinstance(result.score, float), (
+
+    assert isinstance(
+        result.score,
+        float,
+    ), (
         "Semantic score must be a float."
     )
 
 
-def assert_bm25_result(result) -> None:
-    """Validate one BM25RetrievalResult."""
+def assert_bm25_result(
+    result,
+) -> None:
+    """
+    Validate one BM25 result.
+    """
 
-    assert isinstance(result.score, float), (
+    assert isinstance(
+        result.score,
+        float,
+    ), (
         "BM25 score must be a float."
     )
 
     document = result.document
 
-    assert document.point_id, "BM25 result missing point_id."
-    assert document.chunk_id is not None, "BM25 result missing chunk_id."
-    assert document.video_id, "BM25 result missing video_id."
+    assert document.point_id, (
+        "BM25 result missing point_id."
+    )
+
+    assert document.chunk_id is not None, (
+        "BM25 result missing chunk_id."
+    )
+
+    assert document.video_id, (
+        "BM25 result missing video_id."
+    )
 
     assert document.pattern == PATTERN, (
-        f"Unexpected BM25 pattern: {document.pattern}"
+        f"Unexpected BM25 pattern: "
+        f"{document.pattern}"
     )
 
     assert document.sub_pattern == SUB_PATTERN, (
-        f"Unexpected BM25 sub-pattern: {document.sub_pattern}"
+        f"Unexpected BM25 sub-pattern: "
+        f"{document.sub_pattern}"
+    )
+
+
+def assert_fused_result(
+    result: HybridResult,
+) -> None:
+    """
+    Validate one final HybridResult.
+    """
+
+    assert result.point_id, (
+        "Fused result missing point_id."
+    )
+
+    assert isinstance(
+        result.rrf_score,
+        float,
+    ), (
+        "RRF score must be a float."
+    )
+
+    assert result.rrf_score > 0, (
+        "RRF score must be greater than zero."
+    )
+
+    assert isinstance(
+        result.rank_positions,
+        dict,
+    ), (
+        "rank_positions must be a dictionary."
+    )
+
+    assert isinstance(
+        result.contributions,
+        dict,
+    ), (
+        "contributions must be a dictionary."
+    )
+
+    assert (
+        result.semantic_result is not None
+        or result.bm25_document is not None
+    ), (
+        "Fused result has no underlying "
+        "semantic or BM25 document."
     )
 
 
@@ -102,25 +191,47 @@ def assert_bm25_result(result) -> None:
 # MAIN TEST
 # ============================================================
 
-
 def main() -> None:
+
     print("=" * 60)
     print("HYBRID RETRIEVAL INTEGRATION TEST")
     print("=" * 60)
 
-    print(f"Query       : {QUERY}")
-    print(f"Top-K       : {TOP_K}")
-    print(f"Pattern     : {PATTERN}")
-    print(f"Sub-pattern : {SUB_PATTERN}")
+    print(
+        f"Query       : {QUERY}"
+    )
+
+    print(
+        f"Top-K       : {TOP_K}"
+    )
+
+    print(
+        f"Pattern     : {PATTERN}"
+    )
+
+    print(
+        f"Sub-pattern : {SUB_PATTERN}"
+    )
+
+    expected_candidate_k = max(
+        TOP_K,
+        TOP_K * DEFAULT_CANDIDATE_MULTIPLIER,
+    )
+
     print(
         f"Candidate K : "
-        f"{TOP_K * DEFAULT_CANDIDATE_MULTIPLIER}"
+        f"{expected_candidate_k}"
     )
 
     print()
+
     print("=" * 60)
-    print("Running Hybrid Retrieval")
+    print("Running Complete Hybrid Retrieval")
     print("=" * 60)
+
+    # --------------------------------------------------------
+    # Execute complete pipeline
+    # --------------------------------------------------------
 
     result = retrieve_hybrid(
         query=QUERY,
@@ -134,23 +245,43 @@ def main() -> None:
     # --------------------------------------------------------
 
     assert result.query == QUERY
+
     assert result.pattern == PATTERN
+
     assert result.sub_pattern == SUB_PATTERN
+
+    print()
+    print(
+        "✓ Query and metadata validated."
+    )
 
     # --------------------------------------------------------
     # Candidate count validation
     # --------------------------------------------------------
 
-    expected_candidate_k = max(
-        TOP_K,
-        TOP_K * DEFAULT_CANDIDATE_MULTIPLIER,
+    assert (
+        len(result.semantic_results)
+        <= expected_candidate_k
+    ), (
+        "Semantic candidate count exceeded "
+        "candidate_k."
     )
 
-    assert len(result.semantic_results) <= expected_candidate_k
-    assert len(result.bm25_results) <= expected_candidate_k
+    assert (
+        len(result.bm25_results)
+        <= expected_candidate_k
+    ), (
+        "BM25 candidate count exceeded "
+        "candidate_k."
+    )
+
+    print(
+        f"✓ Candidate pool validated "
+        f"(max={expected_candidate_k})."
+    )
 
     # --------------------------------------------------------
-    # Validate semantic results
+    # Semantic validation
     # --------------------------------------------------------
 
     print()
@@ -163,11 +294,18 @@ def main() -> None:
         f"{len(result.semantic_results)}"
     )
 
+    assert len(result.semantic_results) > 0, (
+        "Semantic retrieval returned no results."
+    )
+
     for rank, semantic_result in enumerate(
         result.semantic_results,
         start=1,
     ):
-        assert_semantic_result(semantic_result)
+
+        assert_semantic_result(
+            semantic_result
+        )
 
         print(
             f"[{rank}] "
@@ -197,20 +335,18 @@ def main() -> None:
 
         print(
             f"    timestamp  : "
-            f"{semantic_result.start_seconds:.2f}s"
+            f"{semantic_result.start:.2f}s"
             f" → "
-            f"{semantic_result.end_seconds:.2f}s"
+            f"{semantic_result.end:.2f}s"
         )
 
-    assert len(result.semantic_results) > 0, (
-        "Semantic retrieval returned no results."
+    print()
+    print(
+        "✓ Semantic retrieval validated."
     )
 
-    print()
-    print("✓ Semantic retrieval validated.")
-
     # --------------------------------------------------------
-    # Validate BM25 results
+    # BM25 validation
     # --------------------------------------------------------
 
     print()
@@ -223,11 +359,18 @@ def main() -> None:
         f"{len(result.bm25_results)}"
     )
 
+    assert len(result.bm25_results) > 0, (
+        "BM25 retrieval returned no results."
+    )
+
     for rank, bm25_result in enumerate(
         result.bm25_results,
         start=1,
     ):
-        assert_bm25_result(bm25_result)
+
+        assert_bm25_result(
+            bm25_result
+        )
 
         document = bm25_result.document
 
@@ -257,28 +400,30 @@ def main() -> None:
             f"{document.sub_pattern}"
         )
 
-    assert len(result.bm25_results) > 0, (
-        "BM25 retrieval returned no results."
+    print()
+    print(
+        "✓ BM25 retrieval validated."
     )
 
-    print()
-    print("✓ BM25 retrieval validated.")
-
     # --------------------------------------------------------
-    # Cross-retriever validation
+    # Cross-retriever ID validation
     # --------------------------------------------------------
 
     semantic_point_ids = {
-        item.point_id
+        str(item.point_id)
         for item in result.semantic_results
     }
 
     bm25_point_ids = {
-        item.document.point_id
+        str(item.document.point_id)
         for item in result.bm25_results
     }
 
-    overlap = semantic_point_ids & bm25_point_ids
+    overlap = (
+        semantic_point_ids
+        &
+        bm25_point_ids
+    )
 
     print()
     print("=" * 60)
@@ -301,48 +446,209 @@ def main() -> None:
     )
 
     if overlap:
+
         print()
         print("Shared point IDs:")
 
-        for point_id in sorted(overlap):
-            print(f"  - {point_id}")
+        for point_id in sorted(
+            overlap
+        ):
+            print(
+                f"  - {point_id}"
+            )
 
-    else:
-        print()
-        print(
-            "No overlapping point IDs found. "
-            "This is still valid; the two retrievers use "
-            "different relevance signals."
+    # --------------------------------------------------------
+    # RRF validation
+    # --------------------------------------------------------
+
+    print()
+    print("=" * 60)
+    print("RRF FUSED RESULTS")
+    print("=" * 60)
+
+    print(
+        f"Final fused results: "
+        f"{len(result.fused_results)}"
+    )
+
+    assert (
+        len(result.fused_results)
+        <= TOP_K
+    ), (
+        "RRF returned more than top_k results."
+    )
+
+    assert len(result.fused_results) > 0, (
+        "RRF fusion returned no results."
+    )
+
+    previous_score = None
+
+    for rank, fused_result in enumerate(
+        result.fused_results,
+        start=1,
+    ):
+
+        assert_fused_result(
+            fused_result
         )
 
+        print(
+            f"[{rank}] "
+            f"RRF={fused_result.rrf_score:.8f}"
+        )
+
+        print(
+            f"    point_id      : "
+            f"{fused_result.point_id}"
+        )
+
+        print(
+            f"    ranks         : "
+            f"{fused_result.rank_positions}"
+        )
+
+        print(
+            f"    contributions : "
+            f"{fused_result.contributions}"
+        )
+
+        if (
+            fused_result.semantic_result
+            is not None
+        ):
+
+            semantic = (
+                fused_result.semantic_result
+            )
+
+            print(
+                f"    semantic      : "
+                f"{semantic.score:.4f}"
+            )
+
+            print(
+                f"    chunk         : "
+                f"{semantic.chunk_id}"
+            )
+
+        if (
+            fused_result.bm25_document
+            is not None
+        ):
+
+            bm25 = (
+                fused_result.bm25_document
+            )
+
+            print(
+                f"    bm25          : available"
+            )
+
+            print(
+                f"    bm25 chunk    : "
+                f"{bm25.chunk_id}"
+            )
+
+        # RRF results must be descending.
+        if previous_score is not None:
+
+            assert (
+                fused_result.rrf_score
+                <= previous_score
+            ), (
+                "RRF results are not sorted "
+                "in descending score order."
+            )
+
+        previous_score = (
+            fused_result.rrf_score
+        )
+
+    print()
+    print(
+        "✓ RRF fusion validated."
+    )
+
     # --------------------------------------------------------
-    # Important architectural assertion
+    # Stable ID preservation
     # --------------------------------------------------------
 
-    # Hybrid retrieval should NOT perform RRF yet.
-    # It should only return the independent candidate sets.
+    all_source_ids = (
+        semantic_point_ids
+        |
+        bm25_point_ids
+    )
 
-    assert hasattr(result, "semantic_results")
-    assert hasattr(result, "bm25_results")
+    fused_ids = {
+        str(item.point_id)
+        for item in result.fused_results
+    }
+
+    assert fused_ids <= all_source_ids, (
+        "RRF produced an unknown point_id."
+    )
+
+    print(
+        "✓ Stable point_id preservation validated."
+    )
+
+    # --------------------------------------------------------
+    # Final architecture validation
+    # --------------------------------------------------------
 
     print()
     print("=" * 60)
-    print("HYBRID RETRIEVAL VALIDATION")
+    print("COMPLETE HYBRID RETRIEVAL VALIDATION")
     print("=" * 60)
 
-    print("✓ Query passed correctly")
-    print("✓ Metadata filters passed correctly")
-    print("✓ Semantic candidate retrieval passed")
-    print("✓ BM25 candidate retrieval passed")
-    print("✓ Both result sets returned independently")
-    print("✓ Shared point IDs are preserved")
-    print("✓ Hybrid layer is ready for RRF integration")
+    print(
+        "✓ Query passed correctly"
+    )
+
+    print(
+        "✓ Metadata filters passed correctly"
+    )
+
+    print(
+        "✓ Semantic candidate retrieval passed"
+    )
+
+    print(
+        "✓ BM25 candidate retrieval passed"
+    )
+
+    print(
+        "✓ Candidate IDs are compatible"
+    )
+
+    print(
+        "✓ RRF fusion executed"
+    )
+
+    print(
+        "✓ Final Top-K constraint passed"
+    )
+
+    print(
+        "✓ RRF ranking order passed"
+    )
+
+    print(
+        "✓ Metadata restoration passed"
+    )
 
     print()
     print("=" * 60)
-    print("✓ HYBRID RETRIEVAL TEST PASSED")
+    print(
+        "✓ COMPLETE HYBRID RETRIEVAL TEST PASSED"
+    )
     print("=" * 60)
 
+
+# ============================================================
+# ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
     main()
