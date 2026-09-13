@@ -2,7 +2,8 @@
 
 An AI-powered DSA revision system that converts educational video content into a
 structured, searchable knowledge base and uses pattern-aware hybrid retrieval,
-reranking, and grounded context construction to provide revision support.
+reranking, grounded context construction, and LLM generation to provide
+evidence-grounded revision support.
 
 The system is designed around **DSA problem-solving patterns**, not individual
 random problems.
@@ -44,8 +45,14 @@ Cross-Encoder Reranking
       ↓
 Context Assembly
       ↓
-Grounded Answer Generation
-````
+Grounded Prompt Construction
+      ↓
+Groq LLM Generation
+      ↓
+Grounding Guard
+      ↓
+Grounded Answer
+```
 
 The long-term system will also use completed topics and patterns to generate
 **pattern-specific practice problems without hints**.
@@ -55,8 +62,8 @@ The long-term system will also use completed topics and patterns to generate
 # 🧠 Core Architecture
 
 The current system uses a hybrid retrieval architecture with lexical search,
-semantic search, Reciprocal Rank Fusion, Cross-Encoder reranking, and structured
-context assembly.
+semantic search, Reciprocal Rank Fusion, Cross-Encoder reranking, structured
+context assembly, grounded prompting, and LLM generation.
 
 ```text
                          ┌──────────────────────┐
@@ -153,8 +160,23 @@ context assembly.
                                    │
                                    ▼
                           ┌──────────────────┐
-                          │ Grounded LLM     │
-                          │     Answer       │
+                          │ Grounded Prompt  │
+                          │     Builder      │
+                          └────────┬─────────┘
+                                   │
+                                   ▼
+                          ┌──────────────────┐
+                          │    Groq LLM      │
+                          └────────┬─────────┘
+                                   │
+                                   ▼
+                          ┌──────────────────┐
+                          │ Grounding Guard  │
+                          └────────┬─────────┘
+                                   │
+                                   ▼
+                          ┌──────────────────┐
+                          │ Grounded Answer  │
                           └──────────────────┘
 ```
 
@@ -181,15 +203,15 @@ Semantic Search         BM25
             ↓
      Candidate Retrieval
             ↓
-       RRF Fusion
+        RRF Fusion
             ↓
    Expanded Candidate Pool
             ↓
    Cross-Encoder Reranking
             ↓
-       Final Top-K
+        Final Top-K
             ↓
-     Context Assembly
+      Context Assembly
 ```
 
 ## Candidate Expansion
@@ -352,7 +374,7 @@ Video ID: ...
 Pattern: dynamic_programming
 Sub-pattern: memoization
 Timestamp: ...
- 
+
 <retrieved chunk text>
 ```
 
@@ -447,6 +469,304 @@ Current integration result:
 
 ---
 
+# 🤖 Phase 13 — Grounded RAG Generation
+
+Phase 13 connects the structured context pipeline to an LLM generation layer.
+
+The objective is to generate answers from retrieved course material while
+preserving source metadata and explicitly preventing unsupported claims.
+
+---
+
+## Grounded Prompt Builder
+
+Implementation:
+
+```text
+backend/app/services/prompt_builder.py
+```
+
+The prompt builder converts the structured `AssembledContext` into a grounded
+LLM prompt.
+
+The prompt contains:
+
+```text
+System Instruction
+      ↓
+Grounding Rules
+      ↓
+Original User Query
+      ↓
+Retrieved Course Context
+      ↓
+Retrieval Metadata
+```
+
+The grounding instructions explicitly require the model to:
+
+```text
+* Answer only from the supplied retrieved context
+* Do not use outside knowledge
+* Do not invent unsupported information
+* Do not guess when the retrieved context is insufficient
+```
+
+Empty retrieval is represented explicitly:
+
+```text
+[NO RETRIEVED COURSE CONTEXT AVAILABLE]
+```
+
+This prevents an empty retrieval result from being silently interpreted as valid
+evidence.
+
+---
+
+## LLM Generator
+
+Implementation:
+
+```text
+backend/app/services/llm_generator.py
+```
+
+The LLM generation flow is:
+
+```text
+AssembledContext
+      ↓
+Grounded Prompt
+      ↓
+Groq Chat Completion
+      ↓
+Structured LLMGenerationResult
+```
+
+Current configuration:
+
+```text
+Provider     : Groq
+Model        : openai/gpt-oss-20b
+Temperature  : 0.0
+Max Tokens   : 1024
+```
+
+The generated result preserves:
+
+```text
+* Original query
+* Generated answer
+* Model name
+* Retrieved context
+* Source metadata
+```
+
+The generation result is also JSON/API serializable.
+
+---
+
+# 🛡️ Grounding & Hallucination Guard
+
+Implementation:
+
+```text
+backend/scripts/test_grounding_guard.py
+```
+
+The grounding validation layer verifies:
+
+```text
+Explicit grounding restrictions
+        ↓
+Retrieved evidence visibility
+        ↓
+Metadata preservation
+        ↓
+Insufficient-context behavior
+        ↓
+Adversarial unsupported-query behavior
+```
+
+The system is intentionally tested with queries whose answers are not present
+in the supplied course context.
+
+Example:
+
+```text
+Retrieved context:
+
+Two pointers use two indices. One pointer can start
+from the left and another can start from the right.
+
+Query:
+
+What is the exact historical origin of the two pointer
+technique, including who invented it and the year it
+was first introduced?
+```
+
+The model correctly returned:
+
+```text
+The retrieved course material does not contain enough
+information to answer that question.
+```
+
+This demonstrates that the model can refuse an unsupported question instead of
+automatically using outside knowledge.
+
+> Note: this validation does not mathematically guarantee zero hallucinations.
+> It validates the implemented grounding instructions and adversarial
+> insufficient-context behavior.
+
+---
+
+# 🧪 Phase 13 Validation
+
+## Prompt Builder Integration Test
+
+Implementation:
+
+```text
+backend/scripts/test_prompt_builder.py
+```
+
+Validation:
+
+```text
+✓ User query preserved.
+✓ Retrieved context preserved.
+✓ Retrieval metadata preserved.
+✓ Grounding instructions present.
+✓ Insufficient-context guard present.
+✓ Chat message structure valid.
+✓ Empty retrieval context handled safely.
+```
+
+Result:
+
+```text
+RESULT: 7/7 TESTS PASSED
+```
+
+---
+
+## LLM Generator Integration Test
+
+Implementation:
+
+```text
+backend/scripts/test_llm_generator.py
+```
+
+Validation:
+
+```text
+✓ LLM generation returned a structured result.
+✓ Generated answer is non-empty.
+✓ Original query preserved.
+✓ Model recorded.
+✓ Retrieved source metadata preserved.
+✓ Generation result is API-serializable.
+```
+
+Result:
+
+```text
+RESULT: 6/6 TESTS PASSED
+```
+
+---
+
+## End-to-End Grounded RAG Test
+
+Implementation:
+
+```text
+backend/scripts/test_e2e_rag.py
+```
+
+The test validates the real retrieval-to-generation pipeline:
+
+```text
+Query
+  ↓
+Hybrid Retrieval
+  ↓
+RRF Fusion
+  ↓
+Cross-Encoder Reranking
+  ↓
+Final Top-K
+  ↓
+Context Assembly
+  ↓
+Grounded Prompt Construction
+  ↓
+Groq LLM Generation
+  ↓
+Source Preservation
+```
+
+Example validated run:
+
+```text
+Semantic candidates       : 15
+BM25 candidates           : 15
+RRF candidates            : 23
+Final reranked results    : 5
+Context items             : 5
+```
+
+The real pipeline successfully generated a grounded answer and preserved the
+retrieved source metadata.
+
+Result:
+
+```text
+✓ Retrieval
+✓ RRF fusion
+✓ Cross-Encoder reranking
+✓ Context assembly
+✓ Grounded prompt construction
+✓ Groq LLM generation
+✓ Source preservation
+
+✓ END-TO-END RAG TEST PASSED
+```
+
+---
+
+## Grounding Quality Test
+
+Implementation:
+
+```text
+backend/scripts/test_grounding_guard.py
+```
+
+Validation:
+
+```text
+✓ Explicit grounding restrictions present.
+✓ Empty-context safety guard present.
+✓ Retrieved evidence is visible to the LLM.
+✓ Source metadata is available to the grounding layer.
+✓ Retrieved context is explicitly structured.
+✓ Query and evidence are jointly available.
+✓ Empty retrieval is explicitly represented.
+✓ Unsupported query triggered a grounded refusal.
+```
+
+Result:
+
+```text
+RESULT: 8/8 TESTS PASSED
+```
+
+---
+
 # 📊 Current Validation Status
 
 ```text
@@ -482,9 +802,21 @@ Context Assembly
 
 Context Integration
     ✓ Passed
+
+Grounded Prompt Builder
+    ✓ 7/7 checks passed
+
+LLM Generator
+    ✓ 6/6 checks passed
+
+End-to-End Grounded RAG
+    ✓ Passed
+
+Grounding / Hallucination Guard
+    ✓ 8/8 checks passed
 ```
 
-The current validated retrieval-to-context pipeline is:
+The current validated retrieval-to-generation pipeline is:
 
 ```text
 Query
@@ -505,7 +837,13 @@ Final Top-K
   ↓
 Context Assembly
   ↓
-LLM-Ready Context
+Grounded Prompt Builder
+  ↓
+Groq LLM
+  ↓
+Grounding Guard
+  ↓
+Grounded Answer
 ```
 
 ---
@@ -520,6 +858,8 @@ Run:
 python .\scripts\test_hybrid_retrieval.py
 ```
 
+---
+
 ## Cross-Encoder Benchmark
 
 Run:
@@ -527,6 +867,8 @@ Run:
 ```powershell
 python .\scripts\benchmark_reranking.py
 ```
+
+---
 
 ## Context Assembly Test
 
@@ -536,6 +878,8 @@ Run:
 python .\scripts\test_context_assembly.py
 ```
 
+---
+
 ## Context Integration Test
 
 Run:
@@ -544,7 +888,48 @@ Run:
 python .\scripts\test_context_integration.py
 ```
 
-The context integration test validates the complete retrieval-to-context path.
+---
+
+## Prompt Builder Test
+
+Run:
+
+```powershell
+python .\scripts\test_prompt_builder.py
+```
+
+---
+
+## LLM Generator Test
+
+Run:
+
+```powershell
+python .\scripts\test_llm_generator.py
+```
+
+---
+
+## End-to-End RAG Test
+
+Run:
+
+```powershell
+python .\scripts\test_e2e_rag.py
+```
+
+---
+
+## Grounding Quality Test
+
+Run:
+
+```powershell
+python .\scripts\test_grounding_guard.py
+```
+
+The grounding test includes both deterministic prompt-level checks and a real
+adversarial LLM test for unsupported questions.
 
 ---
 
@@ -566,6 +951,8 @@ dsa_revision_analyzer/
 │   │       ├── rrf.py
 │   │       ├── reranker.py
 │   │       ├── context_assembler.py
+│   │       ├── prompt_builder.py
+│   │       ├── llm_generator.py
 │   │       └── video_metadata_schema.py
 │   │
 │   ├── data/
@@ -589,6 +976,10 @@ dsa_revision_analyzer/
 │   │   ├── benchmark_reranking.py
 │   │   ├── test_context_assembly.py
 │   │   ├── test_context_integration.py
+│   │   ├── test_prompt_builder.py
+│   │   ├── test_llm_generator.py
+│   │   ├── test_e2e_rag.py
+│   │   ├── test_grounding_guard.py
 │   │   ├── local_translation.py
 │   │   ├── indictrans_onnx_test.py
 │   │   ├── benchmark_indictrans.py
@@ -619,11 +1010,15 @@ not be committed to the repository.
 * [x] Environment configuration
 * [x] Core backend foundation
 
+---
+
 ## Phase 2 — YouTube Transcript Ingestion
 
 * [x] YouTube transcript extraction
 * [x] Transcript storage
 * [x] Timestamp preservation
+
+---
 
 ## Phase 3 — Transcript Translation
 
@@ -633,6 +1028,8 @@ not be committed to the repository.
 * [x] Resume-safe checkpoints
 * [ ] Complete translation of the remaining representative dataset
 
+---
+
 ## Phase 4 — Intelligent Transcript Chunking
 
 * [x] Character-aware chunking
@@ -640,11 +1037,15 @@ not be committed to the repository.
 * [x] Timestamp preservation
 * [x] Chunk JSON generation
 
+---
+
 ## Phase 5 — Embedding Generation
 
 * [x] Sentence Transformer integration
 * [x] 384-dimensional embeddings
 * [x] Local embedding generation
+
+---
 
 ## Phase 6 — Qdrant Vector Database
 
@@ -654,12 +1055,16 @@ not be committed to the repository.
 * [x] Payload indexes
 * [x] Deterministic point IDs
 
+---
+
 ## Phase 7 — Semantic Retrieval
 
 * [x] Query embedding
 * [x] Vector search
 * [x] Top-K retrieval
 * [x] Structured retrieval results
+
+---
 
 ## Phase 8 — DSA Knowledge & Metadata Layer
 
@@ -669,6 +1074,8 @@ not be committed to the repository.
 * [x] Metadata validation
 * [x] Chunk metadata enrichment
 
+---
+
 ## Phase 9 — Query Understanding
 
 * [x] Intent classification
@@ -677,6 +1084,8 @@ not be committed to the repository.
 * [x] Confidence scoring
 * [x] Unsupported algorithm protection
 
+---
+
 ## Phase 10 — Metadata-Aware Retrieval
 
 * [x] Pattern filtering
@@ -684,6 +1093,8 @@ not be committed to the repository.
 * [x] Metadata validation
 * [x] Safe fallback behavior
 * [x] Retrieval integration testing
+
+---
 
 ## Phase 11 — Hybrid Search + Reranking
 
@@ -754,10 +1165,46 @@ LLM-Ready Context
 
 ## Phase 13 — Grounded RAG Generation
 
-* [ ] LLM answer generation
-* [ ] Source-grounded responses
-* [ ] Retrieval-context prompting
-* [ ] Hallucination-aware answer structure
+* [x] LLM answer generation
+* [x] Groq LLM integration
+* [x] Source-grounded responses
+* [x] Retrieval-context prompting
+* [x] Grounding instructions
+* [x] Insufficient-context handling
+* [x] Structured generation result
+* [x] Source metadata preservation
+* [x] End-to-end grounded RAG integration
+* [x] Adversarial unsupported-query test
+* [x] Grounding quality validation
+
+### Phase 13 Final Pipeline
+
+```text
+Final Reranked Top-K
+        ↓
+Context Assembly
+        ↓
+Grounded Prompt Builder
+        ↓
+Groq LLM
+        ↓
+Grounding Guard
+        ↓
+Grounded Answer
+```
+
+Validation:
+
+```text
+Prompt Builder        : 7/7 PASSED
+LLM Generator         : 6/6 PASSED
+Grounding Guard       : 8/8 PASSED
+End-to-End RAG        : PASSED
+```
+
+**Phase 13: COMPLETE**
+
+---
 
 ## Phase 14 — Timestamp-Aware Retrieval
 
@@ -765,6 +1212,8 @@ LLM-Ready Context
 * [ ] Video jump links
 * [ ] Relevant time-range extraction
 * [ ] Timestamp-grounded explanations
+
+---
 
 ## Phase 15 — FastAPI Backend
 
@@ -774,6 +1223,8 @@ LLM-Ready Context
 * [ ] Metadata endpoints
 * [ ] Request validation
 
+---
+
 ## Phase 16 — React Frontend
 
 * [ ] Search interface
@@ -781,12 +1232,16 @@ LLM-Ready Context
 * [ ] Retrieved source display
 * [ ] Video/timestamp navigation
 
+---
+
 ## Phase 17 — Pattern / Playlist Navigation
 
 * [ ] Pattern browser
 * [ ] Playlist navigation
 * [ ] Video ordering
 * [ ] Topic progression
+
+---
 
 ## Phase 18 — Adaptive Practice System
 
@@ -809,12 +1264,16 @@ AI evaluates solution
 The goal is to test whether the learner can recognize and apply a DSA pattern
 without being explicitly told which pattern to use.
 
+---
+
 ## Phase 19 — Performance & Weakness Detection
 
 * [ ] Track practice performance
 * [ ] Detect weak sub-patterns
 * [ ] Detect recurring mistakes
 * [ ] Identify knowledge gaps
+
+---
 
 ## Phase 20 — Adaptive Revision Engine
 
@@ -834,6 +1293,8 @@ Performance Tracking
 Adaptive Next Step
 ```
 
+---
+
 ## Phase 21 — Evaluation System
 
 * [ ] Retrieval evaluation dataset
@@ -844,6 +1305,8 @@ Adaptive Next Step
 * [ ] Reranking evaluation
 * [ ] RAG answer evaluation
 
+---
+
 ## Phase 22 — Automated Testing
 
 * [ ] Unit tests
@@ -851,6 +1314,8 @@ Adaptive Next Step
 * [ ] Retrieval regression tests
 * [ ] API tests
 * [ ] End-to-end tests
+
+---
 
 ## Phase 23 — Production Hardening
 
@@ -860,6 +1325,8 @@ Adaptive Next Step
 * [ ] Model caching
 * [ ] Security hardening
 * [ ] Configuration cleanup
+
+---
 
 ## Phase 24 — Deployment
 
@@ -873,8 +1340,32 @@ Adaptive Next Step
 
 # 📌 Current Project Status
 
-The project has now completed the retrieval and context-construction
-foundation through **Phase 12**.
+The project has now completed the retrieval, context-construction, and grounded
+RAG generation foundation through **Phase 13**.
+
+The current validated system can:
+
+```text
+1. Ingest educational DSA videos
+2. Extract transcripts
+3. Translate transcript content
+4. Create structured chunks
+5. Enrich chunks with DSA metadata
+6. Generate embeddings
+7. Store vectors in Qdrant
+8. Understand user queries
+9. Apply metadata-aware retrieval
+10. Perform semantic retrieval
+11. Perform BM25 lexical retrieval
+12. Fuse candidates using RRF
+13. Rerank candidates using a Cross-Encoder
+14. Assemble structured LLM context
+15. Build grounded prompts
+16. Generate answers using Groq
+17. Preserve source metadata
+18. Handle insufficient retrieval context
+19. Validate unsupported-query behavior
+```
 
 Current validated pipeline:
 
@@ -897,7 +1388,7 @@ Query Understanding
    ↓
 Metadata-Aware Retrieval
    ↓
-BM25
+Semantic + BM25
    ↓
 RRF Fusion
    ↓
@@ -909,7 +1400,13 @@ Final Top-K
    ↓
 Context Assembly
    ↓
-LLM-Ready Context
+Grounded Prompt Builder
+   ↓
+Groq LLM
+   ↓
+Grounding Guard
+   ↓
+Grounded Answer
 ```
 
 Completed:
@@ -917,7 +1414,7 @@ Completed:
 ```text
 Phase 1   ✓
 Phase 2   ✓
-Phase 3   ✓* 
+Phase 3   ✓*
 Phase 4   ✓
 Phase 5   ✓
 Phase 6   ✓
@@ -927,6 +1424,7 @@ Phase 9   ✓
 Phase 10  ✓
 Phase 11  ✓
 Phase 12  ✓
+Phase 13  ✓
 ```
 
 `*` Phase 3 still contains the remaining representative-dataset translation
@@ -935,10 +1433,11 @@ work.
 The next major development stage is:
 
 ```text
-Phase 13 — Grounded RAG Generation
+Phase 14 — Timestamp-Aware Retrieval
 ```
 
-which will consume the structured context produced by Phase 12.
+which will build on the grounded answers and preserved video/timestamp metadata
+produced by Phase 13.
 
 ---
 
@@ -1092,6 +1591,10 @@ Cross-Encoder Reranking
 Final Top-K
       ↓
 Context Assembly
+      ↓
+Grounded Prompt
+      ↓
+LLM
 ```
 
 Metadata filtering should not be treated as an optional ranking signal when the
@@ -1118,3 +1621,117 @@ RAG
 Therefore, translation errors can propagate into chunking, embeddings, retrieval,
 and ultimately generated answers.
 
+---
+
+## 7. Grounding Is Evidence-First
+
+The LLM should not be treated as the source of truth.
+
+The intended generation architecture is:
+
+```text
+Retrieved Course Evidence
+          ↓
+Structured Context
+          ↓
+Grounded Prompt
+          ↓
+LLM
+          ↓
+Grounded Answer
+```
+
+The model is instructed to answer only from supplied retrieved context.
+
+When sufficient evidence is unavailable, the system should prefer an explicit
+insufficient-information response over guessing.
+
+---
+
+## 8. Retrieval Metadata Must Survive the RAG Pipeline
+
+Retrieval metadata is not discarded after ranking.
+
+Important metadata such as:
+
+```text
+point_id
+video_id
+pattern
+sub_pattern
+timestamp_start
+timestamp_end
+rrf_score
+reranker_score
+```
+
+is preserved through context assembly and made available to downstream
+generation and source presentation.
+
+This is required for future timestamp-aware answers and video navigation.
+
+---
+
+## 9. Retrieval Evaluation Must Be Evidence-Based
+
+The system does not claim that a retrieval technique is better merely because
+its score or ranking changed.
+
+Meaningful retrieval evaluation should eventually use human-validated relevance
+labels and metrics such as:
+
+```text
+Recall@K
+Precision@K
+MRR
+nDCG@K
+```
+
+Similarly, grounded answer evaluation should eventually measure:
+
+```text
+Answer correctness
+Faithfulness to retrieved evidence
+Source attribution quality
+Unsupported-claim rate
+```
+
+---
+
+# 🚀 Development Philosophy
+
+The project is being built incrementally as a real retrieval and RAG system.
+
+Each major stage is validated before the next stage is added:
+
+```text
+Implement
+   ↓
+Unit Test
+   ↓
+Integration Test
+   ↓
+End-to-End Test
+   ↓
+Validate Behavior
+   ↓
+Move to Next Phase
+```
+
+The goal is not simply to make the system produce an answer.
+
+The goal is to build a pipeline where:
+
+```text
+Retrieval
+   ↓
+Ranking
+   ↓
+Context
+   ↓
+Evidence
+   ↓
+Generation
+```
+
+remain traceable and testable throughout the system.
