@@ -458,68 +458,76 @@ def main() -> None:
             )
 
     # --------------------------------------------------------
-    # RRF validation
+    # RRF candidate pool validation
     # --------------------------------------------------------
 
     print()
     print("=" * 60)
-    print("RRF FUSED RESULTS")
+    print("RRF CANDIDATE POOL")
     print("=" * 60)
 
     print(
-        f"Final fused results: "
-        f"{len(result.fused_results)}"
+        f"RRF candidate count: "
+        f"{len(result.rrf_results)}"
     )
 
-    assert (
-        len(result.fused_results)
-        <= TOP_K
-    ), (
-        "RRF returned more than top_k results."
+    assert result.rrf_results, (
+        "RRF fusion returned no candidates."
     )
 
-    assert len(result.fused_results) > 0, (
-        "RRF fusion returned no results."
+    all_source_ids = (
+        semantic_point_ids
+        |
+        bm25_point_ids
     )
 
-    previous_score = None
+    rrf_ids = {
+        str(item.point_id)
+        for item in result.rrf_results
+    }
 
-    for rank, fused_result in enumerate(
-        result.fused_results,
+    assert rrf_ids <= all_source_ids, (
+        "RRF produced an unknown point_id."
+    )
+
+    previous_rrf_score = None
+
+    for rank, rrf_result in enumerate(
+        result.rrf_results,
         start=1,
     ):
 
         assert_fused_result(
-            fused_result
+            rrf_result
         )
 
         print(
             f"[{rank}] "
-            f"RRF={fused_result.rrf_score:.8f}"
+            f"RRF={rrf_result.rrf_score:.8f}"
         )
 
         print(
             f"    point_id      : "
-            f"{fused_result.point_id}"
+            f"{rrf_result.point_id}"
         )
 
         print(
             f"    ranks         : "
-            f"{fused_result.rank_positions}"
+            f"{rrf_result.rank_positions}"
         )
 
         print(
             f"    contributions : "
-            f"{fused_result.contributions}"
+            f"{rrf_result.contributions}"
         )
 
         if (
-            fused_result.semantic_result
+            rrf_result.semantic_result
             is not None
         ):
 
             semantic = (
-                fused_result.semantic_result
+                rrf_result.semantic_result
             )
 
             print(
@@ -533,12 +541,12 @@ def main() -> None:
             )
 
         if (
-            fused_result.bm25_document
+            rrf_result.bm25_document
             is not None
         ):
 
             bm25 = (
-                fused_result.bm25_document
+                rrf_result.bm25_document
             )
 
             print(
@@ -550,43 +558,138 @@ def main() -> None:
                 f"{bm25.chunk_id}"
             )
 
-        # RRF results must be descending.
-        if previous_score is not None:
+        # RRF candidate pool must be sorted
+        # by RRF score in descending order.
+        if previous_rrf_score is not None:
 
             assert (
-                fused_result.rrf_score
-                <= previous_score
+                rrf_result.rrf_score
+                <= previous_rrf_score
             ), (
-                "RRF results are not sorted "
+                "RRF candidate pool is not sorted "
                 "in descending score order."
             )
 
-        previous_score = (
-            fused_result.rrf_score
+        previous_rrf_score = (
+            rrf_result.rrf_score
         )
 
     print()
     print(
-        "✓ RRF fusion validated."
+        "✓ Full RRF candidate pool validated."
+    )
+
+    print(
+        "✓ RRF ranking order passed."
+    )
+
+    # --------------------------------------------------------
+    # Cross-Encoder reranking validation
+    # --------------------------------------------------------
+
+    print()
+    print("=" * 60)
+    print("CROSS-ENCODER RERANKED RESULTS")
+    print("=" * 60)
+
+    print(
+        f"Final reranked results: "
+        f"{len(result.fused_results)}"
+    )
+
+    assert result.fused_results, (
+        "Cross-Encoder returned no final results."
+    )
+
+    assert (
+        len(result.fused_results)
+        <= TOP_K
+    ), (
+        "Cross-Encoder returned more than "
+        "Top-K results."
+    )
+
+    final_ids = {
+        str(item.point_id)
+        for item in result.fused_results
+    }
+
+    assert final_ids <= rrf_ids, (
+        "Cross-Encoder returned a candidate "
+        "that was not present in the RRF pool."
+    )
+
+    previous_reranker_score = None
+
+    expected_rank = 1
+
+    for reranked_result in result.fused_results:
+
+        assert_fused_result(
+            reranked_result
+        )
+
+        assert (
+            reranked_result.reranker_score
+            is not None
+        ), (
+            "Final result is missing "
+            "Cross-Encoder score."
+        )
+
+        assert (
+            reranked_result.rerank_rank
+            == expected_rank
+        ), (
+            "Cross-Encoder rerank ranks "
+            "are not sequential."
+        )
+
+        print(
+            f"[{reranked_result.rerank_rank}] "
+            f"reranker="
+            f"{reranked_result.reranker_score:.6f}"
+        )
+
+        print(
+            f"    point_id : "
+            f"{reranked_result.point_id}"
+        )
+
+        print(
+            f"    RRF      : "
+            f"{reranked_result.rrf_score:.8f}"
+        )
+
+        if previous_reranker_score is not None:
+
+            assert (
+                reranked_result.reranker_score
+                <= previous_reranker_score
+            ), (
+                "Cross-Encoder results are not "
+                "sorted in descending relevance "
+                "score order."
+            )
+
+        previous_reranker_score = (
+            reranked_result.reranker_score
+        )
+
+        expected_rank += 1
+
+    print()
+    print(
+        "✓ Cross-Encoder reranking validated."
     )
 
     # --------------------------------------------------------
     # Stable ID preservation
     # --------------------------------------------------------
 
-    all_source_ids = (
-        semantic_point_ids
-        |
-        bm25_point_ids
-    )
-
-    fused_ids = {
-        str(item.point_id)
-        for item in result.fused_results
-    }
-
-    assert fused_ids <= all_source_ids, (
-        "RRF produced an unknown point_id."
+    assert final_ids <= rrf_ids, (
+        "Final results contain IDs outside "
+        "the RRF candidate pool."
     )
 
     print(
@@ -627,11 +730,27 @@ def main() -> None:
     )
 
     print(
-        "✓ Final Top-K constraint passed"
+        "✓ Full RRF candidate pool passed"
     )
 
     print(
         "✓ RRF ranking order passed"
+    )
+
+    print(
+        "✓ Cross-Encoder reranking passed"
+    )
+
+    print(
+        "✓ Final Top-K constraint passed"
+    )
+
+    print(
+        "✓ Cross-Encoder ranking order passed"
+    )
+
+    print(
+        "✓ Stable ID preservation passed"
     )
 
     print(

@@ -7,6 +7,7 @@ Combines:
     1. Semantic retrieval through Qdrant
     2. Lexical retrieval through BM25
     3. Reciprocal Rank Fusion (RRF)
+    4. Cross-Encoder reranking
 
 Pipeline:
 
@@ -21,13 +22,19 @@ Pipeline:
          +----------+-----------+
                     |
                     v
-                 RRF Fusion
+               RRF Fusion
+                    |
+                    v
+          Expanded Candidate Pool
+                    |
+                    v
+          Cross-Encoder Reranking
                     |
                     v
                Final Top-K
                     |
                     v
-             Hybrid Results
+              Hybrid Results
 """
 
 from __future__ import annotations
@@ -53,6 +60,10 @@ from app.services.rrf import (
     fuse_semantic_and_bm25,
 )
 
+from app.services.reranker import (
+    rerank,
+)
+
 
 # ============================================================
 # CONFIGURATION
@@ -67,6 +78,7 @@ DEFAULT_CANDIDATE_MULTIPLIER = 3
 # RESULT MODELS
 # ============================================================
 
+
 @dataclass(frozen=True)
 class BM25RetrievalResult:
     """
@@ -80,19 +92,17 @@ class BM25RetrievalResult:
 @dataclass(frozen=True)
 class HybridResult:
     """
-    One final RRF-fused retrieval result.
-
-    point_id:
-        Stable identifier shared by semantic and BM25 results.
+    One hybrid retrieval candidate.
 
     rrf_score:
-        Final Reciprocal Rank Fusion score.
+        Score assigned by Reciprocal Rank Fusion.
 
-    rank_positions:
-        Rank contributed by each retriever.
+    reranker_score:
+        Fine-grained relevance score assigned by the
+        Cross-Encoder.
 
-    contributions:
-        Individual RRF contributions.
+    rerank_rank:
+        Final position after Cross-Encoder reranking.
 
     semantic_result:
         Full semantic result when available.
@@ -102,11 +112,19 @@ class HybridResult:
     """
 
     point_id: str
+
     rrf_score: float
+
+    reranker_score: float | None
+
+    rerank_rank: int | None
+
     rank_positions: dict[str, int]
+
     contributions: dict[str, float]
 
     semantic_result: RetrievalResult | None
+
     bm25_document: BM25Document | None
 
 
@@ -121,8 +139,11 @@ class HybridRetrievalResult:
     bm25_results:
         Candidate results returned by BM25.
 
+    rrf_results:
+        Full candidate pool after RRF fusion.
+
     fused_results:
-        Final RRF-ranked results.
+        Final Top-K results after Cross-Encoder reranking.
     """
 
     query: str
@@ -130,6 +151,8 @@ class HybridRetrievalResult:
     semantic_results: list[RetrievalResult]
 
     bm25_results: list[BM25RetrievalResult]
+
+    rrf_results: list[HybridResult]
 
     fused_results: list[HybridResult]
 
@@ -141,6 +164,7 @@ class HybridRetrievalResult:
 # ============================================================
 # BM25 INDEX
 # ============================================================
+
 
 def load_bm25_index() -> BM25Index:
     """
@@ -162,6 +186,7 @@ def load_bm25_index() -> BM25Index:
 # ============================================================
 # QUERY ANALYSIS HELPERS
 # ============================================================
+
 
 def get_analysis_value(
     query_analysis: Any,
@@ -241,6 +266,7 @@ def resolve_metadata(
 # SEMANTIC RETRIEVAL
 # ============================================================
 
+
 def retrieve_semantic(
     *,
     query: str,
@@ -270,6 +296,7 @@ def retrieve_semantic(
 # ============================================================
 # BM25 RETRIEVAL
 # ============================================================
+
 
 def retrieve_bm25(
     *,
@@ -312,6 +339,7 @@ def retrieve_bm25(
 # ============================================================
 # RESULT LOOKUPS
 # ============================================================
+
 
 def _build_result_lookup(
     semantic_results: list[RetrievalResult],
@@ -356,8 +384,9 @@ def _build_result_lookup(
 
 
 # ============================================================
-# BUILD FINAL HYBRID RESULTS
+# BUILD RRF RESULTS
 # ============================================================
+
 
 def _build_fused_results(
     *,
@@ -373,6 +402,8 @@ def _build_fused_results(
 
     This function restores the actual semantic/BM25
     metadata associated with each ID.
+
+    Cross-Encoder fields remain unset at this stage.
     """
 
     (
@@ -398,6 +429,10 @@ def _build_fused_results(
                 rrf_score=float(
                     result.score
                 ),
+
+                reranker_score=None,
+
+                rerank_rank=None,
 
                 rank_positions=dict(
                     result.rank_positions
@@ -425,8 +460,151 @@ def _build_fused_results(
 
 
 # ============================================================
+# CANDIDATE TEXT EXTRACTION
+# ============================================================
+
+
+def _get_candidate_text(
+    result: HybridResult,
+) -> str:
+    """
+    Extract the text that will be passed to the Cross-Encoder.
+
+    Semantic retrieval is preferred because it represents the
+    primary application-level retrieval result.
+
+    BM25 document is used as a fallback.
+    """
+
+    if result.semantic_result is not None:
+
+        text = getattr(
+            result.semantic_result,
+            "text",
+            None,
+        )
+
+        if isinstance(
+            text,
+            str,
+        ) and text.strip():
+
+            return text.strip()
+
+    if result.bm25_document is not None:
+
+        text = getattr(
+            result.bm25_document,
+            "text",
+            None,
+        )
+
+        if isinstance(
+            text,
+            str,
+        ) and text.strip():
+
+            return text.strip()
+
+    raise ValueError(
+        "No candidate text available for "
+        f"point_id={result.point_id}"
+    )
+
+
+# ============================================================
+# CROSS-ENCODER RERANKING
+# ============================================================
+
+
+def _rerank_fused_results(
+    *,
+    query: str,
+    fused_results: list[HybridResult],
+    top_k: int,
+) -> list[HybridResult]:
+    """
+    Rerank the complete RRF candidate pool using the
+    Cross-Encoder.
+
+    RRF and Cross-Encoder have different responsibilities:
+
+        RRF:
+            Candidate fusion.
+
+        Cross-Encoder:
+            Fine-grained relevance ranking.
+
+    Their scores are intentionally NOT added together.
+    """
+
+    if not fused_results:
+        return []
+
+    if top_k <= 0:
+        raise ValueError(
+            "top_k must be greater than 0."
+        )
+
+    candidate_texts = [
+        _get_candidate_text(result)
+        for result in fused_results
+    ]
+
+    reranked = rerank(
+        query=query,
+        candidates=candidate_texts,
+        top_k=top_k,
+    )
+
+    final_results: list[HybridResult] = []
+
+    for final_rank, reranker_result in enumerate(
+        reranked,
+        start=1,
+    ):
+
+        original_result = fused_results[
+            reranker_result.candidate_index
+        ]
+
+        final_results.append(
+            HybridResult(
+                point_id=original_result.point_id,
+
+                rrf_score=original_result.rrf_score,
+
+                reranker_score=float(
+                    reranker_result.score
+                ),
+
+                rerank_rank=final_rank,
+
+                rank_positions=dict(
+                    original_result.rank_positions
+                ),
+
+                contributions=dict(
+                    original_result.contributions
+                ),
+
+                semantic_result=(
+                    original_result.semantic_result
+                ),
+
+                bm25_document=(
+                    original_result.bm25_document
+                ),
+            )
+        )
+
+    return final_results
+
+
+# ============================================================
 # MAIN HYBRID RETRIEVAL
 # ============================================================
+
 
 def retrieve_hybrid(
     *,
@@ -459,7 +637,13 @@ def retrieve_hybrid(
                    RRF
                     |
                     v
-                Final Top-K
+          Expanded Candidate Pool
+                    |
+                    v
+          Cross-Encoder Reranking
+                    |
+                    v
+               Final Top-K
 
     Parameters
     ----------
@@ -476,7 +660,7 @@ def retrieve_hybrid(
         Optional QueryAnalysis-like object or dictionary.
 
     top_k:
-        Number of final fused results.
+        Number of final Cross-Encoder results.
 
     candidate_multiplier:
         Candidate pool multiplier.
@@ -601,23 +785,66 @@ def retrieve_hybrid(
     # RRF FUSION
     # --------------------------------------------------------
 
-    rrf_results = fuse_semantic_and_bm25(
-        semantic_ids=semantic_ids,
-        bm25_ids=bm25_ids,
-        k=rrf_k,
-        semantic_weight=semantic_weight,
-        bm25_weight=bm25_weight,
-        top_k=top_k,
+    # IMPORTANT:
+    #
+    # RRF must preserve the complete candidate pool.
+    #
+    # If RRF is truncated to top_k here, the Cross-Encoder
+    # would only see those already-selected results.
+    #
+    # Therefore:
+    #
+    #   Semantic/BM25 candidate pool
+    #              ↓
+    #             RRF
+    #              ↓
+    #       complete RRF pool
+    #              ↓
+    #        Cross-Encoder
+    #              ↓
+    #          final Top-K
+
+    unique_candidate_ids = list(
+        dict.fromkeys(
+            semantic_ids + bm25_ids
+        )
     )
+
+    if unique_candidate_ids:
+
+        rrf_results = fuse_semantic_and_bm25(
+            semantic_ids=semantic_ids,
+            bm25_ids=bm25_ids,
+            k=rrf_k,
+            semantic_weight=semantic_weight,
+            bm25_weight=bm25_weight,
+            top_k=len(
+                unique_candidate_ids
+            ),
+        )
+
+    else:
+
+        rrf_results = []
 
     # --------------------------------------------------------
     # Restore complete metadata
     # --------------------------------------------------------
 
-    fused_results = _build_fused_results(
+    rrf_hybrid_results = _build_fused_results(
         rrf_results=rrf_results,
         semantic_results=semantic_results,
         bm25_results=bm25_results,
+    )
+
+    # --------------------------------------------------------
+    # Cross-Encoder reranking
+    # --------------------------------------------------------
+
+    final_results = _rerank_fused_results(
+        query=query,
+        fused_results=rrf_hybrid_results,
+        top_k=top_k,
     )
 
     # --------------------------------------------------------
@@ -631,7 +858,9 @@ def retrieve_hybrid(
 
         bm25_results=bm25_results,
 
-        fused_results=fused_results,
+        rrf_results=rrf_hybrid_results,
+
+        fused_results=final_results,
 
         pattern=pattern,
 
@@ -642,6 +871,7 @@ def retrieve_hybrid(
 # ============================================================
 # DISPLAY: SEMANTIC
 # ============================================================
+
 
 def print_semantic_results(
     results: list[RetrievalResult],
@@ -663,6 +893,7 @@ def print_semantic_results(
         results,
         start=1,
     ):
+
         print(
             f"[{rank}] "
             f"score={result.score:.4f} "
@@ -700,6 +931,7 @@ def print_semantic_results(
 # DISPLAY: BM25
 # ============================================================
 
+
 def print_bm25_results(
     results: list[BM25RetrievalResult],
 ) -> None:
@@ -720,6 +952,7 @@ def print_bm25_results(
         results,
         start=1,
     ):
+
         document = result.document
 
         print(
@@ -750,29 +983,31 @@ def print_bm25_results(
 
 
 # ============================================================
-# DISPLAY: FINAL RRF
+# DISPLAY: RRF CANDIDATES
 # ============================================================
 
-def print_fused_results(
+
+def print_rrf_results(
     results: list[HybridResult],
 ) -> None:
     """
-    Print final RRF-fused results.
+    Print the complete RRF candidate pool.
     """
 
     print()
     print("=" * 60)
-    print("RRF FUSED RESULTS")
+    print("RRF CANDIDATE POOL")
     print("=" * 60)
 
     if not results:
-        print("No fused results.")
+        print("No RRF candidates.")
         return
 
     for rank, result in enumerate(
         results,
         start=1,
     ):
+
         print(
             f"[{rank}] "
             f"RRF={result.rrf_score:.8f}"
@@ -781,6 +1016,64 @@ def print_fused_results(
         print(
             f"    point_id      : "
             f"{result.point_id}"
+        )
+
+        print(
+            f"    ranks         : "
+            f"{result.rank_positions}"
+        )
+
+        print(
+            f"    contributions : "
+            f"{result.contributions}"
+        )
+
+
+# ============================================================
+# DISPLAY: FINAL RERANKED RESULTS
+# ============================================================
+
+
+def print_fused_results(
+    results: list[HybridResult],
+) -> None:
+    """
+    Print final Cross-Encoder reranked results.
+    """
+
+    print()
+    print("=" * 60)
+    print("CROSS-ENCODER RERANKED RESULTS")
+    print("=" * 60)
+
+    if not results:
+        print("No reranked results.")
+        return
+
+    for rank, result in enumerate(
+        results,
+        start=1,
+    ):
+
+        print(
+            f"[{rank}] "
+            f"reranker="
+            f"{result.reranker_score:.6f}"
+        )
+
+        print(
+            f"    point_id      : "
+            f"{result.point_id}"
+        )
+
+        print(
+            f"    RRF           : "
+            f"{result.rrf_score:.8f}"
+        )
+
+        print(
+            f"    rerank_rank   : "
+            f"{result.rerank_rank}"
         )
 
         print(
@@ -813,6 +1106,16 @@ def print_fused_results(
             )
 
             print(
+                f"    pattern       : "
+                f"{semantic.pattern}"
+            )
+
+            print(
+                f"    sub_pattern   : "
+                f"{semantic.sub_pattern}"
+            )
+
+            print(
                 f"    timestamp     : "
                 f"{semantic.start:.2f}s → "
                 f"{semantic.end:.2f}s"
@@ -823,7 +1126,8 @@ def print_fused_results(
         if bm25 is not None:
 
             print(
-                f"    bm25          : available"
+                "    bm25          : "
+                "available"
             )
 
             print(
@@ -835,6 +1139,7 @@ def print_fused_results(
 # ============================================================
 # DISPLAY: COMPLETE PIPELINE
 # ============================================================
+
 
 def print_hybrid_results(
     result: HybridRetrievalResult,
@@ -871,6 +1176,10 @@ def print_hybrid_results(
         result.bm25_results
     )
 
+    print_rrf_results(
+        result.rrf_results
+    )
+
     print_fused_results(
         result.fused_results
     )
@@ -879,6 +1188,7 @@ def print_hybrid_results(
 # ============================================================
 # SELF CHECK
 # ============================================================
+
 
 def self_check() -> None:
     """
@@ -914,10 +1224,13 @@ def self_check() -> None:
     # --------------------------------------------------------
 
     if BM25_INDEX_FILE.exists():
+
         print(
             "✓ BM25 index file exists."
         )
+
     else:
+
         print(
             "⚠ BM25 index file does not exist."
         )
@@ -927,6 +1240,7 @@ def self_check() -> None:
     # --------------------------------------------------------
 
     if callable(retrieve):
+
         print(
             "✓ Semantic retrieval interface available."
         )
@@ -936,6 +1250,7 @@ def self_check() -> None:
     # --------------------------------------------------------
 
     if callable(retrieve_bm25):
+
         print(
             "✓ BM25 retrieval interface available."
         )
@@ -945,8 +1260,19 @@ def self_check() -> None:
     # --------------------------------------------------------
 
     if callable(fuse_semantic_and_bm25):
+
         print(
             "✓ RRF fusion interface available."
+        )
+
+    # --------------------------------------------------------
+    # Cross-Encoder
+    # --------------------------------------------------------
+
+    if callable(rerank):
+
+        print(
+            "✓ Cross-Encoder reranking interface available."
         )
 
     # --------------------------------------------------------
@@ -954,11 +1280,13 @@ def self_check() -> None:
     # --------------------------------------------------------
 
     if callable(retrieve_hybrid):
+
         print(
             "✓ Hybrid retrieval interface available."
         )
 
     print()
+
     print(
         "✓ Hybrid retrieval service self-check passed."
     )
@@ -967,6 +1295,7 @@ def self_check() -> None:
 # ============================================================
 # MODULE ENTRY POINT
 # ============================================================
+
 
 if __name__ == "__main__":
     self_check()
