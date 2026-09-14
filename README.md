@@ -1,3 +1,4 @@
+
 # DSA Revision Analyzer
 
 An AI-powered DSA revision system that converts educational video content into a
@@ -65,8 +66,8 @@ The long-term system will also use completed topics and patterns to generate
 
 The current system uses a hybrid retrieval architecture with lexical search,
 semantic search, Reciprocal Rank Fusion, Cross-Encoder reranking, structured
-context assembly, timestamp-aware source provenance, grounded prompting, and
-LLM generation.
+context assembly, timestamp-aware source provenance, grounded prompting,
+LLM generation, and a FastAPI API layer.
 
 ```text
                          ┌──────────────────────┐
@@ -243,8 +244,8 @@ Therefore:
 = 15 reranking candidates
 ```
 
-This allows the Cross-Encoder to evaluate a larger candidate pool before
-selecting the final context.
+This allows the Cross-Encoder to evaluate a larger candidate pool before selecting
+the final context.
 
 ---
 
@@ -299,7 +300,7 @@ Benchmark:
 backend/scripts/benchmark_reranking.py
 ```
 
-The reranking benchmark currently records:
+The reranking benchmark records:
 
 ```text
 RRF-only latency
@@ -371,10 +372,10 @@ rrf_score
 reranker_score
 ```
 
-The assembled context also provides deterministic text generation for
-downstream LLM prompting.
+The assembled context also provides deterministic text generation for downstream
+LLM prompting.
 
-Example structure:
+Example:
 
 ```text
 [Context 1]
@@ -399,7 +400,7 @@ Unit-level context assembly validation:
 backend/scripts/test_context_assembly.py
 ```
 
-Current validation:
+Validation:
 
 ```text
 ✓ Top-K limit
@@ -451,23 +452,6 @@ Score Preservation
 LLM-Ready Context
       ↓
 Serialization
-```
-
-Current integration checks include:
-
-```text
-✓ Hybrid retrieval completed
-✓ RRF fusion completed
-✓ Cross-Encoder reranking completed
-✓ Final Top-K validated
-✓ Context Assembly completed
-✓ Context metadata preserved
-✓ Stable point IDs preserved
-✓ Chunk text preserved
-✓ RRF scores preserved
-✓ Cross-Encoder scores preserved
-✓ LLM-ready context generated
-✓ Dictionary serialization validated
 ```
 
 Current integration result:
@@ -527,9 +511,6 @@ Empty retrieval is represented explicitly:
 [NO RETRIEVED COURSE CONTEXT AVAILABLE]
 ```
 
-This prevents an empty retrieval result from being silently interpreted as valid
-evidence.
-
 ---
 
 ## LLM Generator
@@ -564,14 +545,12 @@ Max Tokens   : 1024
 The generated result preserves:
 
 ```text
-* Original query
-* Generated answer
-* Model name
-* Retrieved context
-* Source metadata
+Original query
+Generated answer
+Model name
+Retrieved context
+Source metadata
 ```
-
-The generation result is also JSON/API serializable.
 
 ---
 
@@ -597,33 +576,11 @@ Insufficient-context behavior
 Adversarial unsupported-query behavior
 ```
 
-The system is intentionally tested with queries whose answers are not present
-in the supplied course context.
+The system is intentionally tested with queries whose answers are not present in
+the supplied course context.
 
-Example:
-
-```text
-Retrieved context:
-
-Two pointers use two indices. One pointer can start
-from the left and another can start from the right.
-
-Query:
-
-What is the exact historical origin of the two pointer
-technique, including who invented it and the year it
-was first introduced?
-```
-
-The model correctly returned:
-
-```text
-The retrieved course material does not contain enough
-information to answer that question.
-```
-
-This demonstrates that the model can refuse an unsupported question instead of
-automatically using outside knowledge.
+The expected behavior is an explicit insufficient-information response instead
+of automatically using outside knowledge.
 
 > Note: this validation does not mathematically guarantee zero hallucinations.
 > It validates the implemented grounding instructions and adversarial
@@ -635,8 +592,6 @@ automatically using outside knowledge.
 
 ## Prompt Builder Integration Test
 
-Implementation:
-
 ```text
 backend/scripts/test_prompt_builder.py
 ```
@@ -644,13 +599,13 @@ backend/scripts/test_prompt_builder.py
 Validation:
 
 ```text
-✓ User query preserved.
-✓ Retrieved context preserved.
-✓ Retrieval metadata preserved.
-✓ Grounding instructions present.
-✓ Insufficient-context guard present.
-✓ Chat message structure valid.
-✓ Empty retrieval context handled safely.
+✓ User query preserved
+✓ Retrieved context preserved
+✓ Retrieval metadata preserved
+✓ Grounding instructions present
+✓ Insufficient-context guard present
+✓ Chat message structure valid
+✓ Empty retrieval context handled safely
 ```
 
 Result:
@@ -663,8 +618,6 @@ RESULT: 7/7 TESTS PASSED
 
 ## LLM Generator Integration Test
 
-Implementation:
-
 ```text
 backend/scripts/test_llm_generator.py
 ```
@@ -672,12 +625,12 @@ backend/scripts/test_llm_generator.py
 Validation:
 
 ```text
-✓ LLM generation returned a structured result.
-✓ Generated answer is non-empty.
-✓ Original query preserved.
-✓ Model recorded.
-✓ Retrieved source metadata preserved.
-✓ Generation result is API-serializable.
+✓ LLM generation returned a structured result
+✓ Generated answer is non-empty
+✓ Original query preserved
+✓ Model recorded
+✓ Retrieved source metadata preserved
+✓ Generation result is API-serializable
 ```
 
 Result:
@@ -690,13 +643,11 @@ RESULT: 6/6 TESTS PASSED
 
 ## End-to-End Grounded RAG Test
 
-Implementation:
-
 ```text
 backend/scripts/test_e2e_rag.py
 ```
 
-The test validates the real retrieval-to-generation pipeline:
+The test validates:
 
 ```text
 Query
@@ -728,9 +679,6 @@ Final reranked results    : 5
 Context items             : 5
 ```
 
-The real pipeline successfully generated a grounded answer and preserved the
-retrieved source metadata.
-
 Result:
 
 ```text
@@ -743,35 +691,6 @@ Result:
 ✓ Source preservation
 
 ✓ END-TO-END RAG TEST PASSED
-```
-
----
-
-## Grounding Quality Test
-
-Implementation:
-
-```text
-backend/scripts/test_grounding_guard.py
-```
-
-Validation:
-
-```text
-✓ Explicit grounding restrictions present.
-✓ Empty-context safety guard present.
-✓ Retrieved evidence is visible to the LLM.
-✓ Source metadata is available to the grounding layer.
-✓ Retrieved context is explicitly structured.
-✓ Query and evidence are jointly available.
-✓ Empty retrieval is explicitly represented.
-✓ Unsupported query triggered a grounded refusal.
-```
-
-Result:
-
-```text
-RESULT: 8/8 TESTS PASSED
 ```
 
 ---
@@ -944,7 +863,7 @@ Passed : 13/13
 ✓ RELEVANT TIME-RANGE TEST PASSED
 ```
 
-Integration validation:
+Integration:
 
 ```text
 backend/scripts/test_relevant_time_range_integration.py
@@ -962,7 +881,7 @@ Passed : 9/9
 
 ## Timestamp-Grounded Explanations
 
-The grounded prompt now explicitly handles timestamp and video provenance.
+The grounded prompt explicitly handles timestamp and video provenance.
 
 The system instructs the LLM to:
 
@@ -996,7 +915,7 @@ Passed : 14/14
 
 ---
 
-## Context Provenance
+# 🔎 Context Provenance
 
 Phase 14 also preserves retrieval provenance throughout context assembly.
 
@@ -1037,7 +956,7 @@ Passed : 15/15
 ✓ CONTEXT PROVENANCE TEST PASSED
 ```
 
-Integration validation:
+Integration:
 
 ```text
 backend/scripts/test_provenance_integration.py
@@ -1053,7 +972,7 @@ Passed : 20/20
 
 ---
 
-## Prompt / Context Integration
+# 🔗 Prompt / Context Integration
 
 Timestamp-aware context is preserved when constructing the final grounded prompt.
 
@@ -1071,21 +990,9 @@ Passed : 9/9
 ✓ PROMPT / CONTEXT INTEGRATION TEST PASSED
 ```
 
-Prompt builder regression:
-
-```text
-backend/scripts/test_prompt_builder.py
-```
-
-Result:
-
-```text
-RESULT: 7/7 TESTS PASSED
-```
-
 ---
 
-## Phase 14 Validation Summary
+# 📊 Phase 14 Validation Summary
 
 ```text
 Timestamp Formatting            : 7/7 PASSED
@@ -1126,6 +1033,285 @@ Grounded Answer
 ```
 
 **Phase 14: COMPLETE**
+
+---
+
+# 🚀 Phase 15 — FastAPI Backend
+
+Phase 15 introduces the HTTP API layer around the existing retrieval and RAG
+services.
+
+The objective is to expose the internal retrieval pipeline through a clean,
+validated, frontend-consumable API without eagerly initializing expensive
+retrieval, reranking, embedding, or LLM components during application import.
+
+Current API architecture:
+
+```text
+Frontend / API Client
+        ↓
+FastAPI
+        ↓
+Request Validation
+        ↓
+API Route
+        ↓
+Query Understanding
+        ↓
+Hybrid Retrieval
+        ↓
+RRF Fusion
+        ↓
+Cross-Encoder Reranking
+        ↓
+Context Assembly
+        ↓
+Structured API Response
+```
+
+---
+
+## Phase 15.1 — FastAPI Application Foundation
+
+Implemented:
+
+```text
+backend/app/main.py
+```
+
+Responsibilities:
+
+```text
+✓ Create FastAPI application
+✓ Register API routers
+✓ Provide application metadata
+✓ Keep startup lightweight
+✓ Avoid eager initialization of expensive components
+```
+
+Application metadata:
+
+```text
+Title       : DSA Revision Analyzer API
+Version     : 0.1.0
+```
+
+---
+
+## Phase 15.2 — API Schemas
+
+Request and response models are separated from service-layer objects.
+
+Request schemas:
+
+```text
+backend/app/schemas/requests.py
+```
+
+Response schemas:
+
+```text
+backend/app/schemas/responses.py
+```
+
+The schemas provide:
+
+```text
+✓ Request validation
+✓ Structured API contracts
+✓ Typed retrieval requests
+✓ Typed retrieval responses
+✓ Consistent JSON serialization
+```
+
+---
+
+## Phase 15.3 — Retrieval API
+
+Implemented:
+
+```text
+backend/app/api/retrieval.py
+```
+
+Endpoint:
+
+```text
+POST /api/v1/retrieval/search
+```
+
+The endpoint executes:
+
+```text
+Request validation
+        ↓
+Query Understanding
+        ↓
+Hybrid Retrieval
+        ↓
+Context normalization
+        ↓
+Structured API response
+```
+
+Example request:
+
+```json
+{
+  "query": "explain two pointer",
+  "top_k": 5
+}
+```
+
+Example response structure:
+
+```json
+{
+  "query": "explain two pointer",
+  "pattern": "two_pointer",
+  "sub_pattern": null,
+  "results": [
+    {
+      "rank": 1,
+      "point_id": "...",
+      "text": "...",
+      "video_id": "...",
+      "pattern": "two_pointer",
+      "sub_pattern": null,
+      "timestamp_start": 177.48,
+      "timestamp_end": 181.67,
+      "rrf_score": 0.049,
+      "reranker_score": 9.33
+    }
+  ]
+}
+```
+
+The API has been manually validated through the FastAPI Swagger interface.
+
+Validated endpoint:
+
+```text
+POST /api/v1/retrieval/search
+```
+
+Validated result:
+
+```text
+HTTP 200 OK
+```
+
+The returned response successfully contains:
+
+```text
+✓ Query
+✓ Detected pattern
+✓ Sub-pattern
+✓ Retrieved results
+✓ Point IDs
+✓ Chunk text
+✓ Video IDs
+✓ Pattern metadata
+✓ Timestamp metadata
+✓ RRF scores
+✓ Cross-Encoder reranker scores
+```
+
+---
+
+## Phase 15 Current Status
+
+Completed:
+
+```text
+✓ FastAPI application foundation
+✓ API router registration
+✓ Request schemas
+✓ Response schemas
+✓ Retrieval API
+✓ Request validation
+✓ Swagger/OpenAPI exposure
+✓ Retrieval pipeline integration
+✓ Structured JSON response
+```
+
+Still pending:
+
+```text
+[ ] Query API
+[ ] RAG API
+[ ] Metadata endpoints
+[ ] API-level automated test suite
+```
+
+Therefore:
+
+```text
+Phase 15 Core Retrieval API: COMPLETE
+Phase 15 Full API Surface  : IN PROGRESS
+```
+
+---
+
+# 🌐 API Health Checks
+
+Application health endpoint:
+
+```text
+GET /health
+```
+
+Versioned health endpoint:
+
+```text
+GET /api/v1/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "ok",
+  "service": "dsa-revision-analyzer-api"
+}
+```
+
+---
+
+# 🧪 API Validation
+
+The backend can be compiled using:
+
+```powershell
+uv run python -m compileall app
+```
+
+The FastAPI server can be started using:
+
+```powershell
+uv run uvicorn app.main:app --reload
+```
+
+Swagger UI:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Current retrieval endpoint:
+
+```text
+POST http://127.0.0.1:8000/api/v1/retrieval/search
+```
+
+Example request:
+
+```json
+{
+  "query": "explain two pointer",
+  "top_k": 5
+}
+```
 
 ---
 
@@ -1203,38 +1389,62 @@ Provenance Integration
 
 Timestamp-Grounded Explanation
     ✓ 14/14 checks passed
+
+FastAPI Health API
+    ✓ Passed
+
+FastAPI Retrieval API
+    ✓ HTTP 200 validated
 ```
 
-The current validated retrieval-to-generation pipeline is:
+---
+
+# 🔄 Current End-to-End Backend Pipeline
 
 ```text
-Query
-  ↓
+YouTube
+   ↓
+Transcript
+   ↓
+Translation
+   ↓
+Chunking
+   ↓
+Metadata
+   ↓
+Embedding
+   ↓
+Qdrant
+   ↓
 Query Understanding
-  ↓
-Metadata Constraints
-  ↓
-Semantic Search + BM25
-  ↓
+   ↓
+Metadata-Aware Retrieval
+   ↓
+Semantic + BM25
+   ↓
 RRF Fusion
-  ↓
+   ↓
 Candidate Pool
-  ↓
+   ↓
 Cross-Encoder Reranking
-  ↓
+   ↓
 Final Top-K
-  ↓
+   ↓
 Context Assembly
-  ↓
-Timestamp + Provenance Layer
-  ↓
+   ↓
+Timestamp + Provenance
+   ↓
 Grounded Prompt Builder
-  ↓
+   ↓
 Groq LLM
-  ↓
+   ↓
 Grounding Guard
-  ↓
+   ↓
 Grounded Answer
+   ↓
+FastAPI API Layer
+   ↓
+Frontend
 ```
 
 ---
@@ -1319,7 +1529,7 @@ Run:
 python .\scripts\test_grounding_guard.py
 ```
 
-The grounding test includes both deterministic prompt-level checks and a real
+The grounding test includes deterministic prompt-level checks and a real
 adversarial LLM test for unsupported questions.
 
 ---
@@ -1414,6 +1624,32 @@ python .\scripts\test_timestamp_grounded_explanation.py
 
 ---
 
+## FastAPI Compilation Check
+
+Run:
+
+```powershell
+uv run python -m compileall app
+```
+
+---
+
+## FastAPI Server
+
+Run:
+
+```powershell
+uv run uvicorn app.main:app --reload
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
 # 🗂️ Project Structure
 
 ```text
@@ -1422,19 +1658,34 @@ dsa_revision_analyzer/
 ├── backend/
 │   │
 │   ├── app/
-│   │   └── services/
-│   │       ├── dsa_taxonomy.py
-│   │       ├── metadata_storage.py
-│   │       ├── query_understanding.py
-│   │       ├── retrieval.py
-│   │       ├── bm25_index.py
-│   │       ├── hybrid_retrieval.py
-│   │       ├── rrf.py
-│   │       ├── reranker.py
-│   │       ├── context_assembler.py
-│   │       ├── prompt_builder.py
-│   │       ├── llm_generator.py
-│   │       └── video_metadata_schema.py
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── retrieval.py
+│   │   │
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   ├── requests.py
+│   │   │   └── responses.py
+│   │   │
+│   │   ├── services/
+│   │   │   ├── dsa_taxonomy.py
+│   │   │   ├── metadata_storage.py
+│   │   │   ├── query_understanding.py
+│   │   │   ├── retrieval.py
+│   │   │   ├── bm25_index.py
+│   │   │   ├── hybrid_retrieval.py
+│   │   │   ├── hybrid_retrieval_backup.py
+│   │   │   ├── rrf.py
+│   │   │   ├── rrf_backup.py
+│   │   │   ├── reranker.py
+│   │   │   ├── context_assembler.py
+│   │   │   ├── prompt_builder.py
+│   │   │   ├── llm_generator.py
+│   │   │   └── video_metadata_schema.py
+│   │   │
+│   │   └── main.py
 │   │
 │   ├── data/
 │   │   ├── transcripts/
@@ -1702,9 +1953,6 @@ End-to-End RAG        : PASSED
 * [x] Video jump links
 * [x] Relevant time-range extraction
 * [x] Timestamp-grounded explanations
-
-Additional engineering work:
-
 * [x] Context provenance preservation
 * [x] Timestamp + jump-link integration
 * [x] Relevant time-range integration
@@ -1759,20 +2007,72 @@ Timestamp-Grounded Explanation  : 14/14 PASSED
 
 ## Phase 15 — FastAPI Backend
 
-* [ ] Retrieval API
+### Completed
+
+* [x] FastAPI application foundation
+* [x] API router registration
+* [x] Request schemas
+* [x] Response schemas
+* [x] Retrieval API
+* [x] Request validation
+* [x] Swagger/OpenAPI exposure
+* [x] Retrieval pipeline integration
+* [x] Structured JSON response
+* [x] Health endpoints
+
+### Remaining
+
 * [ ] Query API
 * [ ] RAG API
 * [ ] Metadata endpoints
-* [ ] Request validation
+* [ ] API-level automated test suite
+
+### Current Endpoint
+
+```text
+POST /api/v1/retrieval/search
+```
+
+### Phase 15.3 Retrieval Pipeline
+
+```text
+HTTP Request
+      ↓
+Pydantic Validation
+      ↓
+Query Understanding
+      ↓
+Hybrid Retrieval
+      ↓
+RRF
+      ↓
+Cross-Encoder Reranking
+      ↓
+Context Assembly
+      ↓
+Structured Response
+```
+
+Current status:
+
+```text
+Phase 15 Core Retrieval API : COMPLETE
+Phase 15 Full API Surface   : IN PROGRESS
+```
 
 ---
 
 ## Phase 16 — React Frontend
 
+* [ ] Frontend project foundation
+* [ ] API client layer
 * [ ] Search interface
 * [ ] Revision interface
+* [ ] Loading states
+* [ ] Error states
 * [ ] Retrieved source display
-* [ ] Video/timestamp navigation
+* [ ] Timestamp navigation
+* [ ] Grounded answer display
 
 ---
 
@@ -1882,8 +2182,9 @@ Adaptive Next Step
 
 # 📌 Current Project Status
 
-The project has now completed the retrieval, context-construction, grounded
-RAG generation, and timestamp-aware retrieval foundation through **Phase 14**.
+The project has completed the core retrieval, context-construction, grounded
+RAG generation, timestamp-aware retrieval, and the first production-facing
+FastAPI retrieval API layer.
 
 The current validated system can:
 
@@ -1912,9 +2213,15 @@ The current validated system can:
 22. Preserve source metadata
 23. Handle insufficient retrieval context
 24. Validate unsupported-query behavior
+25. Expose retrieval through FastAPI
+26. Validate retrieval requests with Pydantic
+27. Return structured API responses
+28. Expose API documentation through Swagger
 ```
 
-Current validated pipeline:
+---
+
+# 🔄 Current Validated Pipeline
 
 ```text
 YouTube
@@ -1956,34 +2263,10 @@ Groq LLM
 Grounding Guard
    ↓
 Grounded Answer
-```
-
-Completed:
-
-```text
-Phase 1   ✓
-Phase 2   ✓
-Phase 3   ✓*
-Phase 4   ✓
-Phase 5   ✓
-Phase 6   ✓
-Phase 7   ✓
-Phase 8   ✓
-Phase 9   ✓
-Phase 10  ✓
-Phase 11  ✓
-Phase 12  ✓
-Phase 13  ✓
-Phase 14  ✓
-```
-
-`*` Phase 3 still contains the remaining representative-dataset translation
-work.
-
-The next major development stage is:
-
-```text
-Phase 15 — FastAPI Backend
+   ↓
+FastAPI
+   ↓
+Frontend
 ```
 
 ---
@@ -1998,14 +2281,16 @@ The final system is intended to become more than a transcript search engine.
                               ▼
                      Pattern Knowledge
                               │
-                ┌─────────────┴─────────────┐
-                ▼                           ▼
-         Revision Engine              Practice Engine
-                │                           │
-                ▼                           ▼
-       Relevant Video Content        New Problems
-                │                           │
-                └─────────────┬─────────────┘
+                              ▼
+                 ┌────────────┴────────────┐
+                 │                         │
+                 ▼                         ▼
+          Revision Engine            Practice Engine
+                 │                         │
+                 ▼                         ▼
+        Relevant Video Content        New Problems
+                 │                         │
+                 └────────────┬────────────┘
                               ▼
                        Learner Progress
                               │
@@ -2028,6 +2313,9 @@ The system should gradually understand:
 
 ```text
 Python
+FastAPI
+Pydantic
+React
 Sentence Transformers
 Qdrant
 Groq API
@@ -2045,8 +2333,8 @@ JSON-based intermediate storage
 
 ## 1. No Fake Pattern Generation
 
-The system must not invent a pattern merely because a query contains a known DSA
-term.
+The system must not invent a pattern merely because a query contains a known
+DSA term.
 
 For example:
 
@@ -2080,6 +2368,8 @@ Bubble Sort
 Insertion Sort
 Selection Sort
 Radix Sort
+Heap Sort
+Merge Sort
 ```
 
 are not automatically independent pattern categories.
@@ -2258,6 +2548,67 @@ Unsupported-claim rate
 
 ---
 
+## 10. API Layer Should Not Own Retrieval Logic
+
+The FastAPI layer is an interface layer.
+
+The intended separation is:
+
+```text
+API
+ ↓
+Schemas / Validation
+ ↓
+Services
+ ↓
+Retrieval / RAG Pipeline
+```
+
+The API layer should not duplicate:
+
+```text
+Query Understanding
+BM25
+Semantic Retrieval
+RRF
+Reranking
+Context Assembly
+LLM Generation
+```
+
+Those responsibilities remain inside the service layer.
+
+---
+
+## 11. Expensive Components Should Not Be Eagerly Initialized
+
+FastAPI application import/startup should remain lightweight.
+
+The application must avoid eagerly loading:
+
+```text
+Embedding models
+Cross-Encoder models
+Qdrant-heavy clients
+BM25 indexes
+LLM clients
+```
+
+unless required by the actual request or application lifecycle.
+
+This keeps:
+
+```text
+Import
+Startup
+Reload
+Testing
+```
+
+predictable and lightweight.
+
+---
+
 # 🚀 Development Philosophy
 
 The project is being built incrementally as a real retrieval and RAG system.
@@ -2274,6 +2625,10 @@ Integration Test
 End-to-End Test
    ↓
 Validate Behavior
+   ↓
+Expose Through API
+   ↓
+Validate API Contract
    ↓
 Move to Next Phase
 ```
@@ -2294,4 +2649,92 @@ Evidence
 Generation
    ↓
 Source Navigation
+   ↓
+API
+   ↓
+Frontend
 ```
+
+forms a traceable and maintainable system.
+
+---
+
+# 📍 Current Development Position
+
+```text
+Phase 1   ✓
+Phase 2   ✓
+Phase 3   ✓*
+Phase 4   ✓
+Phase 5   ✓
+Phase 6   ✓
+Phase 7   ✓
+Phase 8   ✓
+Phase 9   ✓
+Phase 10  ✓
+Phase 11  ✓
+Phase 12  ✓
+Phase 13  ✓
+Phase 14  ✓
+Phase 15   ~
+Phase 16  →
+```
+
+```text
+✓  = Complete
+~  = In Progress
+→  = Next
+```
+
+`*` Phase 3 still contains the remaining representative-dataset translation
+work.
+
+Current position:
+
+```text
+Phase 15 — FastAPI Backend
+        ↓
+Core Retrieval API complete
+        ↓
+Remaining API surface
+        ↓
+Phase 16 — React Frontend
+```
+
+---
+
+# 🎯 Immediate Next Milestone
+
+The next major development stage is:
+
+```text
+Phase 16 — React Frontend
+```
+
+The frontend will consume:
+
+```text
+POST /api/v1/retrieval/search
+```
+
+and progressively expose the complete revision experience:
+
+```text
+User Query
+    ↓
+Frontend
+    ↓
+FastAPI
+    ↓
+Retrieval Pipeline
+    ↓
+Grounded Results
+    ↓
+Source Metadata
+    ↓
+Timestamp Navigation
+    ↓
+Revision UI
+```
+
+তারপর **Phase 16 শুরু**।
