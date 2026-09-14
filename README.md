@@ -2,8 +2,8 @@
 
 An AI-powered DSA revision system that converts educational video content into a
 structured, searchable knowledge base and uses pattern-aware hybrid retrieval,
-reranking, grounded context construction, and LLM generation to provide
-evidence-grounded revision support.
+reranking, grounded context construction, timestamp-aware retrieval, and LLM
+generation to provide evidence-grounded revision support.
 
 The system is designed around **DSA problem-solving patterns**, not individual
 random problems.
@@ -45,6 +45,8 @@ Cross-Encoder Reranking
       ↓
 Context Assembly
       ↓
+Timestamp-Aware Context
+      ↓
 Grounded Prompt Construction
       ↓
 Groq LLM Generation
@@ -52,7 +54,7 @@ Groq LLM Generation
 Grounding Guard
       ↓
 Grounded Answer
-```
+````
 
 The long-term system will also use completed topics and patterns to generate
 **pattern-specific practice problems without hints**.
@@ -63,7 +65,8 @@ The long-term system will also use completed topics and patterns to generate
 
 The current system uses a hybrid retrieval architecture with lexical search,
 semantic search, Reciprocal Rank Fusion, Cross-Encoder reranking, structured
-context assembly, grounded prompting, and LLM generation.
+context assembly, timestamp-aware source provenance, grounded prompting, and
+LLM generation.
 
 ```text
                          ┌──────────────────────┐
@@ -156,6 +159,12 @@ context assembly, grounded prompting, and LLM generation.
                                    ▼
                           ┌──────────────────┐
                           │ Context Assembly │
+                          └────────┬─────────┘
+                                   │
+                                   ▼
+                          ┌──────────────────┐
+                          │ Timestamp +      │
+                          │ Provenance Layer │
                           └────────┬─────────┘
                                    │
                                    ▼
@@ -767,6 +776,359 @@ RESULT: 8/8 TESTS PASSED
 
 ---
 
+# ⏱️ Phase 14 — Timestamp-Aware Retrieval
+
+Phase 14 extends the grounded RAG pipeline with timestamp-aware source
+provenance and direct navigation back to the relevant portion of the source
+video.
+
+The objective is to ensure that retrieved explanations remain connected to
+their original video location.
+
+```text
+Retrieved Chunk
+      ↓
+Timestamp Metadata
+      ↓
+Relevant Time Range
+      ↓
+YouTube Jump Link
+      ↓
+Provenance-Aware Context
+      ↓
+Timestamp-Grounded Prompt
+      ↓
+Grounded Explanation
+```
+
+---
+
+## Timestamp-Aware Result Formatting
+
+The context layer formats source timestamps into human-readable values.
+
+Examples:
+
+```text
+0 seconds       → 00:00
+83.5 seconds    → 01:23
+127.9 seconds   → 02:07
+```
+
+Timestamp ranges are represented as:
+
+```text
+Timestamp: 01:23 -> 02:07
+```
+
+Missing timestamps are handled safely without inventing source locations.
+
+Implementation:
+
+```text
+backend/app/services/context_assembler.py
+```
+
+Validation:
+
+```text
+backend/scripts/test_timestamp_formatting.py
+```
+
+Result:
+
+```text
+Passed : 7/7
+
+✓ PHASE 14.1 TIMESTAMP FORMATTING TEST PASSED
+```
+
+---
+
+## Video Jump Links
+
+Retrieved context can expose a direct YouTube link to the relevant timestamp.
+
+Example:
+
+```text
+https://www.youtube.com/watch?v=dyG4JBKh6tA&t=83s
+```
+
+The timestamp is converted to a non-negative integer second before constructing
+the jump link.
+
+Missing video IDs are handled safely.
+
+Implementation:
+
+```text
+backend/app/services/context_assembler.py
+```
+
+Validation:
+
+```text
+backend/scripts/test_video_jump_links.py
+```
+
+Result:
+
+```text
+Passed : 6/6
+
+✓ PHASE 14.2 VIDEO JUMP LINK TEST PASSED
+```
+
+Timestamp and jump-link integration:
+
+```text
+backend/scripts/test_timestamp_jump_integration.py
+```
+
+Result:
+
+```text
+Passed : 8/8
+
+✓ TIMESTAMP + VIDEO JUMP LINK INTEGRATION TEST PASSED
+```
+
+---
+
+## Relevant Time-Range Extraction
+
+The system preserves the original relevant timestamp range associated with a
+retrieved chunk.
+
+Example:
+
+```text
+Start    : 83.5
+End      : 127.9
+Duration : 44.4 seconds
+```
+
+The extraction layer validates:
+
+```text
+✓ Valid timestamp ranges
+✓ Integer timestamps
+✓ Zero-duration ranges
+✓ Missing start timestamps
+✓ Missing end timestamps
+✓ Missing timestamp ranges
+✓ Reversed ranges
+✓ Negative timestamps
+✓ Numeric string conversion
+✓ Invalid timestamp values
+```
+
+Implementation:
+
+```text
+backend/app/services/context_assembler.py
+```
+
+Validation:
+
+```text
+backend/scripts/test_relevant_time_range.py
+```
+
+Result:
+
+```text
+Passed : 13/13
+
+✓ RELEVANT TIME-RANGE TEST PASSED
+```
+
+Integration validation:
+
+```text
+backend/scripts/test_relevant_time_range_integration.py
+```
+
+Result:
+
+```text
+Passed : 9/9
+
+✓ RELEVANT TIME-RANGE INTEGRATION TEST PASSED
+```
+
+---
+
+## Timestamp-Grounded Explanations
+
+The grounded prompt now explicitly handles timestamp and video provenance.
+
+The system instructs the LLM to:
+
+```text
+* Ground explanations in supplied timestamped evidence.
+* Use supplied video provenance when referring to source material.
+* Preserve supplied timestamps and video references.
+* Never invent timestamps, timestamp ranges, video IDs, or video links.
+* Avoid fabricating temporal references when they are absent.
+```
+
+Implementation:
+
+```text
+backend/app/services/prompt_builder.py
+```
+
+Validation:
+
+```text
+backend/scripts/test_timestamp_grounded_explanation.py
+```
+
+Result:
+
+```text
+Passed : 14/14
+
+✓ TIMESTAMP-GROUNDED EXPLANATION TEST PASSED
+```
+
+---
+
+## Context Provenance
+
+Phase 14 also preserves retrieval provenance throughout context assembly.
+
+Each context item can preserve:
+
+```text
+point_id
+video_id
+pattern
+sub_pattern
+timestamp_start
+timestamp_end
+rrf_score
+reranker_score
+original chunk text
+```
+
+This allows downstream components to retain evidence about where each retrieved
+piece of information originated.
+
+Implementation:
+
+```text
+backend/app/services/context_assembler.py
+```
+
+Validation:
+
+```text
+backend/scripts/test_context_provenance.py
+```
+
+Result:
+
+```text
+Passed : 15/15
+
+✓ CONTEXT PROVENANCE TEST PASSED
+```
+
+Integration validation:
+
+```text
+backend/scripts/test_provenance_integration.py
+```
+
+Result:
+
+```text
+Passed : 20/20
+
+✓ PROVENANCE INTEGRATION TEST PASSED
+```
+
+---
+
+## Prompt / Context Integration
+
+Timestamp-aware context is preserved when constructing the final grounded prompt.
+
+Validation:
+
+```text
+backend/scripts/test_prompt_context_integration.py
+```
+
+Result:
+
+```text
+Passed : 9/9
+
+✓ PROMPT / CONTEXT INTEGRATION TEST PASSED
+```
+
+Prompt builder regression:
+
+```text
+backend/scripts/test_prompt_builder.py
+```
+
+Result:
+
+```text
+RESULT: 7/7 TESTS PASSED
+```
+
+---
+
+## Phase 14 Validation Summary
+
+```text
+Timestamp Formatting            : 7/7 PASSED
+Video Jump Links                : 6/6 PASSED
+Timestamp + Jump Integration    : 8/8 PASSED
+Relevant Time-Range             : 13/13 PASSED
+Time-Range Integration          : 9/9 PASSED
+Prompt / Context Integration    : 9/9 PASSED
+Prompt Builder Regression       : 7/7 PASSED
+Context Provenance              : 15/15 PASSED
+Provenance Integration          : 20/20 PASSED
+Context Assembly Regression     : 9/9 PASSED
+Timestamp-Grounded Explanation  : 14/14 PASSED
+```
+
+### Phase 14 Final Pipeline
+
+```text
+Final Reranked Top-K
+        ↓
+Context Assembly
+        ↓
+Metadata + Score Preservation
+        ↓
+Timestamp Formatting
+        ↓
+Relevant Time-Range
+        ↓
+YouTube Jump Link
+        ↓
+Provenance-Aware Context
+        ↓
+Timestamp-Grounded Prompt
+        ↓
+Groq LLM
+        ↓
+Grounded Answer
+```
+
+**Phase 14: COMPLETE**
+
+---
+
 # 📊 Current Validation Status
 
 ```text
@@ -814,6 +1176,33 @@ End-to-End Grounded RAG
 
 Grounding / Hallucination Guard
     ✓ 8/8 checks passed
+
+Timestamp Formatting
+    ✓ 7/7 checks passed
+
+Video Jump Links
+    ✓ 6/6 checks passed
+
+Relevant Time-Range
+    ✓ 13/13 checks passed
+
+Timestamp + Jump Integration
+    ✓ 8/8 checks passed
+
+Time-Range Integration
+    ✓ 9/9 checks passed
+
+Prompt / Context Integration
+    ✓ 9/9 checks passed
+
+Context Provenance
+    ✓ 15/15 checks passed
+
+Provenance Integration
+    ✓ 20/20 checks passed
+
+Timestamp-Grounded Explanation
+    ✓ 14/14 checks passed
 ```
 
 The current validated retrieval-to-generation pipeline is:
@@ -836,6 +1225,8 @@ Cross-Encoder Reranking
 Final Top-K
   ↓
 Context Assembly
+  ↓
+Timestamp + Provenance Layer
   ↓
 Grounded Prompt Builder
   ↓
@@ -933,6 +1324,96 @@ adversarial LLM test for unsupported questions.
 
 ---
 
+## Timestamp Formatting Test
+
+Run:
+
+```powershell
+python .\scripts\test_timestamp_formatting.py
+```
+
+---
+
+## Video Jump Link Test
+
+Run:
+
+```powershell
+python .\scripts\test_video_jump_links.py
+```
+
+---
+
+## Timestamp + Jump Integration Test
+
+Run:
+
+```powershell
+python .\scripts\test_timestamp_jump_integration.py
+```
+
+---
+
+## Relevant Time-Range Test
+
+Run:
+
+```powershell
+python .\scripts\test_relevant_time_range.py
+```
+
+---
+
+## Relevant Time-Range Integration Test
+
+Run:
+
+```powershell
+python .\scripts\test_relevant_time_range_integration.py
+```
+
+---
+
+## Prompt / Context Integration Test
+
+Run:
+
+```powershell
+python .\scripts\test_prompt_context_integration.py
+```
+
+---
+
+## Context Provenance Test
+
+Run:
+
+```powershell
+python .\scripts\test_context_provenance.py
+```
+
+---
+
+## Provenance Integration Test
+
+Run:
+
+```powershell
+python .\scripts\test_provenance_integration.py
+```
+
+---
+
+## Timestamp-Grounded Explanation Test
+
+Run:
+
+```powershell
+python .\scripts\test_timestamp_grounded_explanation.py
+```
+
+---
+
 # 🗂️ Project Structure
 
 ```text
@@ -977,9 +1458,18 @@ dsa_revision_analyzer/
 │   │   ├── test_context_assembly.py
 │   │   ├── test_context_integration.py
 │   │   ├── test_prompt_builder.py
+│   │   ├── test_prompt_context_integration.py
 │   │   ├── test_llm_generator.py
 │   │   ├── test_e2e_rag.py
 │   │   ├── test_grounding_guard.py
+│   │   ├── test_timestamp_formatting.py
+│   │   ├── test_video_jump_links.py
+│   │   ├── test_timestamp_jump_integration.py
+│   │   ├── test_relevant_time_range.py
+│   │   ├── test_relevant_time_range_integration.py
+│   │   ├── test_context_provenance.py
+│   │   ├── test_provenance_integration.py
+│   │   ├── test_timestamp_grounded_explanation.py
 │   │   ├── local_translation.py
 │   │   ├── indictrans_onnx_test.py
 │   │   ├── benchmark_indictrans.py
@@ -1208,10 +1698,62 @@ End-to-End RAG        : PASSED
 
 ## Phase 14 — Timestamp-Aware Retrieval
 
-* [ ] Timestamp-aware result formatting
-* [ ] Video jump links
-* [ ] Relevant time-range extraction
-* [ ] Timestamp-grounded explanations
+* [x] Timestamp-aware result formatting
+* [x] Video jump links
+* [x] Relevant time-range extraction
+* [x] Timestamp-grounded explanations
+
+Additional engineering work:
+
+* [x] Context provenance preservation
+* [x] Timestamp + jump-link integration
+* [x] Relevant time-range integration
+* [x] Prompt/context timestamp integration
+* [x] Provenance integration validation
+* [x] Context assembly regression validation
+* [x] Timestamp-grounded explanation validation
+
+### Phase 14 Final Pipeline
+
+```text
+Final Reranked Top-K
+        ↓
+Context Assembly
+        ↓
+Metadata + Score Preservation
+        ↓
+Timestamp Formatting
+        ↓
+Relevant Time-Range
+        ↓
+YouTube Jump Link
+        ↓
+Provenance-Aware Context
+        ↓
+Timestamp-Grounded Prompt
+        ↓
+Groq LLM
+        ↓
+Grounded Answer
+```
+
+Validation:
+
+```text
+Timestamp Formatting            : 7/7 PASSED
+Video Jump Links                : 6/6 PASSED
+Timestamp + Jump Integration    : 8/8 PASSED
+Relevant Time-Range             : 13/13 PASSED
+Time-Range Integration          : 9/9 PASSED
+Prompt / Context Integration    : 9/9 PASSED
+Prompt Builder Regression       : 7/7 PASSED
+Context Provenance              : 15/15 PASSED
+Provenance Integration          : 20/20 PASSED
+Context Assembly Regression     : 9/9 PASSED
+Timestamp-Grounded Explanation  : 14/14 PASSED
+```
+
+**Phase 14: COMPLETE**
 
 ---
 
@@ -1340,8 +1882,8 @@ Adaptive Next Step
 
 # 📌 Current Project Status
 
-The project has now completed the retrieval, context-construction, and grounded
-RAG generation foundation through **Phase 13**.
+The project has now completed the retrieval, context-construction, grounded
+RAG generation, and timestamp-aware retrieval foundation through **Phase 14**.
 
 The current validated system can:
 
@@ -1360,11 +1902,16 @@ The current validated system can:
 12. Fuse candidates using RRF
 13. Rerank candidates using a Cross-Encoder
 14. Assemble structured LLM context
-15. Build grounded prompts
-16. Generate answers using Groq
-17. Preserve source metadata
-18. Handle insufficient retrieval context
-19. Validate unsupported-query behavior
+15. Preserve retrieval provenance
+16. Preserve source timestamps
+17. Extract relevant time ranges
+18. Generate YouTube timestamp jump links
+19. Build grounded prompts
+20. Generate answers using Groq
+21. Ground explanations in timestamped evidence
+22. Preserve source metadata
+23. Handle insufficient retrieval context
+24. Validate unsupported-query behavior
 ```
 
 Current validated pipeline:
@@ -1400,6 +1947,8 @@ Final Top-K
    ↓
 Context Assembly
    ↓
+Timestamp + Provenance
+   ↓
 Grounded Prompt Builder
    ↓
 Groq LLM
@@ -1425,6 +1974,7 @@ Phase 10  ✓
 Phase 11  ✓
 Phase 12  ✓
 Phase 13  ✓
+Phase 14  ✓
 ```
 
 `*` Phase 3 still contains the remaining representative-dataset translation
@@ -1433,11 +1983,8 @@ work.
 The next major development stage is:
 
 ```text
-Phase 14 — Timestamp-Aware Retrieval
+Phase 15 — FastAPI Backend
 ```
-
-which will build on the grounded answers and preserved video/timestamp metadata
-produced by Phase 13.
 
 ---
 
@@ -1646,6 +2193,9 @@ The model is instructed to answer only from supplied retrieved context.
 When sufficient evidence is unavailable, the system should prefer an explicit
 insufficient-information response over guessing.
 
+Timestamp and video references are also treated as evidence. The model must not
+invent source locations that are not present in the retrieved context.
+
 ---
 
 ## 8. Retrieval Metadata Must Survive the RAG Pipeline
@@ -1668,14 +2218,24 @@ reranker_score
 is preserved through context assembly and made available to downstream
 generation and source presentation.
 
-This is required for future timestamp-aware answers and video navigation.
+This enables:
+
+```text
+Source Provenance
+      ↓
+Timestamp-Aware Context
+      ↓
+Video Navigation
+      ↓
+Grounded Explanation
+```
 
 ---
 
 ## 9. Retrieval Evaluation Must Be Evidence-Based
 
-The system does not claim that a retrieval technique is better merely because
-its score or ranking changed.
+The system does not claim that a retrieval technique is better merely because its
+score or ranking changed.
 
 Meaningful retrieval evaluation should eventually use human-validated relevance
 labels and metrics such as:
@@ -1732,6 +2292,6 @@ Context
 Evidence
    ↓
 Generation
+   ↓
+Source Navigation
 ```
-
-remain traceable and testable throughout the system.
