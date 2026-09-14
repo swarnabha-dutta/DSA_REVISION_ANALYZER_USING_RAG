@@ -162,8 +162,8 @@ def test_metadata_survives_in_context() -> None:
     assert "video-001" in prompt.user_instruction
     assert "two_pointer" in prompt.user_instruction
     assert "opposite_direction" in prompt.user_instruction
-    assert "120.50s" in prompt.user_instruction
-    assert "145.75s" in prompt.user_instruction
+    assert "02:00 -> 02:25" in prompt.user_instruction
+    assert "02:26 -> 02:50" in prompt.user_instruction
 
     print("✓ Retrieval metadata preserved.")
 

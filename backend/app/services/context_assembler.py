@@ -14,12 +14,28 @@ Phase 12 responsibilities:
     - Preserve timestamps when available
     - Remove duplicate point IDs
     - Handle empty retrieval results safely
+
+Phase 14.1 responsibilities:
+    - Format retrieved timestamp ranges consistently for human/LLM-readable
+      context without changing the underlying numeric timestamp metadata
+
+Phase 14.2 responsibilities:
+    - Generate safe YouTube jump links from video ID + timestamp_start
+    - Omit jump links when required metadata is missing
+    - Expose links in deterministic assembled context output
+
+Phase 14.3 responsibilities:
+    - Extract and validate the relevant timestamp range
+    - Normalize start/end values to floats
+    - Calculate the duration of the relevant range
+    - Reject incomplete or invalid timestamp ranges
 """
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any, Sequence
+from urllib.parse import quote
 
 
 # ============================================================
@@ -76,25 +92,36 @@ class AssembledContext:
         sections: list[str] = []
 
         for item in self.items:
-            sections.append(
-                "\n".join(
-                    [
-                        f"[Context {item.rank}]",
-                        f"Point ID: {item.point_id}",
-                        f"Video ID: {item.video_id or 'unknown'}",
-                        f"Pattern: {item.pattern or 'unknown'}",
-                        f"Sub-pattern: {item.sub_pattern or 'unknown'}",
-                        (
-                            "Timestamp: "
-                            f"{_format_timestamp(item.timestamp_start)}"
-                            " -> "
-                            f"{_format_timestamp(item.timestamp_end)}"
-                        ),
-                        "",
-                        item.text,
-                    ]
-                )
+            lines = [
+                f"[Context {item.rank}]",
+                f"Point ID: {item.point_id}",
+                f"Video ID: {item.video_id or 'unknown'}",
+                f"Pattern: {item.pattern or 'unknown'}",
+                f"Sub-pattern: {item.sub_pattern or 'unknown'}",
+                (
+                    "Timestamp: "
+                    f"{_format_timestamp_range(item.timestamp_start, item.timestamp_end)}"
+                ),
+            ]
+
+            jump_link = _build_youtube_jump_link(
+                item.video_id,
+                item.timestamp_start,
             )
+
+            if jump_link:
+                lines.append(
+                    f"Video jump link: {jump_link}"
+                )
+
+            lines.extend(
+                [
+                    "",
+                    item.text,
+                ]
+            )
+
+            sections.append("\n".join(lines))
 
         return "\n\n".join(sections)
 
@@ -208,17 +235,166 @@ def _to_float(
         return None
 
 
+# ============================================================
+# PHASE 14.3 — RELEVANT TIME-RANGE EXTRACTION
+# ============================================================
+
+
+def _extract_relevant_time_range(
+    start: Any,
+    end: Any,
+) -> dict[str, float] | None:
+    """
+    Extract and validate a relevant video time range.
+
+    Parameters
+    ----------
+    start:
+        Start timestamp of the retrieved video segment.
+
+    end:
+        End timestamp of the retrieved video segment.
+
+    Returns
+    -------
+    dict[str, float] | None
+        A normalized range containing:
+            - start
+            - end
+            - duration
+
+        Returns None when:
+            - either timestamp is missing
+            - either timestamp is non-numeric
+            - either timestamp is negative
+            - start is greater than end
+    """
+
+    normalized_start = _to_float(start)
+    normalized_end = _to_float(end)
+
+    if normalized_start is None or normalized_end is None:
+        return None
+
+    if normalized_start < 0 or normalized_end < 0:
+        return None
+
+    if normalized_start > normalized_end:
+        return None
+
+    duration = round(
+        normalized_end - normalized_start,
+        3,
+    )
+
+    return {
+        "start": normalized_start,
+        "end": normalized_end,
+        "duration": duration,
+    }
+
+
+# ============================================================
+# PHASE 14.2 — VIDEO JUMP LINK
+# ============================================================
+
+
+def _build_youtube_jump_link(
+    video_id: str | None,
+    timestamp_start: float | None,
+) -> str | None:
+    """
+    Build a safe YouTube jump link for a retrieved video segment.
+
+    A link is returned only when both the video ID and start timestamp
+    are available. The underlying metadata remains unchanged.
+    """
+
+    if video_id is None or timestamp_start is None:
+        return None
+
+    normalized_video_id = str(video_id).strip()
+
+    if not normalized_video_id:
+        return None
+
+    seconds = max(
+        0,
+        int(timestamp_start),
+    )
+
+    encoded_video_id = quote(
+        normalized_video_id,
+        safe="-_",
+    )
+
+    return (
+        "https://www.youtube.com/watch?v="
+        f"{encoded_video_id}"
+        f"&t={seconds}s"
+    )
+
+
+# ============================================================
+# PHASE 14.1 — TIMESTAMP FORMATTING
+# ============================================================
+
+
 def _format_timestamp(
     value: float | None,
 ) -> str:
     """
-    Format timestamps consistently for LLM context.
+    Format a timestamp as a human-readable video position.
+
+    Examples
+    --------
+    0.0     -> "00:00"
+    83.5    -> "01:23"
+    3725.2  -> "01:02:05"
+
+    ``None`` remains explicit as ``"unknown"`` so missing timestamp
+    metadata is never silently converted into a misleading position.
     """
 
     if value is None:
         return "unknown"
 
-    return f"{value:.2f}s"
+    # Timestamps should represent positions in a video. Keep the existing
+    # numeric value untouched in ContextItem and only change its display form.
+    total_seconds = max(
+        0,
+        int(value),
+    )
+
+    hours, remainder = divmod(
+        total_seconds,
+        3600,
+    )
+
+    minutes, seconds = divmod(
+        remainder,
+        60,
+    )
+
+    if hours:
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+    return f"{minutes:02d}:{seconds:02d}"
+
+
+def _format_timestamp_range(
+    start: float | None,
+    end: float | None,
+) -> str:
+    """
+    Format a timestamp range for deterministic context output.
+    """
+
+    return (
+        f"{_format_timestamp(start)}"
+        " -> "
+        f"{_format_timestamp(end)}"
+    )
 
 
 # ============================================================
