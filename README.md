@@ -2736,5 +2736,3 @@ Timestamp Navigation
     ↓
 Revision UI
 ```
-
-তারপর **Phase 16 শুরু**।
