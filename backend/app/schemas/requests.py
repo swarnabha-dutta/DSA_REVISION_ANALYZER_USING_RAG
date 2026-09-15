@@ -1,11 +1,5 @@
 """
 Request schemas for the DSA Revision Analyzer API.
-
-These models define and validate the public API input contract.
-
-Service-layer dataclasses remain separate from API-layer
-Pydantic models so that HTTP concerns do not leak into the
-core retrieval and RAG services.
 """
 
 from __future__ import annotations

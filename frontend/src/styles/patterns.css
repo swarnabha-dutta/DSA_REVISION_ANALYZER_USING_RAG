@@ -6,6 +6,7 @@
             calc(100% - 40px));
 
     margin: 0 auto;
+
     padding-bottom: 100px;
 }
 
@@ -43,6 +44,7 @@
 
 .patterns-summary {
     display: flex;
+
     flex-wrap: wrap;
 
     gap: 12px;
@@ -56,11 +58,14 @@
     padding: 16px 18px;
 
     border: 1px solid var(--border);
+
     border-radius: 16px;
 
-    background: var(--surface);
+    background:
+        var(--surface);
 
-    backdrop-filter: blur(18px);
+    backdrop-filter:
+        blur(18px);
 }
 
 .patterns-summary strong,
@@ -102,16 +107,20 @@
     min-height: 220px;
 
     display: flex;
+
     flex-direction: column;
 
     padding: 22px;
 
     border: 1px solid var(--border);
+
     border-radius: 20px;
 
-    background: var(--surface);
+    background:
+        var(--surface);
 
-    backdrop-filter: blur(20px);
+    backdrop-filter:
+        blur(20px);
 
     box-shadow:
         0 20px 60px var(--shadow);
@@ -125,16 +134,21 @@
 }
 
 .pattern-card:hover {
-    transform: translateY(-4px);
+    transform:
+        translateY(-4px);
 
-    background: var(--hover-surface);
+    background:
+        var(--hover-surface);
 
-    border-color: var(--accent);
+    border-color:
+        var(--accent);
 }
 
 .pattern-card-top {
     display: flex;
-    justify-content: space-between;
+
+    justify-content:
+        space-between;
 
     gap: 10px;
 }
@@ -144,29 +158,36 @@
     color: var(--muted);
 
     font-size: 10px;
+
     font-weight: 700;
 
-    letter-spacing: 0.08em;
+    letter-spacing:
+        0.08em;
 
-    text-transform: uppercase;
+    text-transform:
+        uppercase;
 }
 
 .pattern-card-difficulty {
-    color: var(--accent-strong);
+    color:
+        var(--accent-strong);
 }
 
 .pattern-card h3 {
-    margin: 24px 0 9px;
+    margin:
+        24px 0 9px;
 
     font-size: 22px;
 
-    letter-spacing: -0.5px;
+    letter-spacing:
+        -0.5px;
 }
 
 .pattern-card p {
     margin: 0;
 
-    color: var(--muted);
+    color:
+        var(--muted);
 
     font-size: 13px;
 
@@ -179,12 +200,34 @@
     padding-top: 22px;
 
     display: flex;
-    justify-content: space-between;
 
-    color: var(--accent-strong);
+    justify-content:
+        space-between;
+
+    color:
+        var(--accent-strong);
 
     font-size: 12px;
+
     font-weight: 700;
+}
+
+/* =========================
+   YOUTUBE PLAYER CORE
+   ========================= */
+
+.youtube-player {
+    width: 100%;
+
+    height: 100%;
+}
+
+.youtube-player iframe {
+    width: 100%;
+
+    height: 100%;
+
+    border: 0;
 }
 
 /* =========================
@@ -201,7 +244,8 @@
 
 @media (max-width: 640px) {
     .patterns-page {
-        width: calc(100% - 24px);
+        width:
+            calc(100% - 24px);
     }
 
     .patterns-header {
@@ -213,6 +257,7 @@
     }
 
     .pattern-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 }

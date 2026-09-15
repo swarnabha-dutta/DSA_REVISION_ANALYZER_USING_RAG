@@ -1,11 +1,11 @@
 """
 Response schemas for the DSA Revision Analyzer API.
 
-These Pydantic models define the public JSON contract returned
-by the API layer.
+This module contains API response models only.
 
-Internal service-layer dataclasses are intentionally not exposed
-directly to API clients.
+IMPORTANT:
+    This module must NOT import API routers.
+    Keeping schemas independent prevents circular imports.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 class RetrievalResultResponse(BaseModel):
     """
-    One normalized retrieval result returned by the API.
+    One normalized retrieval result.
     """
 
     rank: int = Field(
@@ -76,7 +76,7 @@ class RetrievalResultResponse(BaseModel):
 
 class RetrievalResponse(BaseModel):
     """
-    Complete response returned by the hybrid retrieval endpoint.
+    Complete response from the hybrid retrieval endpoint.
     """
 
     query: str = Field(
@@ -89,5 +89,81 @@ class RetrievalResponse(BaseModel):
     sub_pattern: str | None = None
 
     results: list[RetrievalResultResponse] = Field(
+        default_factory=list,
+    )
+
+
+class RAGSourceResponse(BaseModel):
+    """
+    Source metadata returned together with a grounded AI answer.
+    """
+
+    rank: int = Field(
+        ...,
+        ge=1,
+    )
+
+    point_id: str = Field(
+        ...,
+        min_length=1,
+    )
+
+    video_id: str | None = None
+
+    pattern: str | None = None
+
+    sub_pattern: str | None = None
+
+    timestamp_start: float | None = Field(
+        default=None,
+        ge=0,
+    )
+
+    timestamp_end: float | None = Field(
+        default=None,
+        ge=0,
+    )
+
+    text: str = Field(
+        ...,
+        min_length=1,
+    )
+
+
+class RAGResponse(BaseModel):
+    """
+    Public response model for the grounded RAG endpoint.
+    """
+
+    query: str = Field(
+        ...,
+        min_length=1,
+    )
+
+    answer: str = Field(
+        ...,
+        min_length=1,
+    )
+
+    model: str = Field(
+        ...,
+        min_length=1,
+    )
+
+    query_language: str = Field(
+        ...,
+        min_length=1,
+    )
+
+    response_language: str = Field(
+        ...,
+        min_length=1,
+    )
+
+    pattern: str | None = None
+
+    sub_pattern: str | None = None
+
+    sources: list[RAGSourceResponse] = Field(
         default_factory=list,
     )

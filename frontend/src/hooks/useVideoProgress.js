@@ -1,57 +1,163 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 
-const STORAGE_KEY = "dsa-video-progress";
+const STORAGE_KEY =
+    "dsa-video-progress";
 
+/*
+ * Load saved progress safely.
+ */
 function loadProgress() {
     try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
 
-        return saved ? JSON.parse(saved) : {};
+        if (!saved) {
+            return {};
+        }
+
+        const parsed =
+            JSON.parse(saved);
+
+        if (
+            parsed &&
+            typeof parsed === "object"
+        ) {
+            return parsed;
+        }
+
+        return {};
     } catch {
         return {};
     }
 }
 
 export default function useVideoProgress() {
-    const [progress, setProgress] = useState(loadProgress);
+    const [progress, setProgress] =
+        useState(loadProgress);
 
+    /*
+     * Ref gives us access to the
+     * latest progress without making
+     * getVideoProgress recreate.
+     */
+    const progressRef =
+        useRef(progress);
+
+    /*
+     * Update ref whenever React state changes.
+     */
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        progressRef.current =
+            progress;
     }, [progress]);
 
-    const updateProgress = useCallback((videoId, data) => {
-        if (!videoId) return;
+    /*
+     * Persist progress.
+     */
+    useEffect(() => {
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(progress)
+            );
+        } catch (error) {
+            console.error(
+                "Unable to persist video progress:",
+                error
+            );
+        }
+    }, [progress]);
 
-        setProgress((previous) => ({
-            ...previous,
-            [videoId]: {
-                ...(previous[videoId] || {}),
-                ...data,
+    /*
+     * Update one video's progress.
+     */
+    const updateProgress =
+        useCallback(
+            (videoId, data) => {
+                if (
+                    !videoId ||
+                    !data
+                ) {
+                    return;
+                }
+
+                setProgress(
+                    (previous) => ({
+                        ...previous,
+
+                        [videoId]: {
+                            ...(previous[
+                                videoId
+                            ] || {}),
+
+                            ...data,
+                        },
+                    })
+                );
             },
-        }));
-    }, []);
+            []
+        );
 
-    const markCompleted = useCallback(
-        (videoId) => {
-            updateProgress(videoId, {
-                completed: true,
-                completedAt: new Date().toISOString(),
-            });
-        },
-        [updateProgress]
-    );
+    /*
+     * Mark video as completed.
+     */
+    const markCompleted =
+        useCallback(
+            (videoId) => {
+                if (!videoId) {
+                    return;
+                }
 
-    const getVideoProgress = useCallback(
-        (videoId) => {
-            return progress[videoId] || null;
-        },
-        [progress]
-    );
+                updateProgress(
+                    videoId,
+                    {
+                        completed: true,
+
+                        completedAt:
+                            new Date()
+                                .toISOString(),
+                    }
+                );
+            },
+            [updateProgress]
+        );
+
+    /*
+     * Read saved progress.
+     *
+     * This callback stays stable.
+     */
+    const getVideoProgress =
+        useCallback(
+            (videoId) => {
+                if (!videoId) {
+                    return null;
+                }
+
+                return (
+                    progressRef
+                        .current[
+                    videoId
+                    ] || null
+                );
+            },
+            []
+        );
 
     return {
         progress,
+
         updateProgress,
+
         markCompleted,
+
         getVideoProgress,
     };
 }

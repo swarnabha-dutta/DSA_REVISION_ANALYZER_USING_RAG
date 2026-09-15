@@ -1,28 +1,68 @@
-import { useEffect, useRef } from "react";
+import {
+    useEffect,
+    useRef,
+} from "react";
+
+const COMPLETION_THRESHOLD_SECONDS = 8;
 
 export default function VideoCompletion({
+    videoId,
     duration,
     currentTime,
     completed,
     onComplete,
 }) {
-    const triggered = useRef(false);
+    const triggered =
+        useRef(false);
 
+    /*
+     * Reset completion trigger
+     * when switching to another video.
+     */
     useEffect(() => {
-        if (!duration || !currentTime) return;
+        triggered.current = false;
+    }, [videoId]);
 
-        const remaining = duration - currentTime;
+    /*
+     * Detect completion when the learner
+     * enters the final 8 seconds.
+     */
+    useEffect(() => {
+        if (
+            completed ||
+            triggered.current
+        ) {
+            return;
+        }
 
-        // Consider the video complete when the user reaches
-        // the final 8 seconds.
-        if (remaining <= 8 && !triggered.current) {
+        if (
+            !duration ||
+            currentTime < 0
+        ) {
+            return;
+        }
+
+        const remaining =
+            duration - currentTime;
+
+        if (
+            remaining <=
+            COMPLETION_THRESHOLD_SECONDS
+        ) {
             triggered.current = true;
 
-            if (!completed) {
-                onComplete();
-            }
+            onComplete?.();
         }
-    }, [duration, currentTime, completed, onComplete]);
+    }, [
+        duration,
+        currentTime,
+        completed,
+        onComplete,
+    ]);
 
+    /*
+     * This component is intentionally
+     * UI-less.
+     */
     return null;
 }

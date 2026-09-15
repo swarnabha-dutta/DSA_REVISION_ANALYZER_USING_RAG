@@ -1,5 +1,7 @@
 import {
+    useCallback,
     useEffect,
+    useMemo,
     useState,
 } from "react";
 
@@ -9,6 +11,7 @@ import {
 } from "react-router-dom";
 
 import VideoPlayer from "../components/video/VideoPlayer";
+
 import VideoPlaylist from "../components/patterns/VideoPlaylist";
 
 import {
@@ -19,15 +22,20 @@ import {
     getPatternVideos,
 } from "../api/client";
 
+import useVideoProgress from "../hooks/useVideoProgress";
+
 export default function Pattern() {
     const {
         patternId,
     } = useParams();
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
     const pattern =
-        getPatternById(patternId);
+        getPatternById(
+            patternId
+        );
 
     const [
         videos,
@@ -39,11 +47,35 @@ export default function Pattern() {
         setActiveVideo,
     ] = useState(null);
 
+    /*
+     * IMPORTANT:
+     *
+     * activeStartAt represents the
+     * position from which the selected
+     * video should initially start.
+     *
+     * It should NOT update every 2 sec
+     * when progress is saved.
+     */
+    const [
+        activeStartAt,
+        setActiveStartAt,
+    ] = useState(0);
+
     const [
         loading,
         setLoading,
     ] = useState(true);
 
+    const {
+        updateProgress,
+        markCompleted,
+        getVideoProgress,
+    } = useVideoProgress();
+
+    /*
+     * Load videos for the current pattern.
+     */
     useEffect(() => {
         let cancelled = false;
 
@@ -57,7 +89,8 @@ export default function Pattern() {
                     );
 
                 const loadedVideos =
-                    response?.videos || [];
+                    response?.videos ||
+                    [];
 
                 if (cancelled) {
                     return;
@@ -67,14 +100,36 @@ export default function Pattern() {
                     loadedVideos
                 );
 
+                /*
+                 * Automatically select
+                 * the first video.
+                 */
                 if (
-                    loadedVideos.length > 0
+                    loadedVideos.length >
+                    0
                 ) {
+                    const firstVideo =
+                        loadedVideos[0];
+
+                    const savedProgress =
+                        getVideoProgress(
+                            firstVideo.id
+                        );
+
                     setActiveVideo(
-                        loadedVideos[0]
+                        firstVideo
+                    );
+
+                    /*
+                     * Resume from previous
+                     * position if available.
+                     */
+                    setActiveStartAt(
+                        savedProgress
+                            ?.currentTime ||
+                        0
                     );
                 }
-
             } catch (error) {
                 console.error(
                     "Unable to load pattern videos:",
@@ -83,12 +138,20 @@ export default function Pattern() {
 
                 if (!cancelled) {
                     setVideos([]);
-                    setActiveVideo(null);
-                }
 
+                    setActiveVideo(
+                        null
+                    );
+
+                    setActiveStartAt(
+                        0
+                    );
+                }
             } finally {
                 if (!cancelled) {
-                    setLoading(false);
+                    setLoading(
+                        false
+                    );
                 }
             }
         }
@@ -98,18 +161,177 @@ export default function Pattern() {
         return () => {
             cancelled = true;
         };
-    }, [patternId]);
+    }, [
+        patternId,
+        getVideoProgress,
+    ]);
 
-    function handleVideoComplete() {
-        if (!activeVideo) {
-            return;
-        }
+    /*
+     * Merge backend video metadata
+     * with local learning progress.
+     */
+    const videosWithProgress =
+        useMemo(
+            () =>
+                videos.map(
+                    (video) => {
+                        const saved =
+                            getVideoProgress(
+                                video.id
+                            );
 
-        navigate(
-            `/revision/${activeVideo.id}`
+                        return {
+                            ...video,
+
+                            completed:
+                                saved?.completed ??
+                                video.completed ??
+                                false,
+
+                            currentTime:
+                                saved?.currentTime ??
+                                0,
+                        };
+                    }
+                ),
+            [
+                videos,
+                getVideoProgress,
+            ]
         );
-    }
 
+    /*
+     * Get active video with
+     * latest progress information.
+     */
+    const activeVideoWithProgress =
+        useMemo(() => {
+            if (!activeVideo) {
+                return null;
+            }
+
+            return (
+                videosWithProgress.find(
+                    (video) =>
+                        video.id ===
+                        activeVideo.id
+                ) ||
+                activeVideo
+            );
+        }, [
+            activeVideo,
+            videosWithProgress,
+        ]);
+
+    /*
+     * Receive progress from
+     * the YouTube player.
+     */
+    const handleProgress =
+        useCallback(
+            ({
+                currentTime,
+                duration,
+            }) => {
+                const videoId =
+                    activeVideo?.id;
+
+                if (!videoId) {
+                    return;
+                }
+
+                updateProgress(
+                    videoId,
+                    {
+                        currentTime,
+
+                        duration,
+
+                        updatedAt:
+                            new Date()
+                                .toISOString(),
+                    }
+                );
+            },
+            [
+                activeVideo?.id,
+                updateProgress,
+            ]
+        );
+
+    /*
+     * Video completion.
+     */
+    const handleVideoComplete =
+        useCallback(() => {
+            const videoId =
+                activeVideo?.id;
+
+            if (!videoId) {
+                return;
+            }
+
+            /*
+             * Save completion state.
+             */
+            markCompleted(
+                videoId
+            );
+
+            /*
+             * Open AI revision.
+             */
+            navigate(
+                `/revision/${videoId}`
+            );
+        }, [
+            activeVideo?.id,
+            markCompleted,
+            navigate,
+        ]);
+
+    /*
+     * User selects another video
+     * from the playlist.
+     */
+    const handleVideoSelect =
+        useCallback(
+            (video) => {
+                setActiveVideo(
+                    video
+                );
+
+                /*
+                 * Find saved progress
+                 * for selected video.
+                 */
+                const savedProgress =
+                    getVideoProgress(
+                        video.id
+                    );
+
+                /*
+                 * Player starts from:
+                 *
+                 * saved progress
+                 * OR backend currentTime
+                 * OR zero
+                 */
+                setActiveStartAt(
+                    savedProgress
+                        ?.currentTime ||
+                    video.currentTime ||
+                    0
+                );
+            },
+            [
+                getVideoProgress,
+            ]
+        );
+
+    /*
+     * Pattern not found.
+     */
     if (!pattern) {
         return (
             <main className="page-content">
@@ -122,9 +344,11 @@ export default function Pattern() {
 
     return (
         <main className="pattern-page">
+            {/* =========================
+                PATTERN HEADER
+               ========================= */}
 
             <header className="pattern-header">
-
                 <span className="hero-eyebrow">
                     PATTERN
                 </span>
@@ -134,63 +358,94 @@ export default function Pattern() {
                 </h1>
 
                 <p>
-                    {pattern.description}
+                    {
+                        pattern.description
+                    }
                 </p>
-
             </header>
+
+            {/* =========================
+                LOADING
+               ========================= */}
 
             {loading ? (
                 <div className="loading-card">
                     Loading pattern playlist...
                 </div>
+            ) : videos.length ===
+                0 ? (
+                <div className="loading-card">
+                    এই pattern-এর জন্য এখনো কোনো
+                    video পাওয়া যায়নি।
+                </div>
             ) : (
                 <div className="learning-layout">
+                    {/* =========================
+                        VIDEO AREA
+                       ========================= */}
 
                     <section className="lesson-area">
-
                         <VideoPlayer
-                            video={activeVideo}
+                            key={
+                                activeVideoWithProgress?.id
+                            }
+                            video={
+                                activeVideoWithProgress
+                            }
+                            startAt={
+                                activeStartAt
+                            }
+                            onProgress={
+                                handleProgress
+                            }
                             onComplete={
                                 handleVideoComplete
                             }
                         />
 
-                        {activeVideo && (
-                            <div className="lesson-info">
+                        {/* =========================
+                            VIDEO INFORMATION
+                           ========================= */}
 
+                        {activeVideoWithProgress && (
+                            <div className="lesson-info">
                                 <span>
                                     NOW LEARNING
                                 </span>
 
                                 <h2>
-                                    {activeVideo.title}
+                                    {
+                                        activeVideoWithProgress.title
+                                    }
                                 </h2>
 
                                 <p>
                                     {
-                                        activeVideo.description ||
+                                        activeVideoWithProgress.description ||
                                         "এই lesson-এর concept গভীরভাবে বুঝে নাও।"
                                     }
                                 </p>
-
                             </div>
                         )}
-
                     </section>
 
+                    {/* =========================
+                        PLAYLIST
+                       ========================= */}
+
                     <VideoPlaylist
-                        videos={videos}
+                        videos={
+                            videosWithProgress
+                        }
                         activeVideoId={
-                            activeVideo?.id
+                            activeVideoWithProgress?.id
                         }
                         onSelect={
-                            setActiveVideo
+                            handleVideoSelect
                         }
                     />
-
                 </div>
             )}
-
         </main>
     );
 }
