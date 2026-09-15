@@ -1,0 +1,203 @@
+/* =========================================================
+   DSA REVISION ANALYZER
+   GLOBAL THEME
+   ========================================================= */
+
+:root {
+    color-scheme: dark;
+
+    /* BACKGROUND */
+
+    --bg: #05060a;
+
+    --surface:
+        rgba(15, 17, 24, 0.78);
+
+    --surface-strong:
+        #11131a;
+
+    --surface-hover:
+        rgba(255, 255, 255, 0.055);
+
+    /* BORDER */
+
+    --border:
+        rgba(255, 255, 255, 0.09);
+
+    --border-soft:
+        rgba(255, 255, 255, 0.055);
+
+    /* TEXT */
+
+    --text:
+        #f7f7fb;
+
+    --muted:
+        #9da3b4;
+
+    --subtle:
+        #6f7484;
+
+    /* ACCENT */
+
+    --accent:
+        #8f8cff;
+
+    --accent-strong:
+        #aaa7ff;
+
+    --soft-accent:
+        rgba(125, 125, 255, 0.12);
+
+    --soft-accent-strong:
+        rgba(125, 125, 255, 0.18);
+
+    /* STATUS */
+
+    --success:
+        #7ee2a8;
+
+    /* SHADOW */
+
+    --shadow:
+        rgba(0, 0, 0, 0.40);
+
+    /* GRID */
+
+    --grid-line:
+        rgba(255, 255, 255, 0.025);
+
+    /* GLOW */
+
+    --glow-one:
+        #6261df;
+
+    --glow-two:
+        #8f55ff;
+
+    /* VIDEO */
+
+    --video-bg:
+        #000000;
+}
+
+
+/* =========================================================
+   LIGHT THEME
+   ========================================================= */
+
+html[data-theme="light"],
+body[data-theme="light"] {
+    color-scheme: light;
+
+    --bg:
+        #f5f6fa;
+
+    --surface:
+        rgba(255, 255, 255, 0.84);
+
+    --surface-strong:
+        #ffffff;
+
+    --surface-hover:
+        rgba(20, 24, 40, 0.045);
+
+    --border:
+        rgba(20, 24, 40, 0.11);
+
+    --border-soft:
+        rgba(20, 24, 40, 0.065);
+
+    --text:
+        #141620;
+
+    --muted:
+        #606779;
+
+    --subtle:
+        #858a98;
+
+    --accent:
+        #625fd7;
+
+    --accent-strong:
+        #514ecb;
+
+    --soft-accent:
+        rgba(98, 97, 223, 0.09);
+
+    --soft-accent-strong:
+        rgba(98, 97, 223, 0.14);
+
+    --success:
+        #238653;
+
+    --shadow:
+        rgba(55, 62, 100, 0.13);
+
+    --grid-line:
+        rgba(20, 24, 40, 0.045);
+
+    --glow-one:
+        #8d8bea;
+
+    --glow-two:
+        #b98cff;
+
+    --video-bg:
+        #111318;
+}
+
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+html,
+body,
+#root {
+    min-height: 100%;
+    background:
+        var(--bg);
+    color:
+        var(--text);
+
+    transition:
+        background-color 240ms ease,
+        color 240ms ease;
+}
+
+body {
+    margin: 0;
+}
+
+
+/* =========================================================
+   FORM CONTROLS
+   ========================================================= */
+
+input,
+textarea,
+select {
+    color:
+        var(--text);
+
+    background:
+        var(--surface-strong);
+
+    border-color:
+        var(--border);
+}
+
+
+/* =========================================================
+   SELECTION
+   ========================================================= */
+
+::selection {
+    background:
+        var(--soft-accent-strong);
+
+    color:
+        var(--text);
+}

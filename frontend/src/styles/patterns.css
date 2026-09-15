@@ -1,0 +1,218 @@
+.patterns-page {
+    position: relative;
+    z-index: 1;
+
+    width: min(1120px,
+            calc(100% - 40px));
+
+    margin: 0 auto;
+    padding-bottom: 100px;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+
+.patterns-header {
+    padding: 70px 0 30px;
+}
+
+.patterns-header h1 {
+    margin: 12px 0;
+
+    font-size: clamp(44px,
+            6vw,
+            72px);
+
+    letter-spacing: -3px;
+}
+
+.patterns-header p {
+    max-width: 700px;
+
+    margin: 0;
+
+    color: var(--muted);
+
+    line-height: 1.7;
+}
+
+/* =========================
+   SUMMARY
+   ========================= */
+
+.patterns-summary {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin: 10px 0 34px;
+}
+
+.patterns-summary div {
+    min-width: 145px;
+
+    padding: 16px 18px;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    background: var(--surface);
+
+    backdrop-filter: blur(18px);
+}
+
+.patterns-summary strong,
+.patterns-summary span {
+    display: block;
+}
+
+.patterns-summary strong {
+    font-size: 18px;
+}
+
+.patterns-summary span {
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+/* =========================
+   PATTERN GRID
+   ========================= */
+
+.pattern-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+/* =========================
+   PATTERN CARD
+   ========================= */
+
+.pattern-card {
+    min-height: 220px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 22px;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    background: var(--surface);
+
+    backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 20px 60px var(--shadow);
+
+    text-decoration: none;
+
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease;
+}
+
+.pattern-card:hover {
+    transform: translateY(-4px);
+
+    background: var(--hover-surface);
+
+    border-color: var(--accent);
+}
+
+.pattern-card-top {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.pattern-card-category,
+.pattern-card-difficulty {
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+}
+
+.pattern-card-difficulty {
+    color: var(--accent-strong);
+}
+
+.pattern-card h3 {
+    margin: 24px 0 9px;
+
+    font-size: 22px;
+
+    letter-spacing: -0.5px;
+}
+
+.pattern-card p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+.pattern-card-footer {
+    margin-top: auto;
+
+    padding-top: 22px;
+
+    display: flex;
+    justify-content: space-between;
+
+    color: var(--accent-strong);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+    .pattern-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .patterns-page {
+        width: calc(100% - 24px);
+    }
+
+    .patterns-header {
+        padding-top: 45px;
+    }
+
+    .patterns-header h1 {
+        font-size: 44px;
+    }
+
+    .pattern-grid {
+        grid-template-columns: 1fr;
+    }
+}
