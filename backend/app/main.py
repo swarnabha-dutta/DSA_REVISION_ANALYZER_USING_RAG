@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.api.retrieval import router as retrieval_router
 from app.api.rag import router as rag_router
+from app.api.patterns import router as patterns_router
 
 
 APP_TITLE = "DSA Revision Analyzer API"
@@ -43,6 +44,13 @@ def create_app() -> FastAPI:
         retrieval_router
     )
 
+    # ========================================================
+    # PATTERN ROUTES
+    # ========================================================
+
+    application.include_router(
+        patterns_router
+    )
     # ========================================================
     # RAG ROUTES
     # ========================================================
