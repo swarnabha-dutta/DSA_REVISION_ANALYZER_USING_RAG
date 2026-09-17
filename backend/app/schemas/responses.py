@@ -110,6 +110,8 @@ class RAGSourceResponse(BaseModel):
 
     video_id: str | None = None
 
+    video_title: str | None = None
+
     pattern: str | None = None
 
     sub_pattern: str | None = None
@@ -128,6 +130,8 @@ class RAGSourceResponse(BaseModel):
         ...,
         min_length=1,
     )
+
+    summary: str | None = None
 
 
 class RAGResponse(BaseModel):

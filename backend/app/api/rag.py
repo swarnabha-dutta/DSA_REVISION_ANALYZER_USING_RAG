@@ -7,6 +7,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.requests import RAGRequest
+
 from app.schemas.responses import (
     RAGResponse,
     RAGSourceResponse,
@@ -130,7 +131,10 @@ def rag_query(
             detail=str(exc),
         ) from exc
 
-    except (TypeError, ValueError) as exc:
+    except (
+        TypeError,
+        ValueError,
+    ) as exc:
 
         raise HTTPException(
             status_code=400,
@@ -157,23 +161,46 @@ def rag_query(
 
     return RAGResponse(
         query=generation.query,
+
         answer=generation.answer,
+
         model=generation.model,
+
         query_language=generation.query_language,
+
         response_language=generation.response_language,
+
         pattern=context.pattern,
+
         sub_pattern=context.sub_pattern,
 
         sources=[
             RAGSourceResponse(
                 rank=item.rank,
+
                 point_id=item.point_id,
+
                 video_id=item.video_id,
+
+                video_title=item.video_title,
+
                 pattern=item.pattern,
+
                 sub_pattern=item.sub_pattern,
+
                 timestamp_start=item.timestamp_start,
+
                 timestamp_end=item.timestamp_end,
+
                 text=item.text,
+
+                summary=(
+                    generation.video_summaries.get(
+                        item.video_id
+                    )
+                    if item.video_id
+                    else None
+                ),
             )
             for item in context.items
         ],

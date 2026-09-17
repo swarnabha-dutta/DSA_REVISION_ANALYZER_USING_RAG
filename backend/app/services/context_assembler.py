@@ -63,6 +63,9 @@ class ContextItem:
     rrf_score: float | None
     reranker_score: float | None
 
+    # Optional metadata added for video-level search summaries.
+    video_title: str | None = None
+
 
 # ============================================================
 # CONTEXT RESULT
@@ -96,6 +99,7 @@ class AssembledContext:
                 f"[Context {item.rank}]",
                 f"Point ID: {item.point_id}",
                 f"Video ID: {item.video_id or 'unknown'}",
+                f"Video Title: {item.video_title or 'unknown'}",
                 f"Pattern: {item.pattern or 'unknown'}",
                 f"Sub-pattern: {item.sub_pattern or 'unknown'}",
                 (
@@ -408,6 +412,9 @@ def _extract_text(
     """
     Extract chunk text from the preferred semantic result.
 
+    English translated text is preferred when available because
+    the video-level summaries must be generated in English.
+
     BM25 document is used as fallback.
     """
 
@@ -429,6 +436,7 @@ def _extract_text(
         text = _get_nested_value(
             source,
             (
+                "text_en",
                 "text",
                 "chunk_text",
                 "content",
@@ -474,6 +482,7 @@ def _extract_metadata(
     )
 
     video_id = None
+    video_title = None
     pattern = None
     sub_pattern = None
     timestamp_start = None
@@ -486,6 +495,15 @@ def _extract_metadata(
                 source,
                 (
                     "video_id",
+                ),
+            )
+
+        if video_title is None:
+            video_title = _get_nested_value(
+                source,
+                (
+                    "video_title",
+                    "title",
                 ),
             )
 
@@ -532,6 +550,12 @@ def _extract_metadata(
             if video_id is not None
             else None
         ),
+        "video_title": (
+            str(video_title).strip()
+            if video_title is not None
+            and str(video_title).strip()
+            else None
+        ),
         "pattern": (
             str(pattern)
             if pattern is not None
@@ -566,28 +590,6 @@ def assemble_context(
 ) -> AssembledContext:
     """
     Assemble final reranked retrieval results into structured context.
-
-    Parameters
-    ----------
-    query:
-        Original user query.
-
-    results:
-        Final reranked hybrid retrieval results.
-
-    pattern:
-        Optional DSA pattern.
-
-    sub_pattern:
-        Optional DSA sub-pattern.
-
-    top_k:
-        Maximum number of context items.
-
-    Returns
-    -------
-    AssembledContext
-        Structured context ready for downstream LLM generation.
     """
 
     if not isinstance(
@@ -637,10 +639,6 @@ def assemble_context(
         if not point_id:
             continue
 
-        # ----------------------------------------------------
-        # Stable ID deduplication
-        # ----------------------------------------------------
-
         if point_id in seen_point_ids:
             continue
 
@@ -648,20 +646,12 @@ def assemble_context(
             point_id
         )
 
-        # ----------------------------------------------------
-        # Extract chunk text
-        # ----------------------------------------------------
-
         text = _extract_text(
             result
         )
 
         if not text:
             continue
-
-        # ----------------------------------------------------
-        # Extract metadata
-        # ----------------------------------------------------
 
         metadata = _extract_metadata(
             result
@@ -679,10 +669,6 @@ def assemble_context(
             else sub_pattern
         )
 
-        # ----------------------------------------------------
-        # Ranking metadata
-        # ----------------------------------------------------
-
         rrf_score = _get_value(
             result,
             "rrf_score",
@@ -693,10 +679,6 @@ def assemble_context(
             "reranker_score",
             "reranker",
         )
-
-        # ----------------------------------------------------
-        # Build context item
-        # ----------------------------------------------------
 
         assembled_items.append(
             ContextItem(
@@ -731,6 +713,10 @@ def assemble_context(
                 reranker_score=_to_float(
                     reranker_score
                 ),
+
+                video_title=metadata[
+                    "video_title"
+                ],
             )
         )
 
