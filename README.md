@@ -1,10 +1,11 @@
+
 # 🧠 DSA Revision Analyzer
 
 > An AI-powered, pattern-first DSA learning and revision system that combines structured video learning, hybrid RAG retrieval, grounded explanations, adaptive questioning, practice problems, and weakness detection.
 
 ---
 
-## 📌 Project Overview
+# 📌 Project Overview
 
 **DSA Revision Analyzer** is an AI-powered learning system designed to make DSA revision more structured, searchable, and adaptive.
 
@@ -76,7 +77,7 @@ DSA Pattern
     └── Video N
           │
           ▼
-      Video Ends
+       Video Ends
           │
           ▼
     AI Revision Session
@@ -95,10 +96,10 @@ DSA Pattern
               Concept Problems
                     │
                     ▼
-             Weakness Detection
+              Weakness Detection
                     │
                     ▼
-             Adaptive Revision
+              Adaptive Revision
 ```
 
 ---
@@ -130,41 +131,41 @@ Each pattern is intended to have:
 # 🏗️ System Architecture
 
 ```text
-                    ┌──────────────────────┐
-                    │      React UI        │
-                    │                      │
-                    │ Overview             │
-                    │ Patterns             │
-                    │ Playlist             │
-                    │ AI Search            │
-                    │ Revision             │
-                    └──────────┬───────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │     FastAPI API      │
-                    │                      │
-                    │ Search               │
-                    │ Retrieval            │
-                    │ RAG                  │
-                    │ Metadata             │
-                    │ Revision             │
-                    └──────────┬───────────┘
-                               │
-              ┌────────────────┼────────────────┐
-              │                │                │
-              ▼                ▼                ▼
-        ┌──────────┐     ┌──────────┐     ┌──────────┐
-        │ Qdrant   │     │ SQLite   │     │   RAG    │
-        │ Vector   │     │ Metadata │     │ Pipeline │
-        │ Search   │     │          │     │          │
-        └──────────┘     └──────────┘     └──────────┘
-              │
-              ▼
-       Transcript Chunks
-              │
-              ▼
-         Embeddings
+                     ┌──────────────────────┐
+                     │      React UI        │
+                     │                      │
+                     │ Overview             │
+                     │ Patterns             │
+                     │ Playlist             │
+                     │ AI Search            │
+                     │ Revision             │
+                     └──────────┬───────────┘
+                                │
+                                ▼
+                     ┌──────────────────────┐
+                     │     FastAPI API      │
+                     │                      │
+                     │ Search               │
+                     │ Retrieval            │
+                     │ RAG                  │
+                     │ Metadata             │
+                     │ Revision             │
+                     └──────────┬───────────┘
+                                │
+                   ┌────────────┼────────────┐
+                   │            │            │
+                   ▼            ▼            ▼
+             ┌──────────┐ ┌──────────┐ ┌──────────┐
+             │ Qdrant   │ │ SQLite   │ │   RAG    │
+             │ Vector   │ │ Metadata │ │ Pipeline │
+             │ Search   │ │          │ │          │
+             └──────────┘ └──────────┘ └──────────┘
+                   │
+                   ▼
+             Transcript Chunks
+                   │
+                   ▼
+               Embeddings
 ```
 
 ---
@@ -288,7 +289,7 @@ The project is divided into **24 major phases**.
 
 ---
 
-## ✅ Phase 1 — Project Foundation
+# ✅ Phase 1 — Project Foundation
 
 **Status: COMPLETE**
 
@@ -302,7 +303,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 2 — YouTube Transcript Acquisition
+# ✅ Phase 2 — YouTube Transcript Acquisition
 
 **Status: COMPLETE**
 
@@ -315,7 +316,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 3 — Transcript Translation
+# ✅ Phase 3 — Transcript Translation
 
 **Status: COMPLETE**
 
@@ -327,7 +328,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 4 — Transcript Chunking
+# ✅ Phase 4 — Transcript Chunking
 
 **Status: COMPLETE**
 
@@ -340,7 +341,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 5 — Embedding Generation
+# ✅ Phase 5 — Embedding Generation
 
 **Status: COMPLETE**
 
@@ -352,7 +353,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 6 — Qdrant Integration
+# ✅ Phase 6 — Qdrant Integration
 
 **Status: COMPLETE**
 
@@ -365,7 +366,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 7 — Basic Semantic Retrieval
+# ✅ Phase 7 — Basic Semantic Retrieval
 
 **Status: COMPLETE**
 
@@ -377,7 +378,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 8 — Metadata & Data Modeling
+# ✅ Phase 8 — Metadata & Data Modeling
 
 **Status: COMPLETE**
 
@@ -390,7 +391,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 9 — Retrieval Infrastructure
+# ✅ Phase 9 — Retrieval Infrastructure
 
 **Status: COMPLETE**
 
@@ -402,7 +403,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 10 — Retrieval Evaluation & Refinement
+# ✅ Phase 10 — Retrieval Evaluation & Refinement
 
 **Status: COMPLETE**
 
@@ -415,7 +416,7 @@ Implemented:
 
 ---
 
-## ✅ Phase 11 — Hybrid Search + Reranking
+# ✅ Phase 11 — Hybrid Search + Reranking
 
 **Status: COMPLETE**
 
@@ -437,18 +438,18 @@ Query
  └── Lexical Search
         │
         ▼
-   Candidate Pool
+    Candidate Pool
         │
         ▼
-     Reranker
+      Reranker
         │
         ▼
- Final Ranked Results
+  Final Ranked Results
 ```
 
 ---
 
-## ✅ Phase 12 — Context Assembly
+# ✅ Phase 12 — Context Assembly
 
 **Status: COMPLETE**
 
@@ -459,10 +460,13 @@ Implemented:
 * Relevant chunk assembly
 * Metadata-aware context construction
 * Timestamp preservation
+* Video title preservation
+* English transcript (`text_en`) preference for summary generation
+* Grounded context formatting
 
 ---
 
-## ✅ Phase 13 — Grounded RAG Generation
+# ✅ Phase 13 — Grounded RAG Generation
 
 **Status: COMPLETE**
 
@@ -472,11 +476,14 @@ Implemented:
 * Grounded responses
 * Source-aware answers
 * Context-based answer generation
+* Structured LLM response
+* Per-video English summaries
+* Video provenance validation
 * Hallucination reduction through retrieval grounding
 
 ---
 
-## ✅ Phase 14 — Timestamp-Aware Retrieval
+# ✅ Phase 14 — Timestamp-Aware Retrieval
 
 **Status: COMPLETE**
 
@@ -486,6 +493,8 @@ Implemented:
 * Video timestamp metadata
 * Retrieval results containing video position
 * Foundation for exact video navigation
+* YouTube jump-link generation
+* Exact timestamp preservation
 
 ---
 
@@ -495,15 +504,17 @@ Implemented:
 
 The FastAPI backend provides the bridge between the RAG pipeline and the React frontend.
 
-### Completed
+## Completed
 
 * FastAPI application foundation
 * Retrieval API
 * RAG API
 * Metadata endpoints
 * API-level testing foundation
+* RAG response contract for video titles
+* RAG response contract for per-video summaries
 
-### Remaining
+## Remaining
 
 * Query API finalization
 * Revision API
@@ -518,9 +529,11 @@ The FastAPI backend provides the bridge between the RAG pipeline and the React f
 
 **Status: IN PROGRESS**
 
-This is the **current active phase**.
+> **Latest milestone:** AI Search integration and exact lesson navigation are now working end-to-end.
 
 The goal of Phase 16 is to build the complete user-facing learning experience.
+
+---
 
 ## Completed
 
@@ -596,16 +609,97 @@ Implemented foundation for:
 
 ---
 
-## Remaining Phase 16 Work
+# 🔎 AI Search Integration — COMPLETE
 
-### 1. Complete Theme Polish
+The AI Search experience is now integrated with the production RAG pipeline.
+
+Implemented:
+
+* Search query submission from React
+* FastAPI RAG API integration
+* Grounded AI answer rendering
+* Video-level result grouping
+* Duplicate transcript-chunk suppression at the UI level
+* Video title propagation from Qdrant metadata
+* English AI-generated summary for each retrieved video
+* Episode-aware result ordering
+* Timestamp-aware result display
+* Exact lesson navigation
+* Exact video selection using the retrieved `video_id`
+* Exact timestamp navigation using `timestamp_start`
+* Raw YouTube video IDs hidden from user-facing result cards
+
+Current search flow:
+
+```text
+User Query
+    ↓
+Query Understanding
+    ↓
+Hybrid Retrieval
+    ↓
+Reranking
+    ↓
+Context Assembly
+    ↓
+Grounded LLM Generation
+    ↓
+Video-wise Result Grouping
+    ↓
+Episode Ordering
+    ↓
+English Video Summaries
+    ↓
+Exact Lesson Navigation
+    ↓
+Correct Video + Timestamp
+```
+
+Example:
+
+```text
+Search: "two pointer"
+
+AI Revision
+    ↓
+Episode 3
+    English Summary
+    Exact timestamp
+    Open Exact Lesson →
+
+Episode 4
+    English Summary
+    Exact timestamp
+    Open Exact Lesson →
+
+Episode 5
+    English Summary
+    Exact timestamp
+    Open Exact Lesson →
+```
+
+Validation completed:
+
+* `two pointer` search returns grounded AI answer
+* Retrieved videos are grouped into one card per video
+* Episode ordering is preserved
+* English summaries are displayed per video
+* Raw `video_id` values are not exposed in the UI
+* Exact lesson navigation works
+* Exact timestamp navigation has been verified in the browser
+
+---
+
+# ⏳ Remaining Phase 16 Work
+
+## 1. Complete Theme Polish
 
 * Final dark mode polish
 * Final light mode polish
 * Component-level theme consistency
 * Theme transition refinement
 
-### 2. Pattern Playlist Integration
+## 2. Pattern Playlist Integration
 
 The UI must support the full **128+ video dataset**.
 
@@ -623,7 +717,7 @@ Video 3
 Video N
 ```
 
-### 3. Video Player Integration
+## 3. Video Player Integration
 
 Implement:
 
@@ -634,31 +728,7 @@ Implement:
 * Completion detection
 * Timestamp-aware navigation
 
-### 4. AI Search → Exact Video Navigation
-
-The intended behaviour:
-
-```text
-User Search
-     ↓
-RAG Retrieval
-     ↓
-Pattern Detection
-     ↓
-Exact Video Detection
-     ↓
-Exact Timestamp
-     ↓
-Open Correct Pattern
-     ↓
-Select Correct Video
-     ↓
-Start From Relevant Context
-```
-
-This is one of the core differentiating features of the application.
-
-### 5. Post-Video AI Revision
+## 4. Post-Video AI Revision
 
 When a video finishes:
 
@@ -676,7 +746,7 @@ AI Validation
 Mastery Estimation
 ```
 
-### 6. Bengali AI Questions
+## 5. Bengali AI Questions
 
 The post-video AI questions should be generated in **Bengali**.
 
@@ -687,7 +757,7 @@ Questions should be based specifically on:
 * Transcript
 * Concepts explained in the video
 
-### 7. High-Quality Concept Questions
+## 6. High-Quality Concept Questions
 
 The system should not depend only on LeetCode/GFG questions.
 
@@ -703,7 +773,7 @@ AI should be able to generate original questions such as:
 
 The objective is to test **actual understanding**, not memorization.
 
-### 8. External Practice Resources
+## 7. External Practice Resources
 
 After the revision session, the system should provide:
 
@@ -721,7 +791,7 @@ Video
 Concept
 ```
 
-### 9. Practice Problem Generation
+## 8. Practice Problem Generation
 
 After concept validation, AI should generate approximately:
 
@@ -737,7 +807,7 @@ Problems should be:
 * Without unnecessary hints
 * Different from simply copying existing LeetCode/GFG questions
 
-### 10. Mastery Score
+## 9. Mastery Score
 
 The system should estimate the learner's understanding.
 
@@ -756,7 +826,7 @@ The score should help identify:
 * Partially understood concepts
 * Topics requiring revision
 
-### 11. Mobile Optimization
+## 10. Mobile Optimization
 
 The complete frontend must work across:
 
@@ -775,7 +845,7 @@ Important areas:
 * Revision questions
 * Practice problems
 
-### 12. Final Phase 16 Polish
+## 11. Final Phase 16 Polish
 
 Before moving to Phase 17:
 
@@ -893,7 +963,7 @@ Focus:
 
 Testing areas:
 
-### Backend
+## Backend
 
 * Unit tests
 * API tests
@@ -901,7 +971,7 @@ Testing areas:
 * RAG tests
 * Metadata tests
 
-### Frontend
+## Frontend
 
 * Component tests
 * Routing tests
@@ -910,7 +980,7 @@ Testing areas:
 * Playlist tests
 * Revision flow tests
 
-### Integration
+## Integration
 
 * Search → retrieval → frontend
 * Video completion → revision
@@ -975,7 +1045,7 @@ DSA learning platform
 
 # 🔎 AI Search Experience
 
-The search system is intended to work beyond simple keyword matching.
+The search system works beyond simple keyword matching and is now integrated with the RAG backend.
 
 Example query:
 
@@ -983,7 +1053,7 @@ Example query:
 "when should I shrink the window?"
 ```
 
-Expected pipeline:
+Current pipeline:
 
 ```text
 User Query
@@ -994,24 +1064,54 @@ Hybrid Retrieval
     ↓
 Reranking
     ↓
-Relevant Pattern
+Context Assembly
     ↓
-Relevant Video
+Grounded LLM Answer
     ↓
-Relevant Timestamp
+Video-wise Grouping
     ↓
-Grounded Answer
+Episode Ordering
+    ↓
+English Video Summaries
+    ↓
+Exact Video
+    ↓
+Exact Timestamp
 ```
 
-The UI should then automatically select:
+The UI now presents one result card per retrieved video instead of exposing multiple raw transcript chunks from the same video.
+
+Each result can contain:
 
 ```text
-Pattern Playlist
-       ↓
-Exact Video
-       ↓
-Exact Relevant Position
+Episode
+Video Title
+Pattern
+Exact Timestamp
+English Summary
+Open Exact Lesson →
 ```
+
+Raw YouTube `video_id` values are kept internally for navigation and are not displayed to the learner.
+
+Verified example:
+
+```text
+Search: "two pointer"
+
+Episode 3
+    ↓
+Episode 4
+    ↓
+Episode 5
+
+Each with:
+    - English summary
+    - exact timestamp
+    - exact lesson navigation
+```
+
+The exact lesson action has been browser-tested and successfully opens the correct video at the retrieved timestamp.
 
 ---
 
@@ -1044,11 +1144,11 @@ When a learner finishes a video:
 │       Mastery Score          │
 └──────────────┬───────────────┘
                ↓
-       ┌───────┴────────┐
-       ↓                ↓
- External Resources   New Problems
-       ↓                ↓
- LeetCode / GFG      4–5 Problems
+        ┌───────┴────────┐
+        ↓                ↓
+External Resources   New Problems
+        ↓                ↓
+LeetCode / GFG      4–5 Problems
 ```
 
 ---
@@ -1218,6 +1318,49 @@ The project is being built as a real software system rather than only as an AI d
 
 ---
 
+# 📝 Latest Development Milestone — 17 September 2026
+
+The latest development milestone completed the **AI Search result experience**.
+
+## Newly Completed
+
+* Video titles are propagated through the RAG context and API response
+* English transcript text is preferred for video-summary generation
+* Groq returns a structured grounded response
+* Main AI answer is separated from per-video summaries
+* One English summary is generated for each retrieved video
+* Video summaries are validated against retrieved video provenance
+* Search results are grouped by unique video
+* Episode order is preserved in the frontend
+* Raw YouTube video IDs are hidden from the UI
+* Exact timestamps remain attached to retrieved source chunks
+* `Open Exact Lesson →` navigates to the correct video
+* Exact timestamp navigation has been browser-tested successfully
+
+## Verified Example
+
+```text
+Query: "two pointer"
+
+AI Answer
+    ↓
+Episode 3
+    ↓
+Episode 4
+    ↓
+Episode 5
+
+Each result:
+    ├── Actual video title
+    ├── English summary
+    ├── Exact timestamp
+    └── Open Exact Lesson →
+```
+
+This milestone completes the **AI Search result presentation and exact lesson navigation portion of Phase 16**.
+
+---
+
 # 📈 Current Project Status
 
 ```text
@@ -1225,26 +1368,42 @@ Phases 1–14       ████████████████████
 
 Phase 15          ███████████████░░░░░  IN PROGRESS
 
-Phase 16          ████████░░░░░░░░░░░░  IN PROGRESS
+Phase 16          █████████████░░░░░░░  IN PROGRESS
 
 Phases 17–24      ░░░░░░░░░░░░░░░░░░░░  PLANNED
 ```
 
-### Current active focus
+## Current Active Focus
 
 > **Phase 16 — React Frontend**
 
-Current work is focused on:
+### Completed within the current Phase 16 milestone
 
-* Theme system
+* Theme system foundation
 * Navigation
 * Routing
 * Pattern UI
-* Playlist UI
-* Video experience
-* Search integration
-* AI revision flow
-* Responsive/mobile UI
+* AI Search integration
+* Grounded AI answer rendering
+* Video-wise search result grouping
+* Episode-aware ordering
+* English video summaries
+* Exact video navigation
+* Exact timestamp navigation
+
+### Remaining Focus
+
+* Playlist integration across the full 128+ video dataset
+* Complete video-player experience
+* Progress and completion tracking
+* Post-video Bengali AI revision
+* Concept-question generation
+* Answer validation
+* Mastery estimation
+* Practice resources
+* Practice problem generation
+* Responsive/mobile polish
+* Final Phase 16 validation
 
 ---
 
@@ -1382,15 +1541,20 @@ The goal is:
 
 ---
 
-## Current Milestone
+# 📌 Current Milestone
 
-**Current Phase: Phase 16 — React Frontend**
+**Current Phase:** Phase 16 — React Frontend
 
-**Dataset Target: 128+ DSA Videos**
+**Latest Completed Milestone:** AI Search + Video-wise Summaries + Exact Lesson Navigation
 
-**Patterns: ~20–25**
+**Dataset Target:** 128+ DSA Videos
 
-**Architecture: React + FastAPI + Qdrant + RAG**
+**Patterns:** ~20–25
 
-**Status: Active Development**
+**Architecture:** React + FastAPI + Qdrant + RAG
 
+**Search Status:** End-to-End Working
+
+**Overall Status:** Active Development
+16 এখনও `IN PROGRESS` রাখা হয়েছে।
+```
