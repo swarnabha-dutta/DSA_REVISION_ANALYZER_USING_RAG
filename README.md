@@ -1,17 +1,16 @@
-
 # 🧠 DSA Revision Analyzer
 
-> An AI-powered, pattern-first DSA learning and revision system that combines structured video learning, hybrid RAG retrieval, grounded explanations, adaptive questioning, practice problems, and weakness detection.
+> An AI-powered, pattern-first DSA learning and revision system that combines structured video learning, hybrid RAG retrieval, grounded explanations, adaptive questioning, practice problems, mastery tracking, weakness detection, strict learning progression, and adaptive revision.
 
 ---
 
 # 📌 Project Overview
 
-**DSA Revision Analyzer** is an AI-powered learning system designed to make DSA revision more structured, searchable, and adaptive.
+**DSA Revision Analyzer** is an AI-powered learning system designed to make DSA revision more structured, searchable, adaptive, and measurable.
 
 Instead of treating DSA as a collection of isolated problems, the system organizes learning around **DSA patterns and concepts**.
 
-The system is designed around a simple learning loop:
+The system is designed around a continuous learning loop:
 
 ```text
 Learn
@@ -33,9 +32,33 @@ Measure Mastery
 Identify Weakness
   ↓
 Revise Again
+  ↓
+Improve
 ````
 
-The long-term goal is to create a system where a learner can search for any DSA concept and immediately reach the **exact pattern → exact video → exact timestamp/context**, followed by an AI-powered revision session.
+The long-term goal is to create a system where a learner can search for any DSA concept and immediately reach:
+
+```text
+Exact Pattern
+      ↓
+Exact Video
+      ↓
+Exact Timestamp / Context
+      ↓
+Video Learning
+      ↓
+Bengali AI Revision
+      ↓
+Concept Validation
+      ↓
+Targeted Practice
+      ↓
+Mastery Tracking
+      ↓
+Weakness Detection
+      ↓
+Adaptive Revision
+```
 
 ---
 
@@ -52,10 +75,17 @@ The system aims to provide:
 * Grounded RAG answers
 * AI-generated revision questions
 * Bengali-language post-video questioning
-* Concept-based practice problems
-* LeetCode and GeeksforGeeks resources
+* One-by-one conceptual AI conversations
+* Answer validation
+* Concept-level weakness detection
 * Mastery estimation
-* Weakness detection
+* Concept-based practice problems
+* LeetCode resources
+* GeeksforGeeks resources
+* Difficulty-aware practice
+* Strict video progression
+* Problem completion tracking
+* Learning streak tracking
 * Adaptive revision
 * Responsive web UI
 * Dark / Light theme
@@ -77,29 +107,158 @@ DSA Pattern
     └── Video N
           │
           ▼
-       Video Ends
+       Watch Lesson
+          │
+          ▼
+     Video Completion
           │
           ▼
     AI Revision Session
           │
-          ├── Concept Questions
+          ├── 6–7 Deep Questions
           │
-          ├── Answer Validation
+          ├── One-by-One Answers
           │
-          ├── Mastery Score
+          ├── AI Answer Validation
           │
-          ├── LeetCode Links
+          ├── Weak Concept Detection
           │
-          ├── GFG Links
-          │
-          └── Newly Generated
-              Concept Problems
+          └── Mastery Estimation
                     │
                     ▼
-              Weakness Detection
+            Targeted Practice
+                    │
+          ┌─────────┼─────────┐
+          ↓         ↓         ↓
+        Easy     Medium      Hard
+          │         │         │
+          └─────────┼─────────┘
                     │
                     ▼
-              Adaptive Revision
+          LeetCode / GFG / Other
+                    │
+                    ▼
+          Solve All Required Problems
+                    │
+                    ▼
+            Problem Completion
+                    │
+                    ▼
+            Streak Qualification
+                    │
+                    ▼
+            Next Video Unlock
+                    │
+                    ▼
+          Adaptive Revision
+```
+
+---
+
+# 🔒 Strict Learning Progression
+
+Watching a video alone does **not** mark the lesson as fully completed.
+
+The system follows a strict progression model:
+
+```text
+Watch Video
+     ↓
+Video Watched
+     ↓
+Complete AI Revision
+     ↓
+Answer 6–7 Deep Questions
+     ↓
+AI Evaluates Answers
+     ↓
+Weakness / Mastery Updated
+     ↓
+Receive Targeted Problems
+     ↓
+Solve ALL Required Problems
+     ↓
+Video Fully Completed
+     ↓
+Next Video Unlocked
+```
+
+A learner cannot simply watch a video and skip directly to the next lesson.
+
+---
+
+## Video Completion Rule
+
+A video is considered fully completed only when:
+
+```text
+VIDEO_COMPLETED =
+    VIDEO_WATCHED
+    AND
+    REVISION_COMPLETED
+    AND
+    ALL_REQUIRED_PROBLEMS_COMPLETED
+```
+
+Therefore:
+
+```text
+Video Watched        ✅
+AI Revision          ❌
+Problems             ❌
+────────────────────────
+Video Complete       ❌
+Next Video           🔒
+```
+
+And:
+
+```text
+Video Watched        ✅
+AI Revision          ✅
+Problems             5 / 5
+────────────────────────
+Video Complete       ✅
+Next Video           🔓
+```
+
+---
+
+# 🔥 Learning Streak Rule
+
+The learning streak is tied to **actual learning completion**, not simply opening or watching a video.
+
+A streak-qualified lesson requires:
+
+```text
+Video Watched
+      +
+AI Revision Completed
+      +
+All Required Problems Solved
+      ↓
+Streak Qualified
+```
+
+Example:
+
+```text
+Video                 ✅
+AI Revision           ✅
+Problems              4 / 5 ❌
+
+Streak:
+NOT QUALIFIED
+```
+
+Only when all required problems are completed:
+
+```text
+Video                 ✅
+AI Revision           ✅
+Problems              5 / 5 ✅
+
+🔥 STREAK QUALIFIED
 ```
 
 ---
@@ -125,6 +284,9 @@ Each pattern is intended to have:
 * Revision questions
 * Practice problems
 * External learning resources
+* Progress state
+* Mastery state
+* Weakness information
 
 ---
 
@@ -139,6 +301,9 @@ Each pattern is intended to have:
                      │ Playlist             │
                      │ AI Search            │
                      │ Revision             │
+                     │ Practice             │
+                     │ Progress             │
+                     │ Mastery              │
                      └──────────┬───────────┘
                                 │
                                 ▼
@@ -150,6 +315,10 @@ Each pattern is intended to have:
                      │ RAG                  │
                      │ Metadata             │
                      │ Revision             │
+                     │ Evaluation           │
+                     │ Practice             │
+                     │ Progress             │
+                     │ Mastery              │
                      └──────────┬───────────┘
                                 │
                    ┌────────────┼────────────┐
@@ -196,6 +365,11 @@ Each pattern is intended to have:
 * Reranking
 * Context assembly
 * Grounded generation
+* AI revision
+* Answer evaluation
+* Weakness detection
+* Mastery estimation
+* Practice generation
 
 ## Vector Database
 
@@ -211,6 +385,7 @@ Each pattern is intended to have:
 * YouTube transcripts
 * LeetCode
 * GeeksforGeeks
+* Other concept-specific learning resources
 
 ---
 
@@ -285,7 +460,15 @@ dsa_revision_analyzer/
 
 # 🚦 Development Phases
 
-The project is divided into **24 major phases**.
+The project is divided into **28 major phases**.
+
+The first 14 phases establish the RAG and retrieval foundation.
+
+Phases 15–16 connect the backend and frontend.
+
+Phases 17–26 build the complete adaptive learning engine.
+
+Phases 27–28 focus on testing, production readiness, and deployment.
 
 ---
 
@@ -520,6 +703,8 @@ The FastAPI backend provides the bridge between the RAG pipeline and the React f
 * Revision API
 * Practice problem API
 * Resource API
+* Progress API
+* Evaluation API
 * Frontend-ready response contracts
 * End-to-end API validation
 
@@ -529,9 +714,9 @@ The FastAPI backend provides the bridge between the RAG pipeline and the React f
 
 **Status: IN PROGRESS**
 
-> **Latest milestone:** AI Search integration and exact lesson navigation are now working end-to-end.
+> **Latest milestone:** AI Search integration and exact lesson navigation are working end-to-end.
 
-The goal of Phase 16 is to build the complete user-facing learning experience.
+The goal of Phase 16 is to build the complete user-facing learning experience and connect it to the backend learning engine.
 
 ---
 
@@ -687,28 +872,34 @@ Validation completed:
 * Raw `video_id` values are not exposed in the UI
 * Exact lesson navigation works
 * Exact timestamp navigation has been verified in the browser
+* Episode 3 exact timestamp navigation verified
+* Episode 4 exact timestamp navigation verified
+* Episode 5 exact timestamp navigation verified
 
 ---
 
-# ⏳ Remaining Phase 16 Work
+# 🟡 Phase 17 — Pattern / Playlist Navigation
 
-## 1. Complete Theme Polish
+**Status: NEXT**
 
-* Final dark mode polish
-* Final light mode polish
-* Component-level theme consistency
-* Theme transition refinement
+Focus:
 
-## 2. Pattern Playlist Integration
+* Complete pattern browsing
+* Pattern-specific playlists
+* Full 128+ video dataset integration
+* Video ordering
+* Playlist selection
+* Original episode metadata
+* Pattern completion state
+* Video navigation
+* Progress visibility
 
-The UI must support the full **128+ video dataset**.
-
-Expected behaviour:
+Expected structure:
 
 ```text
 Pattern
    ↓
-Playlist
+Pattern Playlist
    ↓
 Video 1
 Video 2
@@ -717,190 +908,217 @@ Video 3
 Video N
 ```
 
-## 3. Video Player Integration
+Important rule:
 
-Implement:
+```text
+Original YouTube Episode Number
+          ≠
+Application Playlist Order
+```
 
-* Video playback
-* Active video state
-* Playlist selection
-* Progress tracking
-* Completion detection
-* Timestamp-aware navigation
+The system should preserve original episode numbers as metadata while maintaining a clean pattern-specific playlist order.
 
-## 4. Post-Video AI Revision
+---
 
-When a video finishes:
+# ⏳ Phase 18 — Video Progress & Completion
+
+**Status: NOT STARTED**
+
+Focus:
+
+* Video playback tracking
+* Current playback position
+* Resume from previous position
+* Progress percentage
+* Watch completion detection
+* Video state persistence
+* Pattern-level progress
+
+Example:
+
+```text
+Episode 3
+
+Progress:
+████████████████░░░░ 80%
+
+Status:
+In Progress
+```
+
+Completion state:
+
+```text
+Video Watched
+      ↓
+Trigger AI Revision
+```
+
+---
+
+# ⏳ Phase 19 — Strict Video Unlock / Progression Gate
+
+**Status: NOT STARTED**
+
+Focus:
+
+* Locked next videos
+* Completion-based unlocking
+* Backend validation
+* Frontend lock states
+* Preventing progression bypass
+* Current-video completion validation
+
+Rules:
+
+```text
+Current Video
+     │
+     ├── Watched?       ❌ → Locked
+     │
+     ├── Revision?      ❌ → Locked
+     │
+     └── Problems?      ❌ → Locked
+```
+
+Only:
+
+```text
+Watched
+   +
+Revision Completed
+   +
+All Problems Completed
+   ↓
+Next Video Unlocked
+```
+
+The gate must not rely only on frontend UI state.
+
+---
+
+# ⏳ Phase 20 — Bengali AI Revision Session
+
+**Status: NOT STARTED**
+
+When a learner completes a video:
 
 ```text
 Video Completed
        ↓
-AI Revision Opens
+AI Revision Session
        ↓
-Concept Questions
-       ↓
-User Answers
-       ↓
-AI Validation
-       ↓
-Mastery Estimation
+Bengali Conversation
 ```
 
-## 5. Bengali AI Questions
-
-The post-video AI questions should be generated in **Bengali**.
-
-Questions should be based specifically on:
+The AI revision session should be grounded in:
 
 * Current video
 * Current pattern
 * Transcript
 * Concepts explained in the video
+* Retrieved context when necessary
 
-## 6. High-Quality Concept Questions
+The objective is to create an interactive revision conversation rather than a static quiz.
 
-The system should not depend only on LeetCode/GFG questions.
+---
 
-AI should be able to generate original questions such as:
+# ⏳ Phase 21 — Deep Conceptual Question Engine
 
-* Conceptual questions
-* Edge-case questions
-* Complexity questions
-* Pattern recognition questions
-* Implementation reasoning questions
-* "Why does this work?" questions
-* "What breaks if..." questions
+**Status: NOT STARTED**
 
-The objective is to test **actual understanding**, not memorization.
-
-## 7. External Practice Resources
-
-After the revision session, the system should provide:
-
-* LeetCode problems
-* GeeksforGeeks problems
-* Concept-specific resources
-
-These should be aligned with the current:
+The AI should ask approximately:
 
 ```text
-Pattern
-+
-Video
-+
-Concept
+6–7 questions
 ```
 
-## 8. Practice Problem Generation
+Questions should be presented **one at a time**.
 
-After concept validation, AI should generate approximately:
+The learner must answer before receiving the next question.
 
-```text
-4–5 problems
-```
+Question categories may include:
 
-Problems should be:
-
-* Pattern-specific
-* Concept-specific
-* Quality-focused
-* Without unnecessary hints
-* Different from simply copying existing LeetCode/GFG questions
-
-## 9. Mastery Score
-
-The system should estimate the learner's understanding.
+* Core concept
+* Intuition
+* Why the approach works
+* Pattern recognition
+* Pointer / state movement
+* Edge cases
+* Complexity
+* Implementation reasoning
+* Invariants
+* What-if scenarios
+* Interview-style reasoning
 
 Example:
 
 ```text
-Two Pointer Mastery
+কেন এই সমস্যাটিতে দুইটা pointer ব্যবহার করলে
+O(n²) থেকে O(n) এ যাওয়া সম্ভব হচ্ছে?
 
-████████████████░░░░ 78%
+যদি array sorted না হয় তাহলে কী ভেঙে যাবে?
+
+এই approach-এর কোন invariant আমরা maintain করছি?
 ```
 
-The score should help identify:
-
-* Strong concepts
-* Weak concepts
-* Partially understood concepts
-* Topics requiring revision
-
-## 10. Mobile Optimization
-
-The complete frontend must work across:
-
-* Desktop
-* Laptop
-* Tablet
-* Mobile
-
-Important areas:
-
-* Navbar
-* Pattern cards
-* Playlist
-* Video player
-* AI chat
-* Revision questions
-* Practice problems
-
-## 11. Final Phase 16 Polish
-
-Before moving to Phase 17:
-
-* Responsive testing
-* Loading states
-* Empty states
-* Error states
-* Accessibility
-* Navigation validation
-* API integration validation
-* UI consistency
-* Performance refinement
+The objective is **conceptual depth, not memorization**.
 
 ---
 
-# ⏳ Phase 17 — Pattern / Playlist Navigation
+# ⏳ Phase 22 — AI Answer Evaluation
 
 **Status: NOT STARTED**
 
-Focus:
+Each learner answer should be evaluated before moving to the next question.
 
-* Complete pattern browsing
-* Playlist navigation
-* Video ordering
-* Progress tracking
-* Pattern completion
-* Video completion state
+Evaluation dimensions:
+
+* Correctness
+* Partial correctness
+* Conceptual understanding
+* Reasoning quality
+* Explanation quality
+* Complexity awareness
+* Missing concepts
+* Misconceptions
+
+Example:
+
+```text
+Answer Evaluation
+
+Understanding:
+Strong
+
+Missing:
+Pointer movement justification
+
+Needs Revision:
+Sorted-array invariant
+```
+
+The AI should explain why an answer is correct, partially correct, or incorrect.
 
 ---
 
-# ⏳ Phase 18 — Adaptive Practice
+# ⏳ Phase 23 — Weakness Detection & Mastery
 
 **Status: NOT STARTED**
 
-Focus:
+The system should maintain concept-level learner performance.
 
-* Concept-based question generation
-* 4–5 practice problems
-* Difficulty adaptation
-* Pattern-specific practice
-* Avoiding duplicate problems
+Mastery can track:
 
----
-
-# ⏳ Phase 19 — Performance & Weakness Detection
-
-**Status: NOT STARTED**
-
-Focus:
-
-* Answer evaluation
-* Concept-level performance
-* Weakness identification
-* Mastery calculation
-* Performance history
+```text
+Pattern
+ ├── Concept Understanding
+ ├── Implementation
+ ├── Complexity
+ ├── Edge Cases
+ ├── Pattern Recognition
+ └── Problem Solving
+```
 
 Example:
 
@@ -908,16 +1126,141 @@ Example:
 Two Pointer
 
 Core Idea              92%
-Window Expansion       84%
+Pointer Movement       84%
 Edge Cases             61%
 Complexity Analysis    48%
 
 Overall Mastery        71%
 ```
 
+The system should identify:
+
+* Strong concepts
+* Weak concepts
+* Partially understood concepts
+* Topics requiring revision
+
+Performance should persist as learning history.
+
 ---
 
-# ⏳ Phase 20 — Adaptive Revision Engine
+# ⏳ Phase 24 — AI Targeted Practice Problems
+
+**Status: NOT STARTED**
+
+After concept validation, AI should generate approximately:
+
+```text
+4–5 targeted problems
+```
+
+Problems should be selected based on:
+
+```text
+Current Pattern
+      +
+Current Video
+      +
+Current Concepts
+      +
+Detected Weakness
+      +
+Revision Performance
+```
+
+Difficulty distribution should normally include:
+
+```text
+Easy
+Medium
+Hard
+```
+
+when meaningful for the lesson.
+
+Sources may include:
+
+* LeetCode
+* GeeksforGeeks
+* Other relevant platforms
+* AI-generated concept problems
+
+Problems should be:
+
+* Pattern-specific
+* Concept-specific
+* Quality-focused
+* Without unnecessary hints
+* Relevant to detected weaknesses
+* Different from simply copying a generic problem list
+
+---
+
+# ⏳ Phase 25 — Problem Completion & Streak Engine
+
+**Status: NOT STARTED**
+
+This phase connects practice completion with progression.
+
+Required flow:
+
+```text
+Recommended Problems
+        ↓
+Solve Problem 1
+        ↓
+Solve Problem 2
+        ↓
+...
+        ↓
+Solve Final Problem
+        ↓
+All Required Problems Completed
+        ↓
+Video Fully Completed
+        ↓
+Streak Qualified
+        ↓
+Next Video Unlocked
+```
+
+A partially completed problem set does not qualify the lesson for completion.
+
+Example:
+
+```text
+Problems:
+4 / 5
+
+Video:
+NOT COMPLETE
+
+Streak:
+NOT QUALIFIED
+
+Next Video:
+LOCKED
+```
+
+After:
+
+```text
+Problems:
+5 / 5
+
+Video:
+COMPLETE
+
+Streak:
+QUALIFIED
+
+Next Video:
+UNLOCKED
+```
+
+---
+
+# ⏳ Phase 26 — Adaptive Revision Engine
 
 **Status: NOT STARTED**
 
@@ -928,6 +1271,8 @@ Example:
 ```text
 Weak Area Detected
        ↓
+Relevant Pattern
+       ↓
 Relevant Video
        ↓
 Relevant Timestamp
@@ -935,43 +1280,36 @@ Relevant Timestamp
 Targeted Question
        ↓
 New Evaluation
+       ↓
+Updated Mastery
 ```
 
-The system should become increasingly personalized based on previous performance.
+The revision engine should use previous learner performance to personalize future revision.
+
+The goal is to avoid repeatedly revising concepts the learner already understands while prioritizing weak areas.
 
 ---
 
-# ⏳ Phase 21 — Evaluation System
+# ⏳ Phase 27 — Automated Testing + Production Hardening
 
 **Status: NOT STARTED**
 
-Focus:
+This phase combines complete system testing with production-readiness work.
 
-* Answer correctness
-* Partial correctness
-* Explanation quality
-* Conceptual understanding
-* Reasoning quality
-* Complexity awareness
-* Confidence / mastery estimation
-
----
-
-# ⏳ Phase 22 — Automated Testing
-
-**Status: NOT STARTED**
-
-Testing areas:
-
-## Backend
+## Backend Testing
 
 * Unit tests
 * API tests
 * Retrieval tests
 * RAG tests
 * Metadata tests
+* Revision tests
+* Evaluation tests
+* Practice generation tests
+* Progress tests
+* Unlock-gate tests
 
-## Frontend
+## Frontend Testing
 
 * Component tests
 * Routing tests
@@ -979,21 +1317,37 @@ Testing areas:
 * Theme tests
 * Playlist tests
 * Revision flow tests
+* Progress tests
+* Locked-state tests
+* Practice completion tests
 
-## Integration
+## Integration Testing
 
-* Search → retrieval → frontend
-* Video completion → revision
-* Revision → evaluation
-* Evaluation → practice generation
+```text
+Search
+  ↓
+Retrieval
+  ↓
+RAG
+  ↓
+Frontend
+```
 
----
+```text
+Video Completion
+  ↓
+AI Revision
+  ↓
+Evaluation
+  ↓
+Practice Generation
+  ↓
+Problem Completion
+  ↓
+Video Unlock
+```
 
-# ⏳ Phase 23 — Production Hardening
-
-**Status: NOT STARTED**
-
-Focus:
+## Production Hardening
 
 * Error handling
 * Logging
@@ -1008,7 +1362,7 @@ Focus:
 
 ---
 
-# ⏳ Phase 24 — Deployment
+# ⏳ Phase 28 — Deployment & Final Product Polish
 
 **Status: NOT STARTED**
 
@@ -1032,20 +1386,39 @@ Database
 Production Metadata Store
 ```
 
+Final polish:
+
+* Responsive testing
+* Loading states
+* Empty states
+* Error states
+* Accessibility
+* Navigation validation
+* API integration validation
+* UI consistency
+* Mobile optimization
+* Performance refinement
+* Production build validation
+
 Final objective:
 
 ```text
-Publicly accessible
-AI-powered
-Pattern-first
-DSA learning platform
+Publicly Accessible
+       ↓
+AI-Powered
+       ↓
+Pattern-First
+       ↓
+Adaptive
+       ↓
+DSA Learning & Revision Platform
 ```
 
 ---
 
 # 🔎 AI Search Experience
 
-The search system works beyond simple keyword matching and is now integrated with the RAG backend.
+The search system works beyond simple keyword matching and is integrated with the RAG backend.
 
 Example query:
 
@@ -1079,7 +1452,7 @@ Exact Video
 Exact Timestamp
 ```
 
-The UI now presents one result card per retrieved video instead of exposing multiple raw transcript chunks from the same video.
+The UI presents one result card per retrieved video instead of exposing multiple raw transcript chunks from the same video.
 
 Each result can contain:
 
@@ -1117,7 +1490,7 @@ The exact lesson action has been browser-tested and successfully opens the corre
 
 # 🤖 AI Revision Experience
 
-When a learner finishes a video:
+When a learner completes a video:
 
 ```text
 ┌──────────────────────────────┐
@@ -1130,10 +1503,12 @@ When a learner finishes a video:
                ↓
 ┌──────────────────────────────┐
 │ Bengali Concept Questions    │
+│        6–7 Questions         │
 └──────────────┬───────────────┘
                ↓
 ┌──────────────────────────────┐
 │       User Answers           │
+│      One Question at a Time  │
 └──────────────┬───────────────┘
                ↓
 ┌──────────────────────────────┐
@@ -1141,14 +1516,22 @@ When a learner finishes a video:
 └──────────────┬───────────────┘
                ↓
 ┌──────────────────────────────┐
-│       Mastery Score          │
+│    Weakness + Mastery        │
 └──────────────┬───────────────┘
                ↓
-        ┌───────┴────────┐
-        ↓                ↓
+        ┌──────┴───────┐
+        ↓              ↓
 External Resources   New Problems
-        ↓                ↓
+        ↓              ↓
 LeetCode / GFG      4–5 Problems
+        │              │
+        └──────┬───────┘
+               ↓
+       Solve All Problems
+               ↓
+       Streak Qualified
+               ↓
+       Next Video Unlock
 ```
 
 ---
@@ -1158,6 +1541,8 @@ LeetCode / GFG      4–5 Problems
 The system should not behave like a simple problem recommender.
 
 It should test whether the learner actually understands the concept.
+
+Questions should be generated from the **specific lesson context**.
 
 For example, after a Two Pointer video, AI may ask:
 
@@ -1170,7 +1555,19 @@ O(n²) থেকে O(n) এ যাওয়া সম্ভব হচ্ছে?
 এই approach-এর কোন invariant আমরা maintain করছি?
 ```
 
-The goal is **conceptual depth**, not merely solving known problems.
+The question engine should explore:
+
+* Conceptual understanding
+* Intuition
+* Edge cases
+* Complexity
+* Pattern recognition
+* Implementation reasoning
+* Invariants
+* Failure conditions
+* Alternative approaches
+
+The goal is **actual understanding**, not memorization.
 
 ---
 
@@ -1204,6 +1601,18 @@ Recognition      81%
 Overall          72%
 ```
 
+Mastery should change based on:
+
+```text
+AI Revision Answers
+        +
+Answer Evaluation
+        +
+Practice Performance
+        +
+Historical Performance
+```
+
 ---
 
 # 🔗 External Learning Resources
@@ -1225,7 +1634,49 @@ Current Video
 Current Concept
 +
 Detected Weakness
++
+Learner Performance
 ```
+
+The system may also include relevant resources from other platforms when appropriate.
+
+---
+
+# 💻 Practice Problem Philosophy
+
+The practice system should not simply display a generic list of DSA problems.
+
+Problems should be connected to the lesson:
+
+```text
+Video
+  ↓
+Concepts
+  ↓
+Revision Performance
+  ↓
+Weaknesses
+  ↓
+Targeted Problems
+```
+
+The learner should normally receive approximately:
+
+```text
+4–5 Problems
+```
+
+with meaningful difficulty coverage:
+
+```text
+Easy
+Medium
+Hard
+```
+
+The exact number may vary when the lesson scope makes fewer or more problems more appropriate.
+
+Problems should avoid unnecessary hints so that the learner is required to identify the correct pattern and approach independently.
 
 ---
 
@@ -1281,6 +1732,9 @@ Mobile-specific priorities:
 * Touch-friendly controls
 * Responsive cards
 * Readable typography
+* Revision conversation usability
+* Practice problem usability
+* Locked-state visibility
 
 ---
 
@@ -1312,7 +1766,15 @@ The learning flow should respond to learner performance.
 
 The learner should understand why something is correct or incorrect.
 
-### 7. Production Oriented
+### 7. Progression Driven
+
+A learner should complete the required learning cycle before progressing to the next lesson.
+
+### 8. Measurable
+
+The system should track mastery, weaknesses, practice performance, and learning history.
+
+### 9. Production Oriented
 
 The project is being built as a real software system rather than only as an AI demo.
 
@@ -1320,7 +1782,7 @@ The project is being built as a real software system rather than only as an AI d
 
 # 📝 Latest Development Milestone — 17 September 2026
 
-The latest development milestone completed the **AI Search result experience**.
+The latest completed milestone is the **AI Search result experience and exact lesson navigation**.
 
 ## Newly Completed
 
@@ -1336,6 +1798,9 @@ The latest development milestone completed the **AI Search result experience**.
 * Exact timestamps remain attached to retrieved source chunks
 * `Open Exact Lesson →` navigates to the correct video
 * Exact timestamp navigation has been browser-tested successfully
+* Episode 3 exact navigation verified
+* Episode 4 exact navigation verified
+* Episode 5 exact navigation verified
 
 ## Verified Example
 
@@ -1357,94 +1822,144 @@ Each result:
     └── Open Exact Lesson →
 ```
 
-This milestone completes the **AI Search result presentation and exact lesson navigation portion of Phase 16**.
+This milestone completes the **AI Search result presentation and exact lesson navigation portion of the frontend work**.
 
 ---
 
 # 📈 Current Project Status
 
 ```text
-Phases 1–14       ████████████████████  COMPLETE
+Phases 01–14       ████████████████████  COMPLETE
 
-Phase 15          ███████████████░░░░░  IN PROGRESS
+Phase 15           ███████████████░░░░░  IN PROGRESS
 
-Phase 16          █████████████░░░░░░░  IN PROGRESS
+Phase 16           ██████████████░░░░░░  IN PROGRESS
 
-Phases 17–24      ░░░░░░░░░░░░░░░░░░░░  PLANNED
+Phase 17           ░░░░░░░░░░░░░░░░░░░░  NEXT
+
+Phases 18–28       ░░░░░░░░░░░░░░░░░░░░  PLANNED
 ```
-
-## Current Active Focus
-
-> **Phase 16 — React Frontend**
-
-### Completed within the current Phase 16 milestone
-
-* Theme system foundation
-* Navigation
-* Routing
-* Pattern UI
-* AI Search integration
-* Grounded AI answer rendering
-* Video-wise search result grouping
-* Episode-aware ordering
-* English video summaries
-* Exact video navigation
-* Exact timestamp navigation
-
-### Remaining Focus
-
-* Playlist integration across the full 128+ video dataset
-* Complete video-player experience
-* Progress and completion tracking
-* Post-video Bengali AI revision
-* Concept-question generation
-* Answer validation
-* Mastery estimation
-* Practice resources
-* Practice problem generation
-* Responsive/mobile polish
-* Final Phase 16 validation
 
 ---
 
-# 🗺️ Remaining Roadmap
+# 🎯 Current Active Focus
+
+> **Phase 17 — Pattern / Playlist Navigation**
+
+The current immediate goal is to continue from the completed AI Search + exact navigation milestone and build the complete structured learning progression.
+
+Current known working functionality:
 
 ```text
+Pattern Page
+    ↓
+Core Two Pointer Playlist
+    ↓
+Video Player
+    ↓
+Playlist Selection
+    ↓
+AI Search
+    ↓
+Grounded Answer
+    ↓
+Video-wise Results
+    ↓
+English Summary
+    ↓
+Exact Timestamp
+    ↓
+Open Exact Lesson
+```
+
+---
+
+# 🗺️ Final 28-Phase Roadmap
+
+```text
+Phase 01
+Project Foundation
+        ↓
+Phase 02
+YouTube Transcript Acquisition
+        ↓
+Phase 03
+Transcript Translation
+        ↓
+Phase 04
+Transcript Chunking
+        ↓
+Phase 05
+Embedding Generation
+        ↓
+Phase 06
+Qdrant Integration
+        ↓
+Phase 07
+Basic Semantic Retrieval
+        ↓
+Phase 08
+Metadata & Data Modeling
+        ↓
+Phase 09
+Retrieval Infrastructure
+        ↓
+Phase 10
+Retrieval Evaluation & Refinement
+        ↓
+Phase 11
+Hybrid Search + Reranking
+        ↓
+Phase 12
+Context Assembly
+        ↓
+Phase 13
+Grounded RAG Generation
+        ↓
+Phase 14
+Timestamp-Aware Retrieval
+        ↓
+Phase 15
+FastAPI Backend
+        ↓
 Phase 16
-   ↓
-Complete React Frontend
-   ↓
+React Frontend
+        ↓
 Phase 17
-   ↓
 Pattern / Playlist Navigation
-   ↓
+        ↓
 Phase 18
-   ↓
-Adaptive Practice
-   ↓
+Video Progress & Completion
+        ↓
 Phase 19
-   ↓
-Weakness Detection
-   ↓
+Strict Video Unlock / Progression Gate
+        ↓
 Phase 20
-   ↓
-Adaptive Revision Engine
-   ↓
+Bengali AI Revision Session
+        ↓
 Phase 21
-   ↓
-Evaluation System
-   ↓
+Deep Conceptual Question Engine
+        ↓
 Phase 22
-   ↓
-Automated Testing
-   ↓
+AI Answer Evaluation
+        ↓
 Phase 23
-   ↓
-Production Hardening
-   ↓
+Weakness Detection & Mastery
+        ↓
 Phase 24
-   ↓
-Deployment
+AI Targeted Practice Problems
+        ↓
+Phase 25
+Problem Completion & Streak Engine
+        ↓
+Phase 26
+Adaptive Revision Engine
+        ↓
+Phase 27
+Automated Testing + Production Hardening
+        ↓
+Phase 28
+Deployment & Final Product Polish
 ```
 
 ---
@@ -1489,21 +2004,24 @@ Bengali conceptual questions
 
                 ↓
 
+6–7 deep questions
+one at a time
+
+                ↓
+
 Learner answers
 
                 ↓
 
-AI validates
+AI evaluates
 
                 ↓
 
-Mastery:
-67%
+Weak concepts detected
 
                 ↓
 
-Weak area detected:
-"Window invariant"
+Mastery updated
 
                 ↓
 
@@ -1512,19 +2030,39 @@ AI provides:
 Relevant LeetCode
 Relevant GFG
 +
-4–5 new concept problems
+4–5 targeted problems
 
                 ↓
 
-Learner practices
+Learner solves all required problems
 
                 ↓
 
-Mastery updated
+Streak qualified
 
                 ↓
 
-AI recommends next revision
+Next video unlocked
+
+                ↓
+
+Future performance tracked
+
+                ↓
+
+AI identifies weak areas
+
+                ↓
+
+Relevant video / timestamp
+
+                ↓
+
+Targeted revision
+
+                ↓
+
+Mastery updated again
 ```
 
 ---
@@ -1537,13 +2075,13 @@ The end goal is not simply:
 
 The goal is:
 
-> **An adaptive DSA learning and revision system that understands patterns, retrieves the exact learning context, tests conceptual understanding, measures mastery, identifies weaknesses, and continuously adapts the learner's revision path.**
+> **An adaptive DSA learning and revision system that understands patterns, retrieves the exact learning context, tests conceptual understanding, measures mastery, identifies weaknesses, enforces meaningful learning progression, recommends targeted practice, and continuously adapts the learner's revision path.**
 
 ---
 
 # 📌 Current Milestone
 
-**Current Phase:** Phase 16 — React Frontend
+**Current Phase:** Phase 17 — Pattern / Playlist Navigation
 
 **Latest Completed Milestone:** AI Search + Video-wise Summaries + Exact Lesson Navigation
 
@@ -1551,10 +2089,20 @@ The goal is:
 
 **Patterns:** ~20–25
 
+**Major Development Phases:** 28
+
 **Architecture:** React + FastAPI + Qdrant + RAG
 
 **Search Status:** End-to-End Working
 
+**AI Revision:** Planned
+
+**Strict Progression:** Planned
+
+**Mastery Engine:** Planned
+
+**Adaptive Revision:** Planned
+
 **Overall Status:** Active Development
-16 এখনও `IN PROGRESS` রাখা হয়েছে।
+architecture + final vision—তিন জায়গাতেই reflected আছে।
 ```
