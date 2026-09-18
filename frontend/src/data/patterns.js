@@ -1,15 +1,16 @@
 export const patterns = [
     {
-        id: "two-pointer",
+        id: "two_pointer",
         name: "Two Pointer",
         description:
             "Solve array and string problems by maintaining two strategically placed pointers.",
         category: "Arrays & Strings",
         difficulty: "Medium",
-        videoCount: 0,
+        videoCount: 6,
         completedVideos: 0,
         mastery: 0,
-        thumbnail: "",
+        thumbnail:
+            "https://img.youtube.com/vi/Fu7LD_mIo00/hqdefault.jpg",
         videos: [],
     },
 
@@ -210,12 +211,37 @@ export const patterns = [
     },
 ];
 
+
 export const PROJECT_STATS = {
     patterns: "20–25",
     videos: "128+",
     system: "AI Revision",
 };
 
+
 export function getPatternById(id) {
-    return patterns.find((pattern) => pattern.id === id);
+
+    if (!id) {
+        return undefined;
+    }
+
+    const normalizedId =
+        String(id)
+            .trim()
+            .toLowerCase()
+            .replace(
+                /_/g,
+                "-"
+            );
+
+    return patterns.find(
+        (pattern) =>
+            String(pattern.id)
+                .trim()
+                .toLowerCase()
+                .replace(
+                    /_/g,
+                    "-"
+                ) === normalizedId
+    );
 }
