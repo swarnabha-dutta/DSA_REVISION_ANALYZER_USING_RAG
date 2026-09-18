@@ -1,0 +1,50 @@
+{
+    "two_pointer": {
+        "label": "Two Pointer",
+        "playlist_id": "PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2",
+        "videos": [
+            {
+                "video_id": "Fu7LD_mIo00",
+                "video_title": "Episode 3 –Master DSA Patterns with 2 Pointers Technique",
+                "original_episode": 3,
+                "video_order": 1,
+                "source_url": "https://www.youtube.com/watch?v=Fu7LD_mIo00&list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2&index=3&pp=iAQB"
+            },
+            {
+                "video_id": "PvyEr3CeKzE",
+                "video_title": "Episode - 4 | Master DSA Patterns with the 2 Pointer Technique",
+                "original_episode": 4,
+                "video_order": 2,
+                "source_url": "https://www.youtube.com/watch?v=PvyEr3CeKzE&list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2&index=4&pp=iAQB"
+            },
+            {
+                "video_id": "nPdxCoVHC90",
+                "video_title": "Episode 5 - 2 Pointer DSA Pattern | DSA PATTERNS ROADMAP 2025",
+                "original_episode": 5,
+                "video_order": 3,
+                "source_url": "https://www.youtube.com/watch?v=nPdxCoVHC90&list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2&index=5&pp=iAQB"
+            },
+            {
+                "video_id": "rM9EthMlXnw",
+                "video_title": "Triplet Sum — Core Two Pointer",
+                "original_episode": 7,
+                "video_order": 4,
+                "source_url": "https://www.youtube.com/watch?v=rM9EthMlXnw&list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2&index=7&pp=iAQB"
+            },
+            {
+                "video_id": "ljJJcYql6Bc",
+                "video_title": "Dutch National Flag — Core Two Pointer",
+                "original_episode": 8,
+                "video_order": 5,
+                "source_url": "https://www.youtube.com/watch?v=ljJJcYql6Bc&list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2&index=8&pp=iAQB"
+            },
+            {
+                "video_id": "n7v0SokbF4I",
+                "video_title": "Core Two Pointer — Lesson 06",
+                "original_episode": null,
+                "video_order": 6,
+                "source_url": "https://youtu.be/n7v0SokbF4I?list=PLbJhGqY-mq47k_WLUtzVjmarUm1EuXPj2"
+            }
+        ]
+    }
+}
