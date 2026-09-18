@@ -1,3 +1,4 @@
+
 # 🧠 DSA Revision Analyzer
 
 > An AI-powered, pattern-first DSA learning and revision system that combines structured video learning, hybrid RAG retrieval, grounded explanations, adaptive questioning, practice problems, mastery tracking, weakness detection, strict learning progression, and adaptive revision.
@@ -432,9 +433,7 @@ dsa_revision_analyzer/
 │   │   │   └── video/
 │   │   │
 │   │   ├── data/
-│   │   │
 │   │   ├── hooks/
-│   │   │
 │   │   ├── lib/
 │   │   │
 │   │   ├── pages/
@@ -445,7 +444,6 @@ dsa_revision_analyzer/
 │   │   │   └── Revision.jsx
 │   │   │
 │   │   ├── styles/
-│   │   │
 │   │   ├── App.jsx
 │   │   ├── App.css
 │   │   ├── index.css
@@ -464,9 +462,9 @@ The project is divided into **28 major phases**.
 
 The first 14 phases establish the RAG and retrieval foundation.
 
-Phases 15–16 connect the backend and frontend.
+Phases 15–17 connect and refine the backend, frontend, AI Search, pattern playlists, and exact lesson navigation.
 
-Phases 17–26 build the complete adaptive learning engine.
+Phases 18–26 build the complete adaptive learning engine.
 
 Phases 27–28 focus on testing, production readiness, and deployment.
 
@@ -696,17 +694,17 @@ The FastAPI backend provides the bridge between the RAG pipeline and the React f
 * API-level testing foundation
 * RAG response contract for video titles
 * RAG response contract for per-video summaries
+* Search API integration with the frontend
 
 ## Remaining
 
-* Query API finalization
 * Revision API
 * Practice problem API
 * Resource API
 * Progress API
 * Evaluation API
-* Frontend-ready response contracts
-* End-to-end API validation
+* Frontend-ready contracts for upcoming adaptive learning features
+* Complete end-to-end API validation
 
 ---
 
@@ -791,12 +789,16 @@ Implemented foundation for:
 * Pattern cards
 * Pattern navigation
 * Playlist structure
+* Ordered pattern lesson display
+* Playlist progress visibility
 
 ---
 
-# 🔎 AI Search Integration — COMPLETE
+# 🔎 AI Search Integration
 
-The AI Search experience is now integrated with the production RAG pipeline.
+**Status: IMPLEMENTED — FINAL MULTI-LESSON VALIDATION IN PROGRESS**
+
+The AI Search experience is integrated with the production RAG pipeline.
 
 Implemented:
 
@@ -804,15 +806,20 @@ Implemented:
 * FastAPI RAG API integration
 * Grounded AI answer rendering
 * Video-level result grouping
-* Duplicate transcript-chunk suppression at the UI level
+* Duplicate transcript-chunk suppression
 * Video title propagation from Qdrant metadata
-* English AI-generated summary for each retrieved video
+* English AI-generated summary for retrieved videos
 * Episode-aware result ordering
 * Timestamp-aware result display
 * Exact lesson navigation
-* Exact video selection using the retrieved `video_id`
+* Exact video selection using retrieved `video_id`
 * Exact timestamp navigation using `timestamp_start`
 * Raw YouTube video IDs hidden from user-facing result cards
+* Pattern-aware retrieval
+* Video-level deduplication
+* Pattern playlist ordering
+* Complete pattern lesson discovery for pattern searches
+* Per-video best matching transcript context for lessons not present in the initial candidate pool
 
 Current search flow:
 
@@ -821,17 +828,23 @@ User Query
     ↓
 Query Understanding
     ↓
+Pattern Detection
+    ↓
+Pattern Playlist Discovery
+    ↓
 Hybrid Retrieval
     ↓
 Reranking
+    ↓
+Video-Level Deduplication
+    ↓
+Pattern Playlist Ordering
     ↓
 Context Assembly
     ↓
 Grounded LLM Generation
     ↓
 Video-wise Result Grouping
-    ↓
-Episode Ordering
     ↓
 English Video Summaries
     ↓
@@ -840,83 +853,228 @@ Exact Lesson Navigation
 Correct Video + Timestamp
 ```
 
-Example:
+---
+
+## Pattern Search Behavior
+
+For a query such as:
 
 ```text
-Search: "two pointer"
+two-pointer
+```
 
-AI Revision
-    ↓
-Episode 3
+the system should identify the **Two Pointer** pattern and retrieve the complete set of lessons belonging to that pattern.
+
+Example playlist:
+
+```text
+Two Pointer
+│
+├── Episode 3
+├── Episode 4
+├── Episode 5
+├── Triplet Sum — Core Two Pointer
+├── Dutch National Flag — Core Two Pointer
+└── Core Two Pointer — Lesson 06
+```
+
+The AI Search system is designed so that highly ranked early results do not prevent remaining lessons from appearing.
+
+Instead:
+
+```text
+Pattern
+   ↓
+Complete Pattern Playlist
+   ↓
+Best Transcript Match Per Video
+   ↓
+Video-Level Results
+   ↓
+Playlist Order
+```
+
+This prevents a search from returning only the first few highly similar videos while hiding other lessons belonging to the same pattern.
+
+---
+
+## Result Structure
+
+Each result can contain:
+
+```text
+Episode / Lesson
+Video Title
+Pattern
+Exact Timestamp
+English Summary
+Open Exact Lesson →
+```
+
+The system should produce **one result card per lesson/video**, rather than exposing multiple raw transcript chunks from the same video.
+
+---
+
+## Example
+
+```text
+Search:
+"two pointer"
+
+Expected Pattern:
+Two Pointer
+
+Results:
+
+01. Episode 3
     English Summary
     Exact timestamp
     Open Exact Lesson →
 
-Episode 4
+02. Episode 4
     English Summary
     Exact timestamp
     Open Exact Lesson →
 
-Episode 5
+03. Episode 5
+    English Summary
+    Exact timestamp
+    Open Exact Lesson →
+
+04. Triplet Sum — Core Two Pointer
+    English Summary
+    Exact timestamp
+    Open Exact Lesson →
+
+05. Dutch National Flag — Core Two Pointer
+    English Summary
+    Exact timestamp
+    Open Exact Lesson →
+
+06. Core Two Pointer — Lesson 06
     English Summary
     Exact timestamp
     Open Exact Lesson →
 ```
 
-Validation completed:
+The summaries for the remaining lessons must be grounded in the transcript of the corresponding video.
 
-* `two pointer` search returns grounded AI answer
+For example:
+
+```text
+Triplet Sum
+     ↓
+Triplet Sum transcript
+     ↓
+Best matching chunk
+     ↓
+Timestamp + transcript context
+     ↓
+English summary
+```
+
+The system should **not reuse Episode 3's transcript or summary** for the other lessons.
+
+---
+
+## Exact Lesson Navigation
+
+The exact lesson action uses:
+
+```text
+video_id
+    +
+timestamp_start
+```
+
+to navigate the learner directly to the relevant point in the correct YouTube video.
+
+Raw `video_id` values remain internal.
+
+The learner sees:
+
+```text
+Open Exact Lesson →
+```
+
+rather than the raw YouTube identifier.
+
+---
+
+## Validation Completed
+
+The following behavior has already been browser-tested:
+
+* `two pointer` search returns a grounded AI answer
 * Retrieved videos are grouped into one card per video
 * Episode ordering is preserved
-* English summaries are displayed per video
-* Raw `video_id` values are not exposed in the UI
+* English summaries are displayed
+* Raw `video_id` values are not exposed
 * Exact lesson navigation works
-* Exact timestamp navigation has been verified in the browser
-* Episode 3 exact timestamp navigation verified
-* Episode 4 exact timestamp navigation verified
-* Episode 5 exact timestamp navigation verified
+* Exact timestamp navigation works
+* Episode 3 exact navigation verified
+* Episode 4 exact navigation verified
+* Episode 5 exact navigation verified
+
+The complete six-lesson pattern retrieval implementation has been added and requires final browser validation.
 
 ---
 
 # 🟡 Phase 17 — Pattern / Playlist Navigation
 
-**Status: NEXT**
+**Status: IN PROGRESS**
 
-Focus:
+Phase 17 focuses on connecting pattern playlists with AI Search so that the system understands the complete lesson structure of each DSA pattern.
 
-* Complete pattern browsing
-* Pattern-specific playlists
-* Full 128+ video dataset integration
-* Video ordering
-* Playlist selection
-* Original episode metadata
-* Pattern completion state
-* Video navigation
-* Progress visibility
+---
 
-Expected structure:
+## Completed
+
+* Pattern-specific playlist retrieval
+* Ordered playlist metadata
+* Pattern video catalog discovery
+* Video-level deduplication
+* Original episode metadata preservation
+* Pattern-specific video ordering
+* Playlist progress visibility
+* Complete Two Pointer playlist visible in the Pattern page
+* Six Two Pointer lessons present in the playlist
+* AI Search pattern detection
+* Pattern-aware retrieval
+* Missing lesson discovery during pattern search
+* Per-video transcript matching
+* Exact timestamp preservation
+* Exact lesson navigation integration
+
+---
+
+## Current Two Pointer Playlist
+
+The current Two Pointer pattern contains:
 
 ```text
-Pattern
-   ↓
-Pattern Playlist
-   ↓
-Video 1
-Video 2
-Video 3
-...
-Video N
+01. Episode 3
+02. Episode 4
+03. Episode 5
+04. Triplet Sum — Core Two Pointer
+05. Dutch National Flag — Core Two Pointer
+06. Core Two Pointer — Lesson 06
 ```
 
-Important rule:
+The Pattern page currently exposes all six lessons.
 
-```text
-Original YouTube Episode Number
-          ≠
-Application Playlist Order
-```
+The AI Search implementation is being aligned with this same playlist so that a pattern search does not stop after only the first highly ranked lessons.
 
-The system should preserve original episode numbers as metadata while maintaining a clean pattern-specific playlist order.
+---
+
+## Remaining
+
+* Final browser validation of all six lessons through AI Search
+* Validation of correct summary generation for each remaining lesson
+* Validation of timestamp correctness for each remaining lesson
+* Validation that unrelated videos such as Dynamic Programming Episode 16 do not appear in Two Pointer results
+* Validation across additional DSA patterns
+* Complete pattern playlist/search consistency testing
 
 ---
 
@@ -1433,9 +1591,15 @@ User Query
     ↓
 Query Understanding
     ↓
+Pattern Detection
+    ↓
+Pattern Playlist Discovery
+    ↓
 Hybrid Retrieval
     ↓
 Reranking
+    ↓
+Video-Level Deduplication
     ↓
 Context Assembly
     ↓
@@ -1443,7 +1607,7 @@ Grounded LLM Answer
     ↓
 Video-wise Grouping
     ↓
-Episode Ordering
+Episode / Playlist Ordering
     ↓
 English Video Summaries
     ↓
@@ -1467,24 +1631,39 @@ Open Exact Lesson →
 
 Raw YouTube `video_id` values are kept internally for navigation and are not displayed to the learner.
 
-Verified example:
+---
+
+# 🧠 Pattern-Aware Search
+
+Pattern search is designed to behave differently from a generic semantic search.
+
+For generic queries:
 
 ```text
-Search: "two pointer"
-
-Episode 3
+User Query
     ↓
-Episode 4
+Relevant Transcript Chunks
     ↓
-Episode 5
-
-Each with:
-    - English summary
-    - exact timestamp
-    - exact lesson navigation
+Reranking
+    ↓
+Relevant Videos
 ```
 
-The exact lesson action has been browser-tested and successfully opens the correct video at the retrieved timestamp.
+For pattern-oriented queries:
+
+```text
+User Query
+    ↓
+Pattern Detection
+    ↓
+Complete Pattern Playlist
+    ↓
+Best Match Per Lesson
+    ↓
+Sequential Video Results
+```
+
+This distinction is important because the learner may search for a pattern expecting the complete learning sequence rather than only the most semantically similar transcript chunks.
 
 ---
 
@@ -1780,49 +1959,76 @@ The project is being built as a real software system rather than only as an AI d
 
 ---
 
-# 📝 Latest Development Milestone — 17 September 2026
+# 📝 Latest Development Milestone — 18 September 2026
 
-The latest completed milestone is the **AI Search result experience and exact lesson navigation**.
+The latest milestone focuses on making **AI Search pattern-aware and lesson-oriented**, while preserving the previously completed exact lesson navigation behavior.
 
-## Newly Completed
+## Completed / Implemented
 
 * Video titles are propagated through the RAG context and API response
 * English transcript text is preferred for video-summary generation
 * Groq returns a structured grounded response
 * Main AI answer is separated from per-video summaries
-* One English summary is generated for each retrieved video
-* Video summaries are validated against retrieved video provenance
+* Video summaries are grounded against retrieved video provenance
 * Search results are grouped by unique video
-* Episode order is preserved in the frontend
+* Episode / playlist ordering is preserved
 * Raw YouTube video IDs are hidden from the UI
 * Exact timestamps remain attached to retrieved source chunks
 * `Open Exact Lesson →` navigates to the correct video
-* Exact timestamp navigation has been browser-tested successfully
+* Exact timestamp navigation has been browser-tested
 * Episode 3 exact navigation verified
 * Episode 4 exact navigation verified
 * Episode 5 exact navigation verified
+* Pattern-aware search has been implemented
+* Complete pattern playlist discovery has been added for pattern-oriented search
+* Missing pattern lessons can be retrieved through per-video transcript matching
+* Video-level deduplication is applied
+* Playlist ordering is preserved after retrieval
+* Two Pointer pattern currently contains 6 playlist lessons
 
-## Verified Example
+## Current Two Pointer Dataset
 
 ```text
-Query: "two pointer"
+Two Pointer
+│
+├── Episode 3
+├── Episode 4
+├── Episode 5
+├── Triplet Sum — Core Two Pointer
+├── Dutch National Flag — Core Two Pointer
+└── Core Two Pointer — Lesson 06
+```
 
-AI Answer
-    ↓
-Episode 3
-    ↓
-Episode 4
-    ↓
-Episode 5
+The Pattern page currently displays all six lessons.
 
-Each result:
-    ├── Actual video title
-    ├── English summary
-    ├── Exact timestamp
+The AI Search retrieval implementation has been updated so that remaining playlist lessons are not lost simply because Episode 3, Episode 4, and Episode 5 receive higher initial retrieval scores.
+
+## Final Validation Still Required
+
+The following validation remains before the complete Phase 17 milestone can be marked fully complete:
+
+```text
+Search:
+"two-pointer"
+
+Expected:
+6 / 6 playlist lessons
+
+Each lesson:
+    ├── Correct video
+    ├── Correct transcript
+    ├── Correct timestamp
+    ├── Correct English summary
     └── Open Exact Lesson →
 ```
 
-This milestone completes the **AI Search result presentation and exact lesson navigation portion of the frontend work**.
+The search must also exclude unrelated lessons such as:
+
+```text
+Dynamic Programming — Episode 16
+```
+
+from a Two Pointer pattern search.
 
 ---
 
@@ -1833,9 +2039,9 @@ Phases 01–14       ███████████████████�
 
 Phase 15           ███████████████░░░░░  IN PROGRESS
 
-Phase 16           ██████████████░░░░░░  IN PROGRESS
+Phase 16           █████████████████░░░  IN PROGRESS
 
-Phase 17           ░░░░░░░░░░░░░░░░░░░░  NEXT
+Phase 17           ███████████████░░░░░  IN PROGRESS
 
 Phases 18–28       ░░░░░░░░░░░░░░░░░░░░  PLANNED
 ```
@@ -1844,22 +2050,28 @@ Phases 18–28       ░░░░░░░░░░░░░░░░░░░�
 
 # 🎯 Current Active Focus
 
-> **Phase 17 — Pattern / Playlist Navigation**
+> **Phase 17 — Pattern / Playlist Navigation + Complete Pattern-Aware AI Search**
 
-The current immediate goal is to continue from the completed AI Search + exact navigation milestone and build the complete structured learning progression.
-
-Current known working functionality:
+Current working functionality:
 
 ```text
 Pattern Page
     ↓
-Core Two Pointer Playlist
+Pattern Playlist
+    ↓
+Complete Pattern Lesson List
     ↓
 Video Player
     ↓
 Playlist Selection
     ↓
 AI Search
+    ↓
+Pattern Detection
+    ↓
+Complete Pattern Playlist Discovery
+    ↓
+Best Transcript Match Per Lesson
     ↓
 Grounded Answer
     ↓
@@ -2081,9 +2293,11 @@ The goal is:
 
 # 📌 Current Milestone
 
-**Current Phase:** Phase 17 — Pattern / Playlist Navigation
+**Current Phase:** Phase 17 — Pattern / Playlist Navigation + Pattern-Aware AI Search
 
 **Latest Completed Milestone:** AI Search + Video-wise Summaries + Exact Lesson Navigation
+
+**Latest Implementation:** Complete pattern playlist discovery and per-video retrieval for pattern-oriented search
 
 **Dataset Target:** 128+ DSA Videos
 
@@ -2093,7 +2307,11 @@ The goal is:
 
 **Architecture:** React + FastAPI + Qdrant + RAG
 
-**Search Status:** End-to-End Working
+**Search:** End-to-End Integrated
+
+**Pattern Search:** Implemented, final 6-lesson validation pending
+
+**Exact Navigation:** Browser Verified
 
 **AI Revision:** Planned
 
@@ -2104,5 +2322,3 @@ The goal is:
 **Adaptive Revision:** Planned
 
 **Overall Status:** Active Development
-architecture + final vision—তিন জায়গাতেই reflected আছে।
-```
